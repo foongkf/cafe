@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>FEONG的咖啡厅收藏集</title>
+    <title>FEONG的咖啡馆收藏集 | 现代简约</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: 更现代的无衬线字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
@@ -16,13 +16,14 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background: #f7f5f0;
-            color: #2c2a28;
-            padding: 2rem 1.5rem;
+            background: #f2efe7;
+            font-family: 'Inter', sans-serif;
+            color: #1f1c18;
+            padding: 2.5rem 2rem;
+            line-height: 1.4;
         }
 
         .container {
@@ -30,53 +31,72 @@
             margin: 0 auto;
         }
 
-        /* 头部 */
         .header {
-            margin-bottom: 1.5rem;
-            border-bottom: 3px solid #e0c3a0;
-            padding-bottom: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             flex-wrap: wrap;
             gap: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
         }
         h1 {
             font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #b97f44, #e2b281);
-            background-clip: text;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #c7a16b 0%, #e6c28f 40%, #b3804a 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             color: transparent;
+            text-shadow: 2px 2px 12px rgba(199, 161, 107, 0.15);
+            position: relative;
+            display: inline-block;
         }
-        /* 副标题已移除 */
+        h1::after {
+            content: "☕";
+            font-size: 1.8rem;
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            color: #c7a16b;
+            text-shadow: none;
+            margin-left: 0.5rem;
+            display: inline-block;
+            vertical-align: middle;
+            opacity: 0.8;
+        }
+        /* 可选：增加细微装饰 */
+        @media (max-width: 560px) {
+            h1 { font-size: 1.8rem; }
+            h1::after { font-size: 1.4rem; }
+        }
 
-        /* 搜索 & 筛选栏 */
         .search-bar {
-            background: white;
+            background: rgba(255,255,245,0.85);
+            backdrop-filter: blur(2px);
             border-radius: 60px;
-            padding: 0.6rem 1.2rem;
+            padding: 0.4rem 1rem;
             margin-bottom: 2rem;
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.8rem;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            border: 1px solid #ede3d5;
+            border: 1px solid #e7dfd1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .search-input-group {
             flex: 3;
             min-width: 180px;
             display: flex;
             align-items: center;
-            background: #fefcf8;
+            background: transparent;
             border-radius: 40px;
-            border: 1px solid #e7ddd0;
-            padding: 0.2rem 1rem;
+            padding: 0.2rem 0.8rem;
         }
         .search-input-group i {
-            color: #c99e6c;
+            color: #b48c5c;
+            font-size: 0.9rem;
             margin-right: 8px;
         }
         .search-input-group input {
@@ -86,43 +106,47 @@
             width: 100%;
             outline: none;
             font-size: 0.9rem;
+            font-weight: 400;
+            color: #2b2a27;
         }
-        .filter-group {
-            flex: 1;
-            min-width: 150px;
+        .search-input-group input::placeholder {
+            color: #bcae97;
         }
         .filter-group select {
             width: 100%;
-            padding: 0.6rem 1rem;
+            padding: 0.5rem 1.2rem;
             border-radius: 40px;
-            border: 1px solid #e7ddd0;
-            background: #fefcf8;
-            font-size: 0.9rem;
+            border: 1px solid #e2d8ca;
+            background: white;
+            font-size: 0.85rem;
+            font-weight: 400;
             cursor: pointer;
             outline: none;
+            color: #2b2a27;
         }
         .clear-filter {
             background: none;
             border: none;
-            color: #b78f5e;
+            color: #9b8a72;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             padding: 0.4rem 1rem;
             border-radius: 30px;
-            transition: 0.1s;
+            transition: 0.2s;
         }
         .clear-filter:hover {
-            background: #f0e7dd;
+            background: #e5dbcf;
+            color: #5e4b34;
         }
 
-        /* 添加表单卡片 */
         .form-card {
-            background: white;
-            border-radius: 28px;
-            padding: 1.5rem 1.8rem;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            border: 1px solid #ede3d5;
+            background: #ffffffd9;
+            backdrop-filter: blur(0px);
+            border-radius: 32px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid #ece3d7;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
         }
         .form-grid {
             display: flex;
@@ -136,180 +160,164 @@
         }
         .input-group label {
             display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #b68b5a;
+            letter-spacing: 0.03em;
+            color: #a28c70;
             margin-bottom: 0.3rem;
         }
         .input-group input, .input-group select, .input-group textarea {
             width: 100%;
             padding: 0.7rem 1rem;
-            border: 1.5px solid #e7ddd0;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            background: #fffdfa;
+            border: 1px solid #e2d6c8;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            background: #ffffff;
             transition: 0.2s;
+            font-family: 'Inter', sans-serif;
         }
         .input-group textarea {
             resize: vertical;
-            min-height: 60px;
+            min-height: 64px;
         }
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             outline: none;
-            border-color: #c99e6c;
-            box-shadow: 0 0 0 2px rgba(201,158,108,0.2);
-        }
-        /* 新类别融入区域：让分类下拉框与其他框同宽，添加类别控件紧凑排列 */
-        .category-combo {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            width: 100%;
-        }
-        .category-combo select {
-            flex: 2;
-            min-width: 120px;
-        }
-        .category-combo .new-cat-input {
-            flex: 1;
-            min-width: 100px;
-        }
-        .category-combo .btn-outline {
-            flex-shrink: 0;
-            padding: 0.6rem 1rem;
-            white-space: nowrap;
+            border-color: #c5a26b;
+            box-shadow: 0 0 0 2px rgba(197,162,107,0.2);
         }
         .btn-primary {
-            background: #c58a4a;
+            background: #c7a16b;
             border: none;
             padding: 0.7rem 1.8rem;
             border-radius: 40px;
             color: white;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            letter-spacing: 0.01em;
         }
         .btn-primary:hover {
-            background: #a76f38;
-            transform: scale(0.97);
+            background: #b08854;
+            transform: translateY(-1px);
         }
         .btn-outline {
             background: transparent;
-            border: 1.5px solid #d9c6b0;
-            padding: 0.6rem 1.2rem;
+            border: 1px solid #ddd2c2;
+            padding: 0.5rem 1rem;
             border-radius: 40px;
             font-weight: 500;
             cursor: pointer;
             transition: 0.2s;
-            color: #7c5f3f;
+            color: #8b734f;
+            font-size: 0.8rem;
         }
         .btn-outline:hover {
-            background: #efe2d3;
+            background: #f3ede5;
         }
 
-        /* 分类区块 */
         .category-section {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2.8rem;
         }
         .category-header {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            border-left: 6px solid #c99e6c;
+            border-left: 4px solid #cfb587;
             padding-left: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
         }
         .category-title {
-            font-size: 1.7rem;
-            font-weight: 700;
-            color: #4a3520;
+            font-size: 1.6rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            color: #3b3328;
             cursor: pointer;
             transition: 0.2s;
         }
         .category-title:hover {
-            color: #b97f44;
-            transform: translateX(4px);
+            color: #b88d54;
+            transform: translateX(3px);
         }
         .view-all-btn {
             background: none;
             border: none;
-            color: #a67942;
-            font-weight: 500;
+            color: #ad8f6b;
+            font-weight: 450;
             cursor: pointer;
-            font-size: 0.8rem;
-            padding: 0.3rem 0.8rem;
-            border-radius: 30px;
-            background: #f0e7dd;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            background: #f0e9e0;
         }
         .view-all-btn:hover {
-            background: #e2d2c0;
+            background: #e4d9cd;
         }
 
-        /* 横向滚动区域 */
         .scroll-container {
             display: flex;
             overflow-x: auto;
-            gap: 1.3rem;
-            padding-bottom: 0.8rem;
+            gap: 1.5rem;
+            padding-bottom: 1rem;
             scrollbar-width: thin;
+            scroll-behavior: smooth;
         }
         .scroll-container::-webkit-scrollbar {
-            height: 6px;
+            height: 4px;
         }
         .scroll-container::-webkit-scrollbar-track {
-            background: #e8dfd3;
-            border-radius: 10px;
+            background: #e3dbcf;
+            border-radius: 4px;
         }
         .scroll-container::-webkit-scrollbar-thumb {
-            background: #c99e6c;
-            border-radius: 10px;
+            background: #cfb587;
+            border-radius: 4px;
         }
 
-        /* 大卡片样式 */
         .card {
-            background: white;
+            background: #ffffff;
             border-radius: 28px;
-            width: 300px;
+            width: 290px;
             flex-shrink: 0;
-            padding: 1.2rem;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
-            border: 1px solid #f0e2d4;
+            padding: 1.3rem;
+            transition: all 0.25s ease;
+            border: 1px solid #efe6db;
+            box-shadow: 0 6px 12px -8px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             position: relative;
         }
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 25px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.1);
+            border-color: #e2d2be;
         }
         .card-name {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            color: #3b2a1c;
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.4rem;
+            color: #2a241e;
             padding-right: 40px;
         }
         .card-region {
             font-size: 0.7rem;
+            font-weight: 450;
             color: #b48b54;
             display: flex;
             align-items: center;
-            gap: 4px;
-            margin-bottom: 0.4rem;
+            gap: 5px;
+            margin-bottom: 0.6rem;
         }
         .card-desc {
             font-size: 0.75rem;
-            color: #6f5e4a;
-            margin: 0.5rem 0;
-            line-height: 1.3;
+            line-height: 1.45;
+            color: #6e6252;
+            margin: 0.6rem 0 0.6rem 0;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -317,89 +325,105 @@
         }
         .card-link {
             font-size: 0.75rem;
-            color: #c18546;
+            color: #bc8f5a;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            margin: 0.5rem 0 0.8rem 0;
-            word-break: break-all;
+            gap: 6px;
+            margin: 0.3rem 0 0.9rem 0;
+            font-weight: 450;
         }
         .card-link i {
             font-size: 0.7rem;
+        }
+        .card-link:hover {
+            text-decoration: underline;
+            color: #9c6d3c;
+        }
+        .no-link-text {
+            font-size: 0.7rem;
+            color: #c1b2a0;
+            font-style: italic;
+            margin: 0.3rem 0 0.9rem 0;
         }
         .card-actions {
             display: flex;
             justify-content: flex-end;
             gap: 12px;
             margin-top: auto;
+            border-top: 1px solid #f1eadf;
+            padding-top: 0.8rem;
         }
         .favorite-btn, .delete-btn {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             cursor: pointer;
             transition: 0.1s;
-            padding: 4px;
+            padding: 4px 6px;
+            border-radius: 40px;
         }
         .favorite-btn {
-            color: #d4af7a;
+            color: #d4bb98;
         }
         .favorite-btn.active {
-            color: #e34234;
+            color: #e2674b;
         }
         .delete-btn {
-            color: #b38b6d;
-            font-size: 1.3rem;
+            color: #c6aa86;
+            font-size: 1.2rem;
         }
         .delete-btn:hover {
-            color: #c0392b;
+            color: #b45a4a;
         }
         .empty-cat-msg {
-            color: #a18f78;
+            color: #b9a78e;
             padding: 1rem 0;
-            font-style: italic;
+            font-style: normal;
+            font-size: 0.85rem;
         }
 
-        /* 模态框 */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.6);
+            background-color: rgba(30,27,22,0.4);
+            backdrop-filter: blur(6px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(3px);
         }
         .modal-content {
-            background: #fffdf8;
-            border-radius: 32px;
+            background: #fffef8;
+            border-radius: 36px;
             width: 90%;
             max-width: 700px;
-            max-height: 85vh;
+            max-height: 80vh;
             overflow-y: auto;
             padding: 1.8rem;
             position: relative;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.2);
+            border: 1px solid #f0e5d8;
         }
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            border-bottom: 2px solid #eedbc8;
+            border-bottom: 1px solid #eee2d4;
             padding-bottom: 0.6rem;
         }
         .modal-header h2 {
-            font-size: 1.6rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
         }
         .close-modal {
             font-size: 1.8rem;
             cursor: pointer;
-            color: #a07d56;
+            color: #a68d6e;
+            transition: 0.1s;
         }
         .small-card-list {
             display: flex;
@@ -407,88 +431,99 @@
             gap: 0.8rem;
         }
         .small-card {
-            background: #fef8f0;
-            border-radius: 20px;
+            background: #fefaf5;
+            border-radius: 24px;
             padding: 0.9rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #f0e0ce;
+            border: 1px solid #f0e3d6;
             transition: 0.1s;
             cursor: pointer;
         }
         .small-card:hover {
-            background: #f9efe2;
+            background: #fcf6ed;
+            transform: scale(0.99);
         }
         .small-card-info {
             flex: 1;
         }
         .small-card-name {
-            font-weight: 700;
-            font-size: 1.05rem;
+            font-weight: 600;
+            font-size: 1rem;
             margin-bottom: 4px;
         }
         .small-card-meta {
             font-size: 0.7rem;
-            color: #b48b54;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .small-card-actions {
+            color: #b2916e;
             display: flex;
             gap: 12px;
-            align-items: center;
+            flex-wrap: wrap;
         }
         .small-fav {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             background: none;
             border: none;
             cursor: pointer;
-            color: #cfb287;
+            color: #d1b588;
+            padding: 0 4px;
         }
         .small-fav.active {
-            color: #e34234;
+            color: #e2674b;
         }
         .detail-modal .modal-content {
             max-width: 500px;
         }
         .detail-field {
             margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .detail-field strong {
+            font-weight: 600;
+            color: #5a4a36;
+            display: inline-block;
+            width: 70px;
         }
         .detail-link {
-            color: #bc7a3a;
+            color: #bc8a54;
             word-break: break-all;
+            text-decoration: none;
+        }
+        .detail-link:hover {
+            text-decoration: underline;
         }
         hr {
-            margin: 0.8rem 0;
-            border-color: #eedbc8;
+            margin: 1rem 0;
+            border: 0;
+            height: 1px;
+            background: #ede2d5;
         }
-        /* footer 已移除 */
+        @media (max-width: 720px) {
+            body { padding: 1.5rem; }
+            .card { width: 260px; }
+            .category-title { font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>☕ FEONG的咖啡厅收藏集</h1>
-        <!-- 原副标题已删除 -->
+        <h1>FEONG的咖啡馆收藏集</h1>
     </div>
 
-    <!-- 搜索+地区筛选栏 -->
     <div class="search-bar">
         <div class="search-input-group">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchKeyword" placeholder="搜索咖啡厅名称、地区或简介...">
+            <input type="text" id="searchKeyword" placeholder="搜索名称、地区或简介...">
         </div>
         <div class="filter-group">
             <select id="regionFilter">
                 <option value="">🌍 所有地区</option>
             </select>
         </div>
-        <button class="clear-filter" id="clearFiltersBtn"><i class="fas fa-eraser"></i> 清除筛选</button>
+        <button class="clear-filter" id="clearFiltersBtn"><i class="fas fa-eraser"></i> 清除</button>
     </div>
 
-    <!-- 添加咖啡馆表单 (移除示例文字，修改标签) -->
     <div class="form-card">
         <div class="form-grid">
             <div class="input-group">
@@ -500,32 +535,24 @@
                 <input type="text" id="cafeRegion" placeholder="" autocomplete="off">
             </div>
             <div class="input-group">
-                <label>链接 *</label>
+                <label>链接</label>
                 <input type="url" id="cafeUrl" placeholder="https://..." autocomplete="off">
             </div>
-            <!-- 分类框 + 添加新类别融合区域 -->
             <div class="input-group">
                 <label>分类</label>
-                <div class="category-combo">
-                    <select id="cafeCategory"></select>
-                    <input type="text" id="newCategoryName" class="new-cat-input" placeholder="新类别名称">
-                    <button type="button" class="btn-outline" id="addCategoryBtn">+ 添加</button>
-                </div>
+                <select id="cafeCategory"></select>
             </div>
             <div class="input-group" style="min-width: 200px; flex:2;">
                 <label>简介</label>
                 <textarea id="cafeDesc" rows="2" placeholder=""></textarea>
             </div>
-            <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入收藏集</button>
+            <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入收藏</button>
         </div>
     </div>
 
-    <!-- 动态分类区块 -->
     <div id="categoriesContainer"></div>
-    <!-- footer 已移除 -->
 </div>
 
-<!-- 分类全部小卡片模态框 -->
 <div id="categoryModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -536,7 +563,6 @@
     </div>
 </div>
 
-<!-- 详情模态框 -->
 <div id="detailModal" class="modal detail-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -548,7 +574,6 @@
 </div>
 
 <script>
-    // Firebase 配置
     const firebaseConfig = {
         apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
         authDomain: "cafe-c55f9.firebaseapp.com",
@@ -562,7 +587,6 @@
     const database = firebase.database();
     const cafesRef = database.ref("cafes");
 
-    // 全局变量
     let allCafes = [];
     let globalCategories = [];
     let currentModalCategory = null;
@@ -575,12 +599,6 @@
     function computeGlobalCategories() {
         let catsSet = new Set(DEFAULT_CATEGORIES);
         allCafes.forEach(cafe => { if(cafe.category) catsSet.add(cafe.category); });
-        const storedExtra = localStorage.getItem("extraCategories");
-        if(storedExtra) {
-            try {
-                JSON.parse(storedExtra).forEach(c => catsSet.add(c));
-            } catch(e) {}
-        }
         globalCategories = [...catsSet].sort((a,b) => {
             let aIdx = DEFAULT_CATEGORIES.indexOf(a);
             let bIdx = DEFAULT_CATEGORIES.indexOf(b);
@@ -590,11 +608,6 @@
             return a.localeCompare(b);
         });
         return globalCategories;
-    }
-
-    function saveExtraCategories() {
-        const extra = globalCategories.filter(c => !DEFAULT_CATEGORIES.includes(c));
-        localStorage.setItem("extraCategories", JSON.stringify(extra));
     }
 
     function updateRegionFilterDropdown() {
@@ -654,7 +667,7 @@
             sectionDiv.innerHTML = `
                 <div class="category-header">
                     <div class="category-title" data-cat="${category}">${category}</div>
-                    <button class="view-all-btn" data-cat="${category}">📋 查看全部 (${cafesInCat.length})</button>
+                    <button class="view-all-btn" data-cat="${category}">📋 全部 (${cafesInCat.length})</button>
                 </div>
                 <div class="scroll-container" id="scroll-${category.replace(/[^a-zA-Z0-9]/g, '_')}"></div>
             `;
@@ -671,25 +684,30 @@
             viewBtn.addEventListener("click", openModalFunc);
         }
         if(container.children.length === 0) {
-            container.innerHTML = `<div style="padding:2rem; text-align:center; background:#fef4e8; border-radius:30px;">🔍 没有找到匹配的咖啡厅，试试其他关键词或地区～</div>`;
+            container.innerHTML = `<div style="padding:2rem; text-align:center; background:#fef7ef; border-radius:36px;">🔍 没有找到匹配的咖啡厅，试试其他关键词～</div>`;
         }
         if(currentModalCategory) {
             openCategoryModal(currentModalCategory);
         }
     }
 
-    // 创建大卡片，按钮文字改为 "🔗链接"
     function createCardElement(cafe) {
         const cardDiv = document.createElement("div");
         cardDiv.className = "card";
         const isFav = cafe.favorited === true;
         const regionHtml = cafe.region ? `<div class="card-region"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(cafe.region)}</div>` : '';
-        const descHtml = cafe.description ? `<div class="card-desc">${escapeHtml(cafe.description.length>70 ? cafe.description.substring(0,67)+'...' : cafe.description)}</div>` : '';
+        const descHtml = cafe.description ? `<div class="card-desc">${escapeHtml(cafe.description.length>80 ? cafe.description.substring(0,77)+'...' : cafe.description)}</div>` : '';
+        let linkHtml = '';
+        if(cafe.url && cafe.url.trim() !== "") {
+            linkHtml = `<a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> 🔗链接</a>`;
+        } else {
+            linkHtml = `<div class="no-link-text"><i class="fas fa-link-slash"></i> 未提供链接</div>`;
+        }
         cardDiv.innerHTML = `
             <div class="card-name">${escapeHtml(cafe.name)}</div>
             ${regionHtml}
             ${descHtml}
-            <a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> 🔗链接</a>
+            ${linkHtml}
             <div class="card-actions">
                 <button class="favorite-btn ${isFav ? 'active' : ''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button>
                 <button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i></button>
@@ -703,7 +721,7 @@
         });
         delBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            if(confirm(`确定移除「${cafe.name}」吗？`)) deleteCafe(cafe.id);
+            if(confirm(`移除「${cafe.name}」吗？`)) deleteCafe(cafe.id);
         });
         return cardDiv;
     }
@@ -716,12 +734,16 @@
     }
 
     async function addCafe(name, url, category, region, description) {
-        if(!name.trim()) { alert("请输入咖啡厅名称"); return false; }
-        if(!url.trim()) { alert("请输入有效链接"); return false; }
-        if(!url.startsWith("http")) { alert("链接需以 http:// 或 https:// 开头"); return false; }
+        if(!name.trim()) { alert("请填写咖啡厅名称"); return false; }
+        let finalUrl = url.trim();
+        if(finalUrl && !finalUrl.startsWith("http")) {
+            if(confirm("链接未以http://开头，是否继续保存？")) {
+                // 允许保存
+            } else return false;
+        }
         const newCafe = {
             name: name.trim(),
-            url: url.trim(),
+            url: finalUrl || "",
             category: category,
             favorited: false,
             region: region.trim() || "",
@@ -729,17 +751,6 @@
             createdAt: Date.now()
         };
         await cafesRef.push(newCafe);
-        return true;
-    }
-
-    function addNewCategory(catName) {
-        let newCat = catName.trim();
-        if(newCat === "") { alert("请输入类别名称"); return false; }
-        if(globalCategories.includes(newCat)) { alert("该类别已存在"); return false; }
-        globalCategories.push(newCat);
-        saveExtraCategories();
-        renderCategorySelect();
-        renderMainView();
         return true;
     }
 
@@ -763,7 +774,7 @@
         modalTitle.innerText = `📌 ${category} · 全部咖啡馆`;
         const cafesInCat = allCafes.filter(c => c.category === category);
         if(cafesInCat.length === 0) {
-            listContainer.innerHTML = `<div style="padding:2rem;text-align:center">暂无咖啡馆</div>`;
+            listContainer.innerHTML = `<div style="padding:2rem;text-align:center">✨ 暂无咖啡馆</div>`;
         } else {
             listContainer.innerHTML = "";
             cafesInCat.forEach(cafe => {
@@ -808,13 +819,14 @@
         const modal = document.getElementById("detailModal");
         const detailContainer = document.getElementById("detailContent");
         const isFav = cafe.favorited === true;
+        const linkDisplay = (cafe.url && cafe.url.trim()) ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a>` : '<span style="color:#b5a084;">未提供链接</span>';
         detailContainer.innerHTML = `
-            <div class="detail-field"><strong>🏷️ 名称</strong><br>${escapeHtml(cafe.name)}</div>
-            <div class="detail-field"><strong>📍 地区</strong><br>${cafe.region ? escapeHtml(cafe.region) : '未填写'}</div>
-            <div class="detail-field"><strong>📂 分类</strong><br>${escapeHtml(cafe.category)}</div>
-            <div class="detail-field"><strong>📝 简介</strong><br>${cafe.description ? escapeHtml(cafe.description) : '暂无简介'}</div>
-            <div class="detail-field"><strong>🔗 链接</strong><br><a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a></div>
-            <div class="detail-field"><strong>❤️ 收藏</strong><br>${isFav ? '已收藏' : '未收藏'}</div>
+            <div class="detail-field"><strong>名称</strong><br>${escapeHtml(cafe.name)}</div>
+            <div class="detail-field"><strong>地区</strong><br>${cafe.region ? escapeHtml(cafe.region) : '未填写'}</div>
+            <div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div>
+            <div class="detail-field"><strong>简介</strong><br>${cafe.description ? escapeHtml(cafe.description) : '暂无简介'}</div>
+            <div class="detail-field"><strong>链接</strong><br>${linkDisplay}</div>
+            <div class="detail-field"><strong>收藏</strong><br>${isFav ? '已收藏 ❤️' : '未收藏'}</div>
             <hr>
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button id="detailFavBtn" class="btn-outline"><i class="fas fa-heart"></i> ${isFav ? '取消收藏' : '收藏'}</button>
@@ -827,7 +839,7 @@
             modal.style.display = "none";
         });
         document.getElementById("detailDelBtn").addEventListener("click", () => {
-            if(confirm(`删除「${cafe.name}」？`)) {
+            if(confirm(`永久删除「${cafe.name}」？`)) {
                 deleteCafe(cafe.id);
                 modal.style.display = "none";
             }
@@ -844,7 +856,7 @@
                     cafesArray.push({
                         id: key,
                         name: item.name || "未命名",
-                        url: item.url || "#",
+                        url: item.url || "",
                         category: item.category || "Others",
                         favorited: item.favorited === true,
                         region: item.region || "",
@@ -865,11 +877,11 @@
         if(snapshot.exists()) return;
         const examples = [
             { name: "蓝瓶咖啡", url: "https://bluebottlecoffee.com", category: "Cafe", favorited: true, region: "东京·涩谷", description: "精品咖啡领航者，手冲与冷萃闻名，极简美学空间。" },
-            { name: "福来甜品屋", url: "https://example.com/dessert", category: "Dessert", favorited: false, region: "槟城", description: "传统马来甜点+创意西式蛋糕，椰糖系列必尝。" },
+            { name: "福来甜品屋", url: "", category: "Dessert", favorited: false, region: "槟城", description: "传统马来甜点+创意西式蛋糕，椰糖系列必尝。" },
             { name: "槟城娘惹餐厅", url: "https://example.com/nyonya", category: "Nyonya", favorited: true, region: "槟城乔治市", description: "正宗娘惹菜，叻沙与小金杯，复古峇峇娘惹装潢。" },
-            { name: "合艾泰式咖啡", url: "https://example.com/hatyai", category: "Hatyai", favorited: false, region: "合艾", description: "泰南风味咖啡，搭配斑斓甜品，悠闲度假氛围。" },
+            { name: "合艾泰式咖啡", url: "", category: "Hatyai", favorited: false, region: "合艾", description: "泰南风味咖啡，搭配斑斓甜品，悠闲度假氛围。" },
             { name: "喫茶 夜雾", url: "https://example.com/japanese", category: "Japanese", favorited: true, region: "京都", description: "日式深烘，昭和复古喫茶店，布丁与拿铁绝配。" },
-            { name: "老南洋 Kopitiam", url: "https://example.com/kopitiam", category: "Kopitiam", favorited: false, region: "吉隆坡茨厂街", description: "传统海南咖啡、咖椰吐司，半熟蛋，地道南洋早餐。" }
+            { name: "老南洋 Kopitiam", url: "", category: "Kopitiam", favorited: false, region: "吉隆坡茨厂街", description: "传统海南咖啡、咖椰吐司，半熟蛋，地道南洋早餐。" }
         ];
         for(let ex of examples) {
             await cafesRef.push(ex);
@@ -908,10 +920,6 @@
             document.getElementById("cafeRegion").value = "";
             document.getElementById("cafeUrl").value = "";
             document.getElementById("cafeDesc").value = "";
-        });
-        document.getElementById("addCategoryBtn").addEventListener("click", () => {
-            const newCatInput = document.getElementById("newCategoryName");
-            if(addNewCategory(newCatInput.value)) newCatInput.value = "";
         });
         const modal = document.getElementById("categoryModal");
         const closeModal = document.getElementById("closeModalBtn");
