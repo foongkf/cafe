@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>FEONG的咖啡厅收藏集</title>
-    <!-- Font Awesome 6 (免费图标库，用于爱心和删除图标) -->
+    <title>FEONG的咖啡厅收藏集 | 地区·简介·搜索</title>
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts 提升字体 -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -25,7 +25,6 @@
             padding: 2rem 1.5rem;
         }
 
-        /* 主容器 */
         .container {
             max-width: 1600px;
             margin: 0 auto;
@@ -33,7 +32,7 @@
 
         /* 头部 */
         .header {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             border-bottom: 3px solid #e0c3a0;
             padding-bottom: 0.75rem;
             display: flex;
@@ -56,6 +55,69 @@
             font-weight: 500;
         }
 
+        /* 搜索 & 筛选栏 */
+        .search-bar {
+            background: white;
+            border-radius: 60px;
+            padding: 0.6rem 1.2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid #ede3d5;
+        }
+        .search-input-group {
+            flex: 3;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            background: #fefcf8;
+            border-radius: 40px;
+            border: 1px solid #e7ddd0;
+            padding: 0.2rem 1rem;
+        }
+        .search-input-group i {
+            color: #c99e6c;
+            margin-right: 8px;
+        }
+        .search-input-group input {
+            border: none;
+            background: transparent;
+            padding: 0.6rem 0;
+            width: 100%;
+            outline: none;
+            font-size: 0.9rem;
+        }
+        .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .filter-group select {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #e7ddd0;
+            background: #fefcf8;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+        }
+        .clear-filter {
+            background: none;
+            border: none;
+            color: #b78f5e;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            transition: 0.1s;
+        }
+        .clear-filter:hover {
+            background: #f0e7dd;
+        }
+
         /* 添加表单卡片 */
         .form-card {
             background: white;
@@ -73,7 +135,7 @@
         }
         .input-group {
             flex: 1;
-            min-width: 160px;
+            min-width: 150px;
         }
         .input-group label {
             display: block;
@@ -84,16 +146,20 @@
             color: #b68b5a;
             margin-bottom: 0.3rem;
         }
-        .input-group input, .input-group select {
+        .input-group input, .input-group select, .input-group textarea {
             width: 100%;
             padding: 0.7rem 1rem;
             border: 1.5px solid #e7ddd0;
-            border-radius: 40px;
+            border-radius: 20px;
             font-size: 0.9rem;
             background: #fffdfa;
             transition: 0.2s;
         }
-        .input-group input:focus, .input-group select:focus {
+        .input-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             outline: none;
             border-color: #c99e6c;
             box-shadow: 0 0 0 2px rgba(201,158,108,0.2);
@@ -197,11 +263,11 @@
             border-radius: 10px;
         }
 
-        /* 大卡片样式 */
+        /* 大卡片样式 (新增地区与简介预览) */
         .card {
             background: white;
             border-radius: 28px;
-            width: 280px;
+            width: 300px;
             flex-shrink: 0;
             padding: 1.2rem;
             box-shadow: 0 8px 18px rgba(0,0,0,0.05);
@@ -218,27 +284,43 @@
         .card-name {
             font-size: 1.35rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
             color: #3b2a1c;
-            word-break: break-word;
             padding-right: 40px;
         }
+        .card-region {
+            font-size: 0.7rem;
+            color: #b48b54;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 0.4rem;
+        }
+        .card-desc {
+            font-size: 0.75rem;
+            color: #6f5e4a;
+            margin: 0.5rem 0;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
         .card-link {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #c18546;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            margin-bottom: 1rem;
+            margin: 0.5rem 0 0.8rem 0;
             word-break: break-all;
         }
         .card-link i {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
         .card-link:hover {
             text-decoration: underline;
-            color: #9b5f2a;
         }
         .card-actions {
             display: flex;
@@ -273,7 +355,7 @@
             font-style: italic;
         }
 
-        /* 模态框 (全分类小卡片列表 + 详情大卡片模态框) */
+        /* 模态框 (分类全部小卡片 + 详情模态框) */
         .modal {
             display: none;
             position: fixed;
@@ -330,7 +412,7 @@
             cursor: pointer;
         }
         .small-card:hover {
-            background: #f9efE2;
+            background: #f9efe2;
         }
         .small-card-info {
             flex: 1;
@@ -340,9 +422,12 @@
             font-size: 1.05rem;
             margin-bottom: 4px;
         }
-        .small-card-cat {
+        .small-card-meta {
             font-size: 0.7rem;
-            color: #bc8f5a;
+            color: #b48b54;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .small-card-actions {
             display: flex;
@@ -360,8 +445,7 @@
             color: #e34234;
         }
         .detail-modal .modal-content {
-            max-width: 480px;
-            text-align: left;
+            max-width: 500px;
         }
         .detail-field {
             margin: 1rem 0;
@@ -382,7 +466,7 @@
         }
         @media (max-width: 700px) {
             body { padding: 1.2rem; }
-            .card { width: 260px; }
+            .card { width: 270px; }
             .category-title { font-size: 1.4rem; }
         }
     </style>
@@ -391,18 +475,36 @@
 <div class="container">
     <div class="header">
         <h1>☕ FEONG的咖啡厅收藏集</h1>
-        <div class="sub">收藏·探索·品味</div>
+        <div class="sub">地区·简介·珍藏</div>
     </div>
 
-    <!-- 添加新咖啡馆的表单 -->
+    <!-- 搜索+地区筛选栏 -->
+    <div class="search-bar">
+        <div class="search-input-group">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchKeyword" placeholder="搜索咖啡厅名称、地区或简介...">
+        </div>
+        <div class="filter-group">
+            <select id="regionFilter">
+                <option value="">🌍 所有地区</option>
+            </select>
+        </div>
+        <button class="clear-filter" id="clearFiltersBtn"><i class="fas fa-eraser"></i> 清除筛选</button>
+    </div>
+
+    <!-- 添加咖啡馆表单 (增加地区与简介) -->
     <div class="form-card">
         <div class="form-grid">
             <div class="input-group">
-                <label>咖啡厅名称</label>
-                <input type="text" id="cafeName" placeholder="例: 墨尔本精品咖啡馆" autocomplete="off">
+                <label>咖啡厅名称 *</label>
+                <input type="text" id="cafeName" placeholder="例: 南国咖啡馆" autocomplete="off">
             </div>
             <div class="input-group">
-                <label>官网/主页链接</label>
+                <label>地区</label>
+                <input type="text" id="cafeRegion" placeholder="例: 吉隆坡 / 槟城" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>官网链接 *</label>
                 <input type="url" id="cafeUrl" placeholder="https://..." autocomplete="off">
             </div>
             <div class="input-group">
@@ -415,16 +517,20 @@
                 </div>
                 <button type="button" class="btn-outline" id="addCategoryBtn">+ 添加类别</button>
             </div>
+            <div class="input-group" style="min-width: 200px; flex:2;">
+                <label>简介</label>
+                <textarea id="cafeDesc" rows="2" placeholder="手冲咖啡、复古氛围、招牌甜点..."></textarea>
+            </div>
             <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入收藏集</button>
         </div>
     </div>
 
-    <!-- 动态分类区块将注入到这里 -->
+    <!-- 动态分类区块将注入 -->
     <div id="categoriesContainer"></div>
-    <footer>❤️ 点击爱心收藏 · 每个卡片都可单独移除 · 点分类标题查看完整小卡片列表</footer>
+    <footer>❤️ 爱心收藏 · 点击分类标题查看完整列表 · 支持地区/关键词筛选</footer>
 </div>
 
-<!-- 模态框：展示某分类下全部小卡片 -->
+<!-- 分类全部小卡片模态框 -->
 <div id="categoryModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -435,7 +541,7 @@
     </div>
 </div>
 
-<!-- 详情模态框：点击小卡片后展示完整大卡片资料 -->
+<!-- 详情模态框 -->
 <div id="detailModal" class="modal detail-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -462,29 +568,31 @@
     const cafesRef = database.ref("cafes");
 
     // ----------------------------- 全局变量 ---------------------------------
-    let allCafes = [];         // 存储 { id, name, url, category, favorited }
-    let globalCategories = []; // 动态类别列表 (预置13类 + 用户新增)
-    let currentModalCategory = null;   // 用于重绘后自动恢复模态框
-    let currentDetailCafe = null;
+    let allCafes = [];           // 原始数据 { id, name, url, category, favorited, region, description }
+    let globalCategories = [];   // 动态类别
+    let currentModalCategory = null;
+    
+    // 筛选相关
+    let searchKeyword = "";
+    let selectedRegion = "";
+    
+    // 从所有咖啡馆动态提取地区列表 (用于下拉)
+    let regionSet = new Set();
 
-    // 预置13个基础类别 (顺序自定义)
+    // 预置13类别
     const DEFAULT_CATEGORIES = ["Bar", "Cafe", "Chinese", "Dessert", "Fine Dine", "Hatyai", "Japanese", "Kopitiam", "Korean", "Nyonya", "Thai", "Western", "Others"];
 
-    // 辅助函数: 合并并去重类别 (基于现有咖啡馆 + 基础类别 + 本地存储的新类别)
+    // 辅助函数: 合并类别
     function computeGlobalCategories() {
         let catsSet = new Set(DEFAULT_CATEGORIES);
-        // 加入现有咖啡馆中的类别
         allCafes.forEach(cafe => { if(cafe.category) catsSet.add(cafe.category); });
-        // 从 localStorage 读取用户新增的类别 (持久化)
         const storedExtra = localStorage.getItem("extraCategories");
         if(storedExtra) {
             try {
-                const extraArr = JSON.parse(storedExtra);
-                extraArr.forEach(c => catsSet.add(c));
+                JSON.parse(storedExtra).forEach(c => catsSet.add(c));
             } catch(e) {}
         }
-        // 排序: 保持基础类别在前，然后按字母排其他
-        let sorted = [...catsSet].sort((a,b) => {
+        globalCategories = [...catsSet].sort((a,b) => {
             let aIdx = DEFAULT_CATEGORIES.indexOf(a);
             let bIdx = DEFAULT_CATEGORIES.indexOf(b);
             if(aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
@@ -492,54 +600,73 @@
             if(bIdx !== -1) return 1;
             return a.localeCompare(b);
         });
-        globalCategories = sorted;
         return globalCategories;
     }
 
-    // 保存额外类别到 localStorage
     function saveExtraCategories() {
         const extra = globalCategories.filter(c => !DEFAULT_CATEGORIES.includes(c));
         localStorage.setItem("extraCategories", JSON.stringify(extra));
     }
 
-    // 渲染下拉框
-    function renderCategorySelect() {
-        const select = document.getElementById("cafeCategory");
-        if(!select) return;
-        select.innerHTML = "";
-        globalCategories.forEach(cat => {
+    // 更新地区下拉菜单
+    function updateRegionFilterDropdown() {
+        regionSet.clear();
+        allCafes.forEach(cafe => {
+            if(cafe.region && cafe.region.trim() !== "") regionSet.add(cafe.region.trim());
+        });
+        const select = document.getElementById("regionFilter");
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">🌍 所有地区</option>';
+        Array.from(regionSet).sort().forEach(region => {
             const option = document.createElement("option");
-            option.value = cat;
-            option.textContent = cat;
+            option.value = region;
+            option.textContent = region;
             select.appendChild(option);
         });
+        if(currentVal && regionSet.has(currentVal)) select.value = currentVal;
+        else if(currentVal === "") select.value = "";
+        else select.value = "";
+        selectedRegion = select.value;
     }
 
-    // 核心渲染: 根据类别分组展示横向滚动大卡片区块
+    // 筛选咖啡馆 (基于关键词和地区)
+    function getFilteredCafes() {
+        let filtered = [...allCafes];
+        if(searchKeyword.trim() !== "") {
+            const kw = searchKeyword.trim().toLowerCase();
+            filtered = filtered.filter(cafe => 
+                cafe.name.toLowerCase().includes(kw) ||
+                (cafe.region && cafe.region.toLowerCase().includes(kw)) ||
+                (cafe.description && cafe.description.toLowerCase().includes(kw))
+            );
+        }
+        if(selectedRegion && selectedRegion !== "") {
+            filtered = filtered.filter(cafe => cafe.region === selectedRegion);
+        }
+        return filtered;
+    }
+
+    // 渲染分类区块 (基于筛选后的咖啡馆)
     function renderMainView() {
         const container = document.getElementById("categoriesContainer");
         if(!container) return;
         container.innerHTML = "";
-        // 没有类别时提示
-        if(globalCategories.length === 0) {
-            container.innerHTML = "<div style='padding:2rem;text-align:center'>暂无分类，请添加类别或咖啡馆</div>";
-            return;
-        }
-        // 按分类分组
+        const filteredCafes = getFilteredCafes();
+        // 按分类分组 (使用globalCategories，确保所有可能类别出现)
         const grouped = new Map();
         globalCategories.forEach(cat => { grouped.set(cat, []); });
-        allCafes.forEach(cafe => {
+        filteredCafes.forEach(cafe => {
             const cat = cafe.category;
             if(grouped.has(cat)) grouped.get(cat).push(cafe);
-            else grouped.set(cat, [cafe]); // 如果新类别未在global中，但一般同步
+            else grouped.set(cat, [cafe]);
         });
-        // 为每个分类创建区块
+        // 只显示有咖啡馆的分类区块，但为了体验即使空分类也显示？为简洁，只显示有数据的区块
         for(let category of globalCategories) {
             const cafesInCat = grouped.get(category) || [];
+            if(cafesInCat.length === 0) continue;
             const sectionDiv = document.createElement("div");
             sectionDiv.className = "category-section";
             sectionDiv.setAttribute("data-category", category);
-            // header
             sectionDiv.innerHTML = `
                 <div class="category-header">
                     <div class="category-title" data-cat="${category}">${category}</div>
@@ -549,35 +676,38 @@
             `;
             container.appendChild(sectionDiv);
             const scrollDiv = sectionDiv.querySelector(".scroll-container");
-            if(cafesInCat.length === 0) {
-                scrollDiv.innerHTML = `<div class="empty-cat-msg">✨ 暂无咖啡厅，点击上方添加 ✨</div>`;
-            } else {
-                cafesInCat.forEach(cafe => {
-                    const card = createCardElement(cafe);
-                    scrollDiv.appendChild(card);
-                });
-            }
-            // 绑定标题点击事件(查看该分类全部小卡片)
+            cafesInCat.forEach(cafe => {
+                const card = createCardElement(cafe);
+                scrollDiv.appendChild(card);
+            });
+            // 绑定标题和按钮事件
             const titleDiv = sectionDiv.querySelector(".category-title");
             const viewBtn = sectionDiv.querySelector(".view-all-btn");
             const openModalFunc = () => openCategoryModal(category);
             titleDiv.addEventListener("click", openModalFunc);
             viewBtn.addEventListener("click", openModalFunc);
         }
-        // 如果有之前打开的模态框类别，重新打开它（确保数据同步后依然显示）
+        if(container.children.length === 0) {
+            container.innerHTML = `<div style="padding:2rem; text-align:center; background:#fef4e8; border-radius:30px;">🔍 没有找到匹配的咖啡厅，试试其他关键词或地区～</div>`;
+        }
+        // 恢复模态框若之前打开
         if(currentModalCategory) {
             openCategoryModal(currentModalCategory);
         }
     }
 
-    // 创建大卡片DOM (横向滚动使用)
+    // 创建大卡片 (含地区、简介预览)
     function createCardElement(cafe) {
         const cardDiv = document.createElement("div");
         cardDiv.className = "card";
         const isFav = cafe.favorited === true;
+        const regionHtml = cafe.region ? `<div class="card-region"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(cafe.region)}</div>` : '';
+        const descHtml = cafe.description ? `<div class="card-desc">${escapeHtml(cafe.description.length>70 ? cafe.description.substring(0,67)+'...' : cafe.description)}</div>` : '';
         cardDiv.innerHTML = `
             <div class="card-name">${escapeHtml(cafe.name)}</div>
-            <a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> ${escapeHtml(cafe.url.length>35 ? cafe.url.substring(0,32)+'...' : cafe.url)}</a>
+            ${regionHtml}
+            ${descHtml}
+            <a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> 访问主页</a>
             <div class="card-actions">
                 <button class="favorite-btn ${isFav ? 'active' : ''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button>
                 <button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i></button>
@@ -591,24 +721,20 @@
         });
         delBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            if(confirm(`确定移除「${cafe.name}」吗？`)) {
-                deleteCafe(cafe.id);
-            }
+            if(confirm(`确定移除「${cafe.name}」吗？`)) deleteCafe(cafe.id);
         });
         return cardDiv;
     }
 
-    // 切换收藏状态
     async function toggleFavorite(id, newState) {
         await cafesRef.child(id).update({ favorited: newState });
     }
-
     async function deleteCafe(id) {
         await cafesRef.child(id).remove();
     }
 
-    // 添加新咖啡馆
-    async function addCafe(name, url, category) {
+    // 添加新咖啡厅 (携带region, description)
+    async function addCafe(name, url, category, region, description) {
         if(!name.trim()) { alert("请输入咖啡厅名称"); return false; }
         if(!url.trim()) { alert("请输入有效链接"); return false; }
         if(!url.startsWith("http")) { alert("链接需以 http:// 或 https:// 开头"); return false; }
@@ -617,35 +743,49 @@
             url: url.trim(),
             category: category,
             favorited: false,
+            region: region.trim() || "",
+            description: description.trim() || "",
             createdAt: Date.now()
         };
         await cafesRef.push(newCafe);
         return true;
     }
 
-    // 添加新类别 (全局)
+    // 添加新类别
     function addNewCategory(catName) {
         let newCat = catName.trim();
         if(newCat === "") { alert("请输入类别名称"); return false; }
         if(globalCategories.includes(newCat)) { alert("该类别已存在"); return false; }
         globalCategories.push(newCat);
-        // 重新计算保存额外类别
         saveExtraCategories();
         renderCategorySelect();
-        renderMainView();  // 刷新主界面
+        renderMainView();
         return true;
     }
 
-    // 打开分类模态框 (展示该分类下所有咖啡馆的小卡片)
+    function renderCategorySelect() {
+        const select = document.getElementById("cafeCategory");
+        if(!select) return;
+        select.innerHTML = "";
+        globalCategories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+        });
+    }
+
+    // 模态框: 展示某分类下全部咖啡馆(基于原始allCafes但受筛选影响? 为了完整查看全部，使用未筛选的该分类咖啡馆，更符合直觉)
     function openCategoryModal(category) {
         currentModalCategory = category;
         const modal = document.getElementById("categoryModal");
         const modalTitle = document.getElementById("modalCategoryTitle");
         const listContainer = document.getElementById("modalSmallCardList");
         modalTitle.innerText = `📌 ${category} · 全部咖啡馆`;
+        // 显示该分类下所有咖啡馆(不受搜索筛选影响，方便管理)
         const cafesInCat = allCafes.filter(c => c.category === category);
         if(cafesInCat.length === 0) {
-            listContainer.innerHTML = `<div style="padding:2rem;text-align:center">暂无咖啡馆，快去添加吧 ☕</div>`;
+            listContainer.innerHTML = `<div style="padding:2rem;text-align:center">暂无咖啡馆</div>`;
         } else {
             listContainer.innerHTML = "";
             cafesInCat.forEach(cafe => {
@@ -656,7 +796,6 @@
         modal.style.display = "flex";
     }
 
-    // 创建小卡片 (一行行展示，右侧爱心，点击卡片区域查看大卡片详情)
     function createSmallCardElement(cafe) {
         const div = document.createElement("div");
         div.className = "small-card";
@@ -664,20 +803,21 @@
         div.innerHTML = `
             <div class="small-card-info">
                 <div class="small-card-name">${escapeHtml(cafe.name)}</div>
-                <div class="small-card-cat">${escapeHtml(cafe.category)}</div>
+                <div class="small-card-meta">
+                    ${cafe.region ? `<span><i class="fas fa-map-marker-alt"></i> ${escapeHtml(cafe.region)}</span>` : ''}
+                    <span><i class="fas fa-tag"></i> ${escapeHtml(cafe.category)}</span>
+                </div>
             </div>
             <div class="small-card-actions">
                 <button class="small-fav ${isFav ? 'active' : ''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button>
             </div>
         `;
-        // 点击小卡片主体 (除去爱心按钮区) 显示详情大卡片
         const infoArea = div.querySelector(".small-card-info");
         infoArea.style.cursor = "pointer";
         infoArea.addEventListener("click", (e) => {
             e.stopPropagation();
             showDetailModal(cafe);
         });
-        // 爱心按钮独立
         const favSmallBtn = div.querySelector(".small-fav");
         favSmallBtn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -686,38 +826,37 @@
         return div;
     }
 
-    // 显示完整资料大卡片模态框 (点击小卡片后)
     function showDetailModal(cafe) {
         const modal = document.getElementById("detailModal");
         const detailContainer = document.getElementById("detailContent");
         const isFav = cafe.favorited === true;
         detailContainer.innerHTML = `
             <div class="detail-field"><strong>🏷️ 名称</strong><br>${escapeHtml(cafe.name)}</div>
+            <div class="detail-field"><strong>📍 地区</strong><br>${cafe.region ? escapeHtml(cafe.region) : '未填写'}</div>
             <div class="detail-field"><strong>📂 分类</strong><br>${escapeHtml(cafe.category)}</div>
-            <div class="detail-field"><strong>🔗 主页链接</strong><br><a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a></div>
-            <div class="detail-field"><strong>❤️ 收藏状态</strong><br>${isFav ? '已收藏' : '未收藏'}</div>
+            <div class="detail-field"><strong>📝 简介</strong><br>${cafe.description ? escapeHtml(cafe.description) : '暂无简介'}</div>
+            <div class="detail-field"><strong>🔗 主页</strong><br><a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a></div>
+            <div class="detail-field"><strong>❤️ 收藏</strong><br>${isFav ? '已收藏' : '未收藏'}</div>
             <hr>
-            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 0.5rem;">
-                <button id="detailFavBtn" class="btn-outline" style="background:#f0e2d4;"><i class="fas fa-heart"></i> ${isFav ? '取消收藏' : '收藏'}</button>
-                <button id="detailDelBtn" class="btn-outline" style="color:#b1624b;"><i class="fas fa-trash-alt"></i> 移除卡片</button>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button id="detailFavBtn" class="btn-outline"><i class="fas fa-heart"></i> ${isFav ? '取消收藏' : '收藏'}</button>
+                <button id="detailDelBtn" class="btn-outline" style="color:#b1624b;"><i class="fas fa-trash-alt"></i> 移除</button>
             </div>
         `;
         modal.style.display = "flex";
-        const favDetailBtn = document.getElementById("detailFavBtn");
-        const delDetailBtn = document.getElementById("detailDelBtn");
-        favDetailBtn.addEventListener("click", () => {
+        document.getElementById("detailFavBtn").addEventListener("click", () => {
             toggleFavorite(cafe.id, !cafe.favorited);
             modal.style.display = "none";
         });
-        delDetailBtn.addEventListener("click", () => {
-            if(confirm(`永久删除「${cafe.name}」？`)) {
+        document.getElementById("detailDelBtn").addEventListener("click", () => {
+            if(confirm(`删除「${cafe.name}」？`)) {
                 deleteCafe(cafe.id);
                 modal.style.display = "none";
             }
         });
     }
 
-    // 监听Firebase实时数据变化
+    // 实时监听
     function subscribeCafes() {
         cafesRef.on("value", (snapshot) => {
             const data = snapshot.val();
@@ -730,82 +869,80 @@
                         name: item.name || "未命名",
                         url: item.url || "#",
                         category: item.category || "Others",
-                        favorited: item.favorited === true
+                        favorited: item.favorited === true,
+                        region: item.region || "",
+                        description: item.description || ""
                     });
                 });
             }
             allCafes = cafesArray;
-            // 更新全局类别 (基于现有cafes+预设+localstorage)
             computeGlobalCategories();
-            // 重新渲染下拉框 (确保新类别)
+            updateRegionFilterDropdown();
             renderCategorySelect();
-            // 刷新主界面 (若当前有模态框打开，内部会根据currentModalCategory重开)
-            renderMainView();
+            renderMainView();   // 应用当前筛选条件重新渲染
         });
     }
 
-    // 添加示例数据 (仅当数据库为空时写入几个例子)
+    // 示例数据 (包含地区、简介)
     async function seedExampleData() {
         const snapshot = await cafesRef.once("value");
         if(snapshot.exists()) return;
         const examples = [
-            { name: "蓝瓶咖啡", url: "https://bluebottlecoffee.com", category: "Cafe", favorited: true },
-            { name: "福来甜品屋", url: "https://example.com/dessert", category: "Dessert", favorited: false },
-            { name: "槟城娘惹餐厅", url: "https://example.com/nyonya", category: "Nyonya", favorited: true },
-            { name: "合艾泰式咖啡", url: "https://example.com/hatyai", category: "Hatyai", favorited: false },
-            { name: "日式喫茶店", url: "https://example.com/japanese", category: "Japanese", favorited: true },
-            { name: "老南洋 Kopitiam", url: "https://example.com/kopitiam", category: "Kopitiam", favorited: false }
+            { name: "蓝瓶咖啡", url: "https://bluebottlecoffee.com", category: "Cafe", favorited: true, region: "东京·涩谷", description: "精品咖啡领航者，手冲与冷萃闻名，极简美学空间。" },
+            { name: "福来甜品屋", url: "https://example.com/dessert", category: "Dessert", favorited: false, region: "槟城", description: "传统马来甜点+创意西式蛋糕，椰糖系列必尝。" },
+            { name: "槟城娘惹餐厅", url: "https://example.com/nyonya", category: "Nyonya", favorited: true, region: "槟城乔治市", description: "正宗娘惹菜，叻沙与小金杯，复古峇峇娘惹装潢。" },
+            { name: "合艾泰式咖啡", url: "https://example.com/hatyai", category: "Hatyai", favorited: false, region: "合艾", description: "泰南风味咖啡，搭配斑斓甜品，悠闲度假氛围。" },
+            { name: "喫茶 夜雾", url: "https://example.com/japanese", category: "Japanese", favorited: true, region: "京都", description: "日式深烘，昭和复古喫茶店，布丁与拿铁绝配。" },
+            { name: "老南洋 Kopitiam", url: "https://example.com/kopitiam", category: "Kopitiam", favorited: false, region: "吉隆坡茨厂街", description: "传统海南咖啡、咖椰吐司，半熟蛋，地道南洋早餐。" }
         ];
         for(let ex of examples) {
             await cafesRef.push(ex);
         }
     }
 
-    // 辅助防XSS
-    function escapeHtml(str) {
-        if(!str) return "";
-        return str.replace(/[&<>]/g, function(m) {
-            if(m === '&') return '&amp;';
-            if(m === '<') return '&lt;';
-            if(m === '>') return '&gt;';
-            return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
+    // 筛选事件监听
+    function bindSearchEvents() {
+        const searchInput = document.getElementById("searchKeyword");
+        const regionSelect = document.getElementById("regionFilter");
+        const clearBtn = document.getElementById("clearFiltersBtn");
+        const updateFilters = () => {
+            searchKeyword = searchInput.value;
+            selectedRegion = regionSelect.value;
+            renderMainView();
+        };
+        searchInput.addEventListener("input", updateFilters);
+        regionSelect.addEventListener("change", updateFilters);
+        clearBtn.addEventListener("click", () => {
+            searchInput.value = "";
+            regionSelect.value = "";
+            searchKeyword = "";
+            selectedRegion = "";
+            renderMainView();
         });
     }
 
-    // 初始化类别下拉和额外类别加载
-    function initCategories() {
-        const stored = localStorage.getItem("extraCategories");
-        let extra = [];
-        if(stored) try { extra = JSON.parse(stored); } catch(e) {}
-        globalCategories = [...new Set([...DEFAULT_CATEGORIES, ...extra])];
-        renderCategorySelect();
-    }
-
-    // 事件绑定
     function bindEvents() {
         document.getElementById("addCafeBtn").addEventListener("click", async () => {
             const name = document.getElementById("cafeName").value;
             const url = document.getElementById("cafeUrl").value;
             const category = document.getElementById("cafeCategory").value;
-            await addCafe(name, url, category);
+            const region = document.getElementById("cafeRegion").value;
+            const description = document.getElementById("cafeDesc").value;
+            await addCafe(name, url, category, region, description);
             document.getElementById("cafeName").value = "";
+            document.getElementById("cafeRegion").value = "";
             document.getElementById("cafeUrl").value = "";
+            document.getElementById("cafeDesc").value = "";
         });
         document.getElementById("addCategoryBtn").addEventListener("click", () => {
             const newCatInput = document.getElementById("newCategoryName");
-            const catVal = newCatInput.value;
-            if(addNewCategory(catVal)) {
-                newCatInput.value = "";
-            }
+            if(addNewCategory(newCatInput.value)) newCatInput.value = "";
         });
-        // 关闭模态框事件
         const modal = document.getElementById("categoryModal");
-        const closeBtn = document.getElementById("closeModalBtn");
+        const closeModal = document.getElementById("closeModalBtn");
         const detailModal = document.getElementById("detailModal");
         const closeDetail = document.getElementById("closeDetailModalBtn");
-        closeBtn.onclick = () => { modal.style.display = "none"; currentModalCategory = null; };
+        closeModal.onclick = () => { modal.style.display = "none"; currentModalCategory = null; };
         closeDetail.onclick = () => { detailModal.style.display = "none"; };
         window.onclick = (e) => {
             if(e.target === modal) { modal.style.display = "none"; currentModalCategory = null; }
@@ -813,12 +950,23 @@
         };
     }
 
-    // 启动
+    function escapeHtml(str) {
+        if(!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
     async function init() {
-        initCategories();
+        computeGlobalCategories();
+        renderCategorySelect();
         bindEvents();
+        bindSearchEvents();
         await seedExampleData();
-        subscribeCafes();   // 开始实时监听
+        subscribeCafes();
     }
     init();
 </script>
