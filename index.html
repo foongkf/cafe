@@ -26,30 +26,54 @@
         .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
         .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0e6da; }
         .suggestion-item:hover { background: #fef5e8; }
-        .search-bar { background: rgba(255,255,245,0.85); backdrop-filter: blur(2px); border-radius: 60px; padding: 0.4rem 1rem; margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; border: 1px solid #e7dfd1; }
-        .search-input-group { flex: 3; min-width: 160px; display: flex; align-items: center; padding: 0.2rem 0.6rem; position: relative; }
+        /* 搜索栏样式改成与添加栏一致 */
+        .search-bar {
+            background: #ffffffd9;
+            border-radius: 28px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            border: 1px solid #ece3d7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .search-input-group { flex: 3; min-width: 160px; display: flex; align-items: center; padding: 0.2rem 0.6rem; position: relative; background: transparent; }
         .search-input-group i { color: #b48c5c; margin-right: 8px; }
         .search-input-group input { border: none; background: transparent; padding: 0.6rem 0; width: 100%; outline: none; font-size: 0.9rem; }
         .filter-group select { width: 100%; padding: 0.5rem 1rem; border-radius: 40px; border: 1px solid #e2d8ca; background: white; font-size: 0.85rem; cursor: pointer; }
-        .clear-filter { background: none; border: none; color: #9b8a72; cursor: pointer; padding: 0.4rem 0.8rem; border-radius: 30px; }
-        .form-card { background: #ffffffd9; border-radius: 28px; padding: 1.2rem 1.5rem; margin-bottom: 2rem; border: 1px solid #ece3d7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .clear-filter { background: none; border: none; color: #9b8a72; cursor: pointer; padding: 0.4rem 0.8rem; border-radius: 30px; font-size: 0.8rem; }
+        .clear-filter:hover { background: #e5dbcf; }
+        .form-card {
+            background: #ffffffd9;
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #ece3d7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
         .form-grid { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: flex-end; }
         .input-group { flex: 1; min-width: 130px; }
         .input-group label { display: block; font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; color: #a28c70; margin-bottom: 0.2rem; }
         .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.6rem 0.9rem; border: 1px solid #e2d6c8; border-radius: 24px; font-size: 0.85rem; background: #ffffff; }
         .btn-primary { background: #c7a16b; border: none; padding: 0.6rem 1.5rem; border-radius: 40px; color: white; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary:hover { background: #b08854; }
         .btn-secondary { background: #e9dfd1; border: none; padding: 0.4rem 1rem; border-radius: 40px; cursor: pointer; color: #7a6233; font-size: 0.8rem; }
         .category-section { margin-bottom: 2rem; }
         .category-header { display: flex; justify-content: space-between; align-items: baseline; border-left: 4px solid #cfb587; padding-left: 0.8rem; margin-bottom: 1rem; }
         .category-title { font-size: 1.4rem; font-weight: 500; color: #3b3328; cursor: pointer; }
-        .scroll-container { display: flex; overflow-x: auto; gap: 1.2rem; padding-bottom: 0.8rem; scrollbar-width: thin; }
-        .card { background: #ffffff; border-radius: 24px; width: 280px; flex-shrink: 0; padding: 1.2rem; transition: 0.2s; border: 1px solid #efe6db; display: flex; flex-direction: column; }
+        .category-title:hover { color: #b88d54; }
+        .view-all-btn { background: #f0e9e0; border: none; color: #ad8f6b; cursor: pointer; font-size: 0.7rem; padding: 0.2rem 0.7rem; border-radius: 40px; }
+        .scroll-container { display: flex; overflow-x: auto; gap: 1.2rem; padding-bottom: 0.8rem; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .card { background: #ffffff; border-radius: 24px; width: 280px; flex-shrink: 0; padding: 1.2rem; transition: 0.2s; border: 1px solid #efe6db; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -8px rgba(0,0,0,0.1); }
         .card-name { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.3rem; color: #2a241e; display: flex; justify-content: space-between; align-items: center; }
         .card-region { font-size: 0.65rem; color: #b48b54; display: flex; align-items: center; gap: 4px; margin-bottom: 0.5rem; }
         .card-desc { font-size: 0.7rem; line-height: 1.4; color: #6e6252; margin: 0.5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-link { color: #bc8f5a; text-decoration: none; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 5px; }
-        .no-link-text { font-size: 0.7rem; color: #c1b2a0; font-style: italic; }
+        .card-link, .no-link-text { font-size: 0.7rem; margin: 0.3rem 0 0.8rem; }
+        .card-link { color: #bc8f5a; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        .no-link-text { color: #c1b2a0; font-style: italic; }
         .card-actions { display: flex; gap: 8px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.6rem; justify-content: flex-end; }
         .favorite-btn, .delete-btn, .edit-btn, .share-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; }
         .favorite-btn { color: #d4bb98; }
@@ -58,9 +82,11 @@
         .edit-btn { color: #b88d54; }
         .share-btn { color: #6f9e7c; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30,27,22,0.4); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: #fffef8; border-radius: 32px; width: 90%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #eee2d4; }
-        .modal-filters { padding: 0.8rem 1.5rem; display: flex; gap: 0.8rem; flex-wrap: wrap; border-bottom: 1px solid #eee2d4; background: #fefaf5; }
+        .modal-content { background: #fffef8; border-radius: 32px; width: 90%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #f0e5d8; box-shadow: 0 20px 30px -12px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #eee2d4; flex-shrink: 0; }
+        .modal-header h2 { font-size: 1.3rem; font-weight: 500; }
+        .modal-filters { padding: 0.8rem 1.5rem; display: flex; gap: 0.8rem; flex-wrap: wrap; border-bottom: 1px solid #eee2d4; background: #fefaf5; flex-shrink: 0; }
+        .modal-filters input, .modal-filters select { padding: 0.5rem 1rem; border-radius: 40px; border: 1px solid #e2d8ca; font-size: 0.8rem; background: white; }
         .modal-list { flex: 1; overflow-y: auto; padding: 1rem; }
         .small-card { background: #fefaf5; border-radius: 20px; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f0e3d6; margin-bottom: 0.7rem; cursor: pointer; }
         .small-card-info { flex: 1; }
@@ -69,12 +95,17 @@
         .small-fav { font-size: 1.2rem; background: none; border: none; cursor: pointer; color: #d1b588; }
         .small-fav.active { color: #e2674b; }
         .close-modal { font-size: 1.8rem; cursor: pointer; color: #a68d6e; line-height: 1; }
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #c7a16b; color: white; width: 56px; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; border: none; font-size: 1.5rem; z-index: 99; }
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #c7a16b; color: white; width: 56px; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; border: none; font-size: 1.5rem; z-index: 99; transition: 0.2s; }
+        .fab:hover { background: #b08854; transform: scale(1.02); }
         .back-to-top { bottom: 90px; background: #d9c8b6; color: #5e4b34; width: 44px; height: 44px; font-size: 1.2rem; }
+        .scroll-hint { text-align: center; font-size: 0.65rem; color: #bcae97; margin-top: -0.5rem; margin-bottom: 1rem; display: flex; justify-content: center; gap: 6px; }
         .footer-bar { margin-top: 2rem; padding: 1rem; background: #fffaf2; border-radius: 28px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; border: 1px solid #e7dfd1; }
         .toast-msg { position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%); background: #1f1c18e6; color: white; padding: 8px 20px; border-radius: 40px; font-size: 0.8rem; z-index: 1100; pointer-events: none; transition: opacity 0.2s; opacity: 0; }
         .detail-field { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0e6da; }
-        @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } }
+        .detail-field strong { color: #b88d54; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; }
+        .detail-link { word-break: break-all; color: #b5703a; }
+        .btn-outline { background: transparent; border: 1px solid #dccdbd; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; font-weight: 500; }
+        @media (max-width: 640px) { body { padding: 1rem; padding-bottom: 80px; } .card { width: 260px; } .category-title { font-size: 1.3rem; } .form-card, .search-bar { padding: 1rem; } }
     </style>
 </head>
 <body>
@@ -97,6 +128,7 @@
         </div>
     </div>
 
+    <!-- 搜索栏风格已改为与添加栏一致 -->
     <div class="search-bar">
         <div class="search-input-group" style="position:relative;">
             <i class="fas fa-search"></i>
@@ -119,6 +151,7 @@
     </div>
 
     <div id="categoriesContainer"></div>
+    <div class="scroll-hint"><i class="fas fa-arrow-left"></i> 左右滑动查看更多 <i class="fas fa-arrow-right"></i></div>
     <div class="footer-bar" id="importExportBar">
         <button id="exportDataBtn" class="btn-secondary"><i class="fas fa-download"></i> 导出JSON</button>
         <button id="importDataBtn" class="btn-secondary"><i class="fas fa-upload"></i> 导入JSON</button>
@@ -223,7 +256,6 @@
     async function toggleFavorite(id, val) {
         await cafesRef.child(id).update({ favorited: val });
         showToast(val ? "已收藏" : "取消收藏");
-        // 实时更新所有模态框中该按钮的样式
         document.querySelectorAll(`.small-fav[data-id="${id}"]`).forEach(btn => {
             if(val) btn.classList.add("active"); else btn.classList.remove("active");
         });
@@ -239,7 +271,6 @@
     }
     async function updateCafe(id, data){ await cafesRef.child(id).update(data); showToast("已更新"); }
     
-    // 智能搜索建议
     function updateSuggestions() { 
         let kw = document.getElementById("searchKeyword").value.trim().toLowerCase(); 
         let box = document.getElementById("suggestionsBox"); 
@@ -258,7 +289,6 @@
         });
     }
     
-    // 随机推荐核心
     function doAdvancedRandom(mode, filterVal) {
         let candidates = getActiveCafes();
         if (mode === "favorite") candidates = candidates.filter(c => c.favorited);
@@ -274,14 +304,12 @@
         showDetailModal(lucky);
     }
     
-    // 分享卡片
     function shareCafe(cafe){ 
         let text = `☕ ${cafe.name}\n📍 ${cafe.region||'未知地区'}\n📝 ${cafe.description||'暂无简介'}\n🔗 ${cafe.url||'无链接'}`; 
         if(navigator.share) try{ navigator.share({title:cafe.name, text:text}); }catch(e){} 
         else { navigator.clipboard.writeText(text); showToast("已复制咖啡馆信息"); } 
     }
     
-    // 模态框通用
     function openModal(modal){ modal.style.display="flex"; document.body.classList.add("modal-open"); modal._clickHandler = (e)=>{ if(e.target===modal) closeModal(modal); }; modal.addEventListener("click", modal._clickHandler); }
     function closeModal(modal){ modal.style.display="none"; document.body.classList.remove("modal-open"); if(modal._clickHandler) modal.removeEventListener("click", modal._clickHandler); }
     
@@ -291,7 +319,6 @@
         openModal(document.getElementById("detailModal"));
     }
     
-    // 回收站渲染
     function renderTrashModal(){ 
         let trash = allCafes.filter(c=>c.deleted===true); 
         let container = document.getElementById("trashList"); 
@@ -310,7 +337,6 @@
         openModal(document.getElementById("editModal")); 
     }
     
-    // 批量导入导出
     function exportData(){ 
         let data = getActiveCafes().map(({id,deleted,deletedAt,...rest})=>rest); 
         let blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"}); 
@@ -331,7 +357,6 @@
         reader.readAsText(file); 
     }
     
-    // 模态框内容填充（全部咖啡馆/分类）
     function fillModalList(container, cafes, sortType="date"){
         let items = [...cafes];
         if(sortType === "name") items.sort((a,b)=>a.name.localeCompare(b.name));
@@ -382,7 +407,6 @@
         openModal(document.getElementById("categoryModal"));
     }
     
-    // 高级随机UI联动
     function initAdvancedRandomUI(){
         let modeSelect = document.getElementById("advRandomMode");
         let regionSel = document.getElementById("advRandomRegionSelect");
@@ -408,16 +432,13 @@
         update();
     }
     
-    // 订阅Firebase
     function subscribeCafes(){
         cafesRef.on("value",snap=>{
             let data=snap.val(); let arr=[];
             if(data) Object.keys(data).forEach(k=>{ let it=data[k]; arr.push({ id:k, name:it.name||"未命名", url:it.url||"", category:it.category||"Others", favorited:it.favorited===true, region:it.region||"", description:it.description||"", createdAt:it.createdAt||0, deleted:it.deleted===true, deletedAt:it.deletedAt||0 }); });
             allCafes = arr;
             computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView();
-            // 如果回收站模态框打开，刷新它
             if(document.getElementById("trashModal").style.display === "flex") renderTrashModal();
-            // 刷新全部模态框（若打开）
             if(document.getElementById("allCafesModal").style.display === "flex"){
                 let search = document.getElementById("allModalSearchInput").value;
                 let sort = document.getElementById("allModalSortSelect").value;
