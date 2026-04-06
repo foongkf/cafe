@@ -11,48 +11,42 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #f2efe7; font-family: 'Inter', sans-serif; color: #1f1c18; padding: 2rem 1.5rem; line-height: 1.4; padding-bottom: 100px; }
+        body { background: #f2efe7; font-family: 'Inter', sans-serif; color: #1f1c18; padding: 1.5rem 1.2rem; line-height: 1.4; padding-bottom: 100px; }
         body.modal-open { overflow: hidden; position: fixed; width: 100%; height: 100%; }
         .container { max-width: 1600px; margin: 0 auto; }
-        .header { margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
-        h1 { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.02em; background: linear-gradient(135deg, #c7a16b 0%, #e6c28f 40%, #b3804a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; }
-        h1::after { content: "☕"; font-size: 1.5rem; color: #c7a16b; margin-left: 0.4rem; display: inline-block; vertical-align: middle; opacity: 0.8; }
-        .header-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
-        .btn-icon { background: transparent; border: 1px solid #ddd2c2; padding: 0.4rem 1rem; border-radius: 40px; font-weight: 500; cursor: pointer; color: #8b734f; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-icon.active { background: #c7a16b20; border-color: #c7a16b; color: #c7a16b; }
-        .btn-icon:hover { background: #f3ede5; transform: translateY(-1px); }
-        .random-options { display: inline-flex; gap: 4px; align-items: center; }
-        .search-wrapper { position: relative; flex: 3; min-width: 200px; }
-        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
-        .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0e6da; }
-        .suggestion-item:hover { background: #fef5e8; }
-        /* 搜索栏样式改成与添加栏一致 */
-        .search-bar {
-            background: #ffffffd9;
-            border-radius: 28px;
-            padding: 0.8rem 1.2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            align-items: center;
-            border: 1px solid #ece3d7;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-        .search-input-group { flex: 3; min-width: 160px; display: flex; align-items: center; padding: 0.2rem 0.6rem; position: relative; background: transparent; }
+        
+        /* 头部优化 - 更轻量 */
+        .header { margin-bottom: 1.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; }
+        h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; background: linear-gradient(135deg, #c7a16b 0%, #e6c28f 40%, #b3804a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; }
+        h1::after { content: "☕"; font-size: 1.3rem; color: #c7a16b; margin-left: 0.3rem; display: inline-block; vertical-align: middle; opacity: 0.8; }
+        .header-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+        .btn-icon { background: transparent; border: none; padding: 0.4rem 0.8rem; border-radius: 32px; font-weight: 500; cursor: pointer; color: #5a4a38; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-icon.active { background: #c7a16b20; color: #c7a16b; }
+        .btn-icon:hover { background: #e8dfd3; transform: translateY(-1px); }
+        .random-options { display: inline-flex; gap: 4px; align-items: center; background: transparent; }
+        .random-options select { background: transparent; border: none; padding: 0.4rem 0.4rem; font-size: 0.75rem; color: #5a4a38; font-weight: 500; border-radius: 32px; cursor: pointer; }
+        .random-options select:hover { background: #e8dfd3; }
+        
+        /* 折叠面板通用样式 */
+        .collapsible-card { background: #ffffffd9; border-radius: 28px; margin-bottom: 1.2rem; border: 1px solid #ece3d7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.2rem; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .card-header:hover { background: #fefaf5; }
+        .card-header h3 { font-size: 0.95rem; font-weight: 600; color: #b3804a; letter-spacing: 0.01em; display: flex; align-items: center; gap: 8px; }
+        .card-header i.toggle-icon { font-size: 1rem; color: #b88d54; transition: transform 0.2s; }
+        .card-body { padding: 0 1.2rem 1.2rem 1.2rem; border-top: 1px solid #f0e6da; }
+        .collapsed .card-body { display: none; }
+        .collapsed .toggle-icon { transform: rotate(-90deg); }
+        
+        /* 搜索栏专用样式（折叠体内） */
+        .search-body { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+        .search-input-group { flex: 3; min-width: 160px; display: flex; align-items: center; padding: 0.2rem 0.6rem; background: #ffffff; border-radius: 40px; border: 1px solid #e2d8ca; }
         .search-input-group i { color: #b48c5c; margin-right: 8px; }
         .search-input-group input { border: none; background: transparent; padding: 0.6rem 0; width: 100%; outline: none; font-size: 0.9rem; }
         .filter-group select { width: 100%; padding: 0.5rem 1rem; border-radius: 40px; border: 1px solid #e2d8ca; background: white; font-size: 0.85rem; cursor: pointer; }
         .clear-filter { background: none; border: none; color: #9b8a72; cursor: pointer; padding: 0.4rem 0.8rem; border-radius: 30px; font-size: 0.8rem; }
         .clear-filter:hover { background: #e5dbcf; }
-        .form-card {
-            background: #ffffffd9;
-            border-radius: 28px;
-            padding: 1.2rem 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #ece3d7;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
+        
+        /* 添加表单内部样式 */
         .form-grid { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: flex-end; }
         .input-group { flex: 1; min-width: 130px; }
         .input-group label { display: block; font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; color: #a28c70; margin-bottom: 0.2rem; }
@@ -60,9 +54,11 @@
         .btn-primary { background: #c7a16b; border: none; padding: 0.6rem 1.5rem; border-radius: 40px; color: white; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary:hover { background: #b08854; }
         .btn-secondary { background: #e9dfd1; border: none; padding: 0.4rem 1rem; border-radius: 40px; cursor: pointer; color: #7a6233; font-size: 0.8rem; }
+        
+        /* 咖啡馆卡片等原有样式 */
         .category-section { margin-bottom: 2rem; }
         .category-header { display: flex; justify-content: space-between; align-items: baseline; border-left: 4px solid #cfb587; padding-left: 0.8rem; margin-bottom: 1rem; }
-        .category-title { font-size: 1.4rem; font-weight: 500; color: #3b3328; cursor: pointer; }
+        .category-title { font-size: 1.3rem; font-weight: 500; color: #3b3328; cursor: pointer; }
         .category-title:hover { color: #b88d54; }
         .view-all-btn { background: #f0e9e0; border: none; color: #ad8f6b; cursor: pointer; font-size: 0.7rem; padding: 0.2rem 0.7rem; border-radius: 40px; }
         .scroll-container { display: flex; overflow-x: auto; gap: 1.2rem; padding-bottom: 0.8rem; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
@@ -81,6 +77,8 @@
         .delete-btn { color: #c6aa86; }
         .edit-btn { color: #b88d54; }
         .share-btn { color: #6f9e7c; }
+        
+        /* 模态框等原有样式 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30,27,22,0.4); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #fffef8; border-radius: 32px; width: 90%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #f0e5d8; box-shadow: 0 20px 30px -12px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #eee2d4; flex-shrink: 0; }
@@ -103,9 +101,7 @@
         .toast-msg { position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%); background: #1f1c18e6; color: white; padding: 8px 20px; border-radius: 40px; font-size: 0.8rem; z-index: 1100; pointer-events: none; transition: opacity 0.2s; opacity: 0; }
         .detail-field { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0e6da; }
         .detail-field strong { color: #b88d54; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; }
-        .detail-link { word-break: break-all; color: #b5703a; }
-        .btn-outline { background: transparent; border: 1px solid #dccdbd; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; font-weight: 500; }
-        @media (max-width: 640px) { body { padding: 1rem; padding-bottom: 80px; } .card { width: 260px; } .category-title { font-size: 1.3rem; } .form-card, .search-bar { padding: 1rem; } }
+        @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } .category-title { font-size: 1.2rem; } }
     </style>
 </head>
 <body>
@@ -115,7 +111,7 @@
         <div class="header-actions">
             <div class="random-options">
                 <button id="randomCafeBtn" class="btn-icon"><i class="fas fa-dice-d6"></i> 随机</button>
-                <select id="randomModeSelect" style="border-radius:40px; border:1px solid #ddd2c2; background:transparent; padding:0.4rem 0.8rem; font-size:0.7rem;">
+                <select id="randomModeSelect">
                     <option value="all">全部</option>
                     <option value="favorite">仅收藏</option>
                     <option value="region">按地区</option>
@@ -128,25 +124,40 @@
         </div>
     </div>
 
-    <!-- 搜索栏风格已改为与添加栏一致 -->
-    <div class="search-bar">
-        <div class="search-input-group" style="position:relative;">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchKeyword" placeholder="搜索名称、地区或简介..." autocomplete="off">
-            <div id="suggestionsBox" class="suggestions-box"></div>
+    <!-- 搜索栏：可折叠，默认最小化（折叠） -->
+    <div class="collapsible-card" id="searchCollapsible">
+        <div class="card-header" id="searchHeader">
+            <h3><i class="fas fa-search"></i> 搜索与筛选</h3>
+            <i class="fas fa-chevron-down toggle-icon"></i>
         </div>
-        <div class="filter-group"><select id="regionFilter"><option value="">🌍 所有地区</option></select></div>
-        <button class="clear-filter" id="clearFiltersBtn"><i class="fas fa-eraser"></i> 清除</button>
+        <div class="card-body">
+            <div class="search-body">
+                <div class="search-input-group" style="position:relative;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchKeyword" placeholder="搜索名称、地区或简介..." autocomplete="off">
+                    <div id="suggestionsBox" class="suggestions-box" style="position:absolute; top:100%; left:0; right:0; background:white; border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,0.1); z-index:100; max-height:200px; overflow-y:auto; display:none; border:1px solid #e2d8ca;"></div>
+                </div>
+                <div class="filter-group"><select id="regionFilter"><option value="">🌍 所有地区</option></select></div>
+                <button class="clear-filter" id="clearFiltersBtn"><i class="fas fa-eraser"></i> 清除</button>
+            </div>
+        </div>
     </div>
 
-    <div class="form-card" id="addForm">
-        <div class="form-grid">
-            <div class="input-group"><label>名称 *</label><input type="text" id="cafeName"></div>
-            <div class="input-group"><label>地区</label><input type="text" id="cafeRegion"></div>
-            <div class="input-group"><label>链接</label><input type="url" id="cafeUrl" placeholder="https://"></div>
-            <div class="input-group"><label>分类</label><select id="cafeCategory"></select></div>
-            <div class="input-group"><label>简介</label><textarea id="cafeDesc" rows="2"></textarea></div>
-            <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入</button>
+    <!-- 添加资料栏：可折叠，默认展开 -->
+    <div class="collapsible-card" id="addCollapsible">
+        <div class="card-header" id="addHeader">
+            <h3><i class="fas fa-plus-circle"></i> 添加新咖啡馆</h3>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+        </div>
+        <div class="card-body">
+            <div class="form-grid">
+                <div class="input-group"><label>名称 *</label><input type="text" id="cafeName"></div>
+                <div class="input-group"><label>地区</label><input type="text" id="cafeRegion"></div>
+                <div class="input-group"><label>链接</label><input type="url" id="cafeUrl" placeholder="https://"></div>
+                <div class="input-group"><label>分类</label><select id="cafeCategory"></select></div>
+                <div class="input-group"><label>简介</label><textarea id="cafeDesc" rows="2"></textarea></div>
+                <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入</button>
+            </div>
         </div>
     </div>
 
@@ -173,6 +184,7 @@
 <button class="fab back-to-top" id="backToTopBtn"><i class="fas fa-arrow-up"></i></button>
 
 <script>
+    // Firebase 配置 (原样保留)
     const firebaseConfig = {
         apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
         authDomain: "cafe-c55f9.firebaseapp.com",
@@ -469,6 +481,26 @@
         for(let e of ex) await cafesRef.push({ ...e, createdAt:Date.now(), deleted:false }); 
     }
     
+    // 折叠面板逻辑
+    function initCollapsible() {
+        const searchCard = document.getElementById("searchCollapsible");
+        const addCard = document.getElementById("addCollapsible");
+        // 搜索栏默认折叠（最小化）
+        searchCard.classList.add("collapsed");
+        // 添加栏默认展开
+        addCard.classList.remove("collapsed");
+        
+        const searchHeader = document.getElementById("searchHeader");
+        const addHeader = document.getElementById("addHeader");
+        
+        searchHeader.addEventListener("click", () => {
+            searchCard.classList.toggle("collapsed");
+        });
+        addHeader.addEventListener("click", () => {
+            addCard.classList.toggle("collapsed");
+        });
+    }
+    
     function bindEvents(){
         document.getElementById("addCafeBtn").addEventListener("click",async()=>{ 
             let name=document.getElementById("cafeName").value, url=document.getElementById("cafeUrl").value, cat=document.getElementById("cafeCategory").value, reg=document.getElementById("cafeRegion").value, desc=document.getElementById("cafeDesc").value; 
@@ -489,7 +521,11 @@
         document.getElementById("importDataBtn").addEventListener("click",()=>document.getElementById("importFileInput").click());
         document.getElementById("importFileInput").addEventListener("change",e=>{ if(e.target.files[0]) importData(e.target.files[0]); });
         document.getElementById("backToTopBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-        document.getElementById("fabAddBtn").addEventListener("click",()=>document.getElementById("addForm").scrollIntoView({behavior:"smooth"}));
+        document.getElementById("fabAddBtn").addEventListener("click",()=>{
+            const addCard = document.getElementById("addCollapsible");
+            if(addCard.classList.contains("collapsed")) addCard.classList.remove("collapsed");
+            document.getElementById("addForm").scrollIntoView({behavior:"smooth"});
+        });
         let searchInp = document.getElementById("searchKeyword"); 
         searchInp.addEventListener("input",()=>{ searchKeyword=searchInp.value; updateSuggestions(); if(debouncedRender) clearTimeout(debouncedRender); debouncedRender=setTimeout(()=>renderMainView(),300); });
         document.getElementById("regionFilter").addEventListener("change",e=>{ selectedRegion=e.target.value; renderMainView(); });
@@ -519,6 +555,7 @@
         bindEvents();
         renderCategorySelect();
         initAdvancedRandomUI();
+        initCollapsible();
     }
     init();
 </script>
