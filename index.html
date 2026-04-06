@@ -68,7 +68,8 @@
         .card-link { color: #bc8f5a; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .no-link-text { color: #c1b2a0; font-style: italic; }
         .card-actions { display: flex; gap: 12px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.6rem; justify-content: flex-end; flex-wrap: wrap; }
-        .card-actions button { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; gap: 4px; color: #8b734f; }
+        .card-actions button { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 6px; width: 36px; height: 36px; border-radius: 30px; display: inline-flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .card-actions button:hover { background: #f0e9df; }
         .favorite-btn { color: #d4bb98; }
         .favorite-btn.active { color: #e2674b; }
         .delete-btn { color: #c6aa86; }
@@ -87,7 +88,7 @@
         .small-card-info { flex: 1; }
         .small-card-name { font-weight: 600; font-size: 0.95rem; }
         .small-card-meta { font-size: 0.65rem; color: #b2916e; display: flex; gap: 8px; margin-top: 4px; }
-        .small-fav { font-size: 1.2rem; background: none; border: none; cursor: pointer; color: #d1b588; }
+        .small-fav { font-size: 1.2rem; background: none; border: none; cursor: pointer; color: #d1b588; padding: 4px; }
         .small-fav.active { color: #e2674b; }
         .close-modal { font-size: 1.8rem; cursor: pointer; color: #a68d6e; line-height: 1; }
         .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #d9c8b6; color: #5e4b34; width: 44px; height: 44px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; border: none; font-size: 1.2rem; z-index: 99; transition: 0.2s; }
@@ -248,11 +249,12 @@
         let regionHtml = cafe.region ? `<div class="card-region"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(cafe.region)}</div>` : '';
         let descHtml = cafe.description ? `<div class="card-desc">${escapeHtml(cafe.description.length>70?cafe.description.substring(0,67)+'...':cafe.description)}</div>`:'';
         let linkHtml = cafe.url?.trim() ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> 链接</a>` : `<div class="no-link-text">无链接</div>`;
+        // 纯图标按钮，无文字
         div.innerHTML = `<div class="card-name">${escapeHtml(cafe.name)}</div>${regionHtml}${descHtml}${linkHtml}<div class="card-actions">
-            <button class="share-btn" data-id="${cafe.id}"><i class="fas fa-share-alt"></i> 分享</button>
-            <button class="edit-btn" data-id="${cafe.id}"><i class="fas fa-pen"></i> 编辑</button>
-            <button class="favorite-btn ${isFav?'active':''}" data-id="${cafe.id}"><i class="fas fa-heart"></i> ${isFav?'已收藏':'收藏'}</button>
-            <button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i> 删除</button>
+            <button class="share-btn" data-id="${cafe.id}"><i class="fas fa-share-alt"></i></button>
+            <button class="edit-btn" data-id="${cafe.id}"><i class="fas fa-pen"></i></button>
+            <button class="favorite-btn ${isFav?'active':''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button>
+            <button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i></button>
         </div>`;
         div.querySelector(".favorite-btn").addEventListener("click",e=>{ e.stopPropagation(); toggleFavorite(cafe.id, !cafe.favorited); });
         div.querySelector(".delete-btn").addEventListener("click",e=>{ e.stopPropagation(); deleteToTrash(cafe.id); });
@@ -266,6 +268,12 @@
         document.querySelectorAll(`.small-fav[data-id="${id}"]`).forEach(btn => {
             if(val) btn.classList.add("active"); else btn.classList.remove("active");
         });
+        // 更新卡片按钮样式
+        const cardBtn = document.querySelector(`.card .favorite-btn[data-id="${id}"]`);
+        if(cardBtn) {
+            if(val) cardBtn.classList.add("active");
+            else cardBtn.classList.remove("active");
+        }
     }
     async function deleteToTrash(id){ 
         if(confirm("确定要将这家咖啡馆移至回收站吗？")){
@@ -274,7 +282,12 @@
         }
     }
     async function restoreFromTrash(id){ await cafesRef.child(id).update({ deleted: false }); showToast("已恢复"); }
-    async function permanentDelete(id){ await cafesRef.child(id).remove(); showToast("已永久删除"); }
+    async function permanentDelete(id){ 
+        if(confirm("永久删除不可恢复，确定吗？")){
+            await cafesRef.child(id).remove(); 
+            showToast("已永久删除"); 
+        }
+    }
     async function addCafe(name,url,category,region,desc){
         if(!name.trim()){ alert("请填写名称"); return false; }
         if(getActiveCafes().some(c=>c.name.trim().toLowerCase()===name.trim().toLowerCase())){ alert("名称已存在"); return false; }
@@ -332,7 +345,7 @@
         let container = document.getElementById("trashList"); 
         container.innerHTML = trash.map(c=>`<div class="small-card"><div class="small-card-info"><div class="small-card-name">${escapeHtml(c.name)}</div><div class="small-card-meta">${escapeHtml(c.category)}</div></div><div><button class="small-fav restore-btn" data-id="${c.id}"><i class="fas fa-trash-restore"></i> 恢复</button><button class="delete-btn permanent-btn" data-id="${c.id}" style="margin-left:8px;"><i class="fas fa-times-circle"></i> 永久</button></div></div>`).join(""); 
         container.querySelectorAll(".restore-btn").forEach(btn=> btn.addEventListener("click",()=> restoreFromTrash(btn.dataset.id))); 
-        container.querySelectorAll(".permanent-btn").forEach(btn=> btn.addEventListener("click",()=> { if(confirm("永久删除不可恢复")) permanentDelete(btn.dataset.id); })); 
+        container.querySelectorAll(".permanent-btn").forEach(btn=> btn.addEventListener("click",()=> permanentDelete(btn.dataset.id))); 
     }
     function openEditModal(cafe){ 
         currentEditId = cafe.id; 
