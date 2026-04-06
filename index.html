@@ -32,6 +32,33 @@
             max-width: 1600px;
             margin: 0 auto;
         }
+        /* 下拉刷新指示器 */
+        .pull-to-refresh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ffffffcc;
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: #b88d54;
+            transform: translateY(-100%);
+            transition: transform 0.2s ease;
+            z-index: 1001;
+            border-bottom: 1px solid #eee2d4;
+            font-weight: 500;
+        }
+        .pull-to-refresh.show {
+            transform: translateY(0);
+        }
+        .pull-to-refresh i {
+            font-size: 1.2rem;
+        }
         .header {
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
@@ -464,6 +491,11 @@
     </style>
 </head>
 <body>
+<!-- 下拉刷新指示器 -->
+<div id="pullToRefresh" class="pull-to-refresh">
+    <i class="fas fa-arrow-down"></i> <span>下拉刷新</span>
+</div>
+
 <div class="container">
     <div class="header">
         <h1>FEONG的咖啡馆收藏集</h1>
@@ -565,12 +597,16 @@
     let regionSet = new Set();
     let searchDebounceTimer = null;
 
+    // 下拉刷新相关
+    let startY = 0, isRefreshing = false, refreshThreshold = 60;
+    const pullToRefreshEl = document.getElementById("pullToRefresh");
+    let refreshTimer = null;
+
     const DEFAULT_CATEGORIES = ["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"];
 
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     function isValidUrl(url) { if(!url.trim()) return true; return /^https?:\/\/.+/.test(url.trim()); }
     function isDuplicateName(name, excludeId=null) { let n = name.trim().toLowerCase(); return allCafes.some(c => c.name.trim().toLowerCase()===n && c.id!==excludeId); }
-    // 排序函数：按时间倒序（最近添加）
     function sortByDate(arr) { return arr.sort((a,b) => (b.createdAt||0) - (a.createdAt||0)); }
     function sortByName(arr) { return arr.sort((a,b)=>a.name.localeCompare(b.name)); }
     
@@ -613,7 +649,6 @@
         for(let cat of globalCategories){
             let cafes = grouped.get(cat) || [];
             if(cafes.length===0) continue;
-            // 每个分类内默认按最近添加排序
             cafes = sortByDate(cafes);
             let sec = document.createElement("div"); sec.className="category-section";
             sec.innerHTML = `<div class="category-header"><div class="category-title" data-cat="${cat}">${escapeHtml(cat)}</div><button class="view-all-btn" data-cat="${cat}">📋 全部 (${cafes.length})</button></div><div class="scroll-container"></div>`;
@@ -652,6 +687,82 @@
         if(!sel) return;
         sel.innerHTML = "";
         globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); });
+    }
+    // 下拉刷新核心逻辑
+    function initPullToRefresh() {
+        let touchStartY = 0;
+        let pulling = false;
+        document.body.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0 && !isRefreshing) {
+                touchStartY = e.touches[0].clientY;
+                pulling = true;
+            }
+        });
+        document.body.addEventListener('touchmove', (e) => {
+            if (!pulling || isRefreshing) return;
+            let diff = e.touches[0].clientY - touchStartY;
+            if (diff > 0 && window.scrollY === 0) {
+                e.preventDefault(); // 防止页面滑动
+                if (diff >= refreshThreshold) {
+                    pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-up';
+                    pullToRefreshEl.querySelector('span').innerText = '松开刷新';
+                } else {
+                    pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-down';
+                    pullToRefreshEl.querySelector('span').innerText = '下拉刷新';
+                }
+                pullToRefreshEl.style.transform = `translateY(${Math.min(diff, 80)}px)`;
+            }
+        });
+        document.body.addEventListener('touchend', async (e) => {
+            if (!pulling || isRefreshing) return;
+            pulling = false;
+            let diff = e.changedTouches[0].clientY - touchStartY;
+            if (diff >= refreshThreshold && window.scrollY === 0) {
+                // 触发刷新
+                await refreshData();
+            }
+            pullToRefreshEl.style.transform = '';
+            pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-down';
+            pullToRefreshEl.querySelector('span').innerText = '下拉刷新';
+        });
+    }
+    async function refreshData() {
+        if (isRefreshing) return;
+        isRefreshing = true;
+        pullToRefreshEl.classList.add('show');
+        pullToRefreshEl.querySelector('i').className = 'fas fa-spinner fa-pulse';
+        pullToRefreshEl.querySelector('span').innerText = '刷新中...';
+        // 从 Firebase 重新获取最新数据
+        const snapshot = await cafesRef.once('value');
+        const data = snapshot.val();
+        let cafesArray = [];
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const item = data[key];
+                cafesArray.push({
+                    id: key,
+                    name: item.name || "未命名",
+                    url: item.url || "",
+                    category: item.category || "Others",
+                    favorited: item.favorited === true,
+                    region: item.region || "",
+                    description: item.description || "",
+                    createdAt: item.createdAt || 0
+                });
+            });
+        }
+        allCafes = cafesArray;
+        computeGlobalCategories();
+        updateRegionFilter();
+        renderCategorySelect();
+        renderMainView();
+        // 恢复刷新指示器
+        setTimeout(() => {
+            pullToRefreshEl.classList.remove('show');
+            pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-down';
+            pullToRefreshEl.querySelector('span').innerText = '下拉刷新';
+            isRefreshing = false;
+        }, 500);
     }
     // 分页加载
     let modalCurrentPage = 0, modalPageSize = 20, modalFilteredItems = [], modalObserver = null, modalLoading = false, modalHasMore = true;
@@ -692,24 +803,21 @@
         modalFilteredItems = source.filter(item => item.name.toLowerCase().includes(searchVal) || (item.region && item.region.toLowerCase().includes(searchVal)) || (item.description && item.description.toLowerCase().includes(searchVal)));
         if(sortType === "name") modalFilteredItems.sort((a,b)=>a.name.localeCompare(b.name));
         else if(sortType === "favorite") modalFilteredItems.sort((a,b)=> (b.favorited?1:0) - (a.favorited?1:0));
-        else modalFilteredItems.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0)); // 默认最近添加
+        else modalFilteredItems.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
         modalHasMore = modalFilteredItems.length > 0;
         loadMoreItems();
         setupInfiniteScroll(currentModalListContainer);
     }
-    // 控制滚动穿透 + 移动端点击背景关闭
     function disableBodyScroll() { document.body.classList.add("modal-open"); }
     function enableBodyScroll() { document.body.classList.remove("modal-open"); }
     function openModal(modalElement) {
         modalElement.style.display = "flex";
         disableBodyScroll();
-        // 移动端确保背景点击关闭：给modal添加事件监听（避免重复绑定）
         if (!modalElement._clickHandler) {
             modalElement._clickHandler = function(e) {
                 if (e.target === modalElement) closeModal(modalElement);
             };
             modalElement.addEventListener('click', modalElement._clickHandler);
-            // 同时也支持 touchend 移动端
             modalElement.addEventListener('touchend', modalElement._clickHandler);
         }
     }
@@ -717,7 +825,6 @@
         modalElement.style.display = "none";
         enableBodyScroll();
         if(modalObserver) modalObserver.disconnect();
-        // 不移除事件，下次打开重新添加即可，但无妨
     }
     function openCategoryModal(category){
         currentModalCategory = category;
@@ -764,7 +871,6 @@
         let linkDisplay = (cafe.url&&cafe.url.trim()) ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a>` : '<span>未提供链接</span>';
         detail.innerHTML = `<div class="detail-field"><strong>名称</strong><br>${escapeHtml(cafe.name)}</div><div class="detail-field"><strong>地区</strong><br>${cafe.region?escapeHtml(cafe.region):'未填写'}</div><div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div><div class="detail-field"><strong>简介</strong><br>${cafe.description?escapeHtml(cafe.description):'暂无'}</div><div class="detail-field"><strong>链接</strong><br>${linkDisplay}</div><div class="detail-field"><strong>收藏</strong><br>${isFav?'已收藏 ❤️':'未收藏'}</div><hr><div style="display:flex; gap:1rem; justify-content:flex-end;"><button id="detailFavBtn" class="btn-outline"><i class="fas fa-heart"></i> ${isFav?'取消收藏':'收藏'}</button><button id="detailDelBtn" class="btn-outline" style="color:#b1624b;"><i class="fas fa-trash-alt"></i> 移除</button></div>`;
         openModal(modal);
-        // 为了避免事件重复绑定，先移除旧的再添加新的（简单起见使用一次性事件）
         let favBtn = document.getElementById("detailFavBtn");
         let delBtn = document.getElementById("detailDelBtn");
         favBtn.replaceWith(favBtn.cloneNode(true));
@@ -811,17 +917,16 @@
         searchInp.addEventListener("input",()=>{ if(searchDebounceTimer) clearTimeout(searchDebounceTimer); searchDebounceTimer=setTimeout(performSearch,300); });
         regionSel.addEventListener("change",performSearch);
         clearBtn.addEventListener("click",()=>{ searchInp.value=""; regionSel.value=""; searchKeyword=""; selectedRegion=""; renderMainView(); });
-        // 关闭按钮
         let modalCat = document.getElementById("categoryModal"), closeCat = document.getElementById("closeModalBtn");
         let modalAll = document.getElementById("allCafesModal"), closeAll = document.getElementById("closeAllCafesModalBtn");
         let modalDetail = document.getElementById("detailModal"), closeDetail = document.getElementById("closeDetailModalBtn");
         closeCat.onclick = () => closeModal(modalCat);
         closeAll.onclick = () => closeModal(modalAll);
         closeDetail.onclick = () => closeModal(modalDetail);
-        // 全局背景点击已在 openModal 中通过事件监听处理，无需额外 window 监听
     }
     async function init(){
         computeGlobalCategories(); renderCategorySelect(); bindEvents(); await seedExampleData(); subscribeCafes();
+        initPullToRefresh(); // 启动下拉刷新
     }
     init();
 </script>
