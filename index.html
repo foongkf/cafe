@@ -3,648 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>FEONG的咖啡馆收藏集 · 随机灵感</title>
+    <title>FEONG的咖啡馆收藏集 · 全能版</title>
+    <link rel="manifest" href="data:application/manifest+json,{ \"name\":\"FEONG咖啡馆\", \"short_name\":\"咖啡馆集\", \"start_url\":\".\", \"display\":\"standalone\", \"theme_color\":\"#c7a16b\", \"background_color\":\"#f2efe7\" }">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #f2efe7;
-            font-family: 'Inter', sans-serif;
-            color: #1f1c18;
-            padding: 2rem 1.5rem;
-            line-height: 1.4;
-            padding-bottom: 80px;
-        }
-        body.modal-open {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-        .header {
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #c7a16b 0%, #e6c28f 40%, #b3804a 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 2px 2px 12px rgba(199, 161, 107, 0.15);
-            display: inline-block;
-        }
-        h1::after {
-            content: "☕";
-            font-size: 1.5rem;
-            background: none;
-            -webkit-background-clip: unset;
-            background-clip: unset;
-            color: #c7a16b;
-            margin-left: 0.4rem;
-            display: inline-block;
-            vertical-align: middle;
-            opacity: 0.8;
-        }
-        .header-actions {
-            display: flex;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-        }
-        .btn-icon {
-            background: transparent;
-            border: 1px solid #ddd2c2;
-            padding: 0.4rem 1rem;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            color: #8b734f;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.2s;
-        }
-        .btn-icon.active {
-            background: #c7a16b20;
-            border-color: #c7a16b;
-            color: #c7a16b;
-        }
-        .btn-icon:hover {
-            background: #f3ede5;
-            transform: translateY(-1px);
-        }
-        .random-btn i {
-            transition: transform 0.2s ease;
-        }
-        .random-btn:hover i {
-            transform: rotate(15deg);
-        }
-        .search-bar {
-            background: rgba(255,255,245,0.85);
-            backdrop-filter: blur(2px);
-            border-radius: 60px;
-            padding: 0.4rem 1rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-            align-items: center;
-            border: 1px solid #e7dfd1;
-        }
-        .search-input-group {
-            flex: 3;
-            min-width: 160px;
-            display: flex;
-            align-items: center;
-            padding: 0.2rem 0.6rem;
-        }
-        .search-input-group i {
-            color: #b48c5c;
-            margin-right: 8px;
-        }
-        .search-input-group input {
-            border: none;
-            background: transparent;
-            padding: 0.6rem 0;
-            width: 100%;
-            outline: none;
-            font-size: 0.9rem;
-        }
-        .filter-group select {
-            width: 100%;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            border: 1px solid #e2d8ca;
-            background: white;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .clear-filter {
-            background: none;
-            border: none;
-            color: #9b8a72;
-            cursor: pointer;
-            padding: 0.4rem 0.8rem;
-            border-radius: 30px;
-        }
-        .clear-filter:hover {
-            background: #e5dbcf;
-        }
-        .form-card {
-            background: #ffffffd9;
-            border-radius: 28px;
-            padding: 1.2rem 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #ece3d7;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-        .form-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            align-items: flex-end;
-        }
-        .input-group {
-            flex: 1;
-            min-width: 130px;
-        }
-        .input-group label {
-            display: block;
-            font-size: 0.65rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            color: #a28c70;
-            margin-bottom: 0.2rem;
-        }
-        .input-group input, .input-group select, .input-group textarea {
-            width: 100%;
-            padding: 0.6rem 0.9rem;
-            border: 1px solid #e2d6c8;
-            border-radius: 24px;
-            font-size: 0.85rem;
-            background: #ffffff;
-        }
-        .input-group textarea {
-            resize: vertical;
-            min-height: 56px;
-        }
-        .btn-primary {
-            background: #c7a16b;
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 40px;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-primary:hover {
-            background: #b08854;
-        }
-        .category-section {
-            margin-bottom: 2rem;
-        }
-        .category-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            border-left: 4px solid #cfb587;
-            padding-left: 0.8rem;
-            margin-bottom: 1rem;
-        }
-        .category-title {
-            font-size: 1.4rem;
-            font-weight: 500;
-            color: #3b3328;
-            cursor: pointer;
-        }
-        .category-title:hover {
-            color: #b88d54;
-        }
-        .view-all-btn {
-            background: #f0e9e0;
-            border: none;
-            color: #ad8f6b;
-            cursor: pointer;
-            font-size: 0.7rem;
-            padding: 0.2rem 0.7rem;
-            border-radius: 40px;
-        }
-        .scroll-container {
-            display: flex;
-            overflow-x: auto;
-            gap: 1.2rem;
-            padding-bottom: 0.8rem;
-            scrollbar-width: thin;
-            -webkit-overflow-scrolling: touch;
-        }
-        .scroll-container::after {
-            content: '';
-            padding-right: 1rem;
-        }
-        .card {
-            background: #ffffff;
-            border-radius: 24px;
-            width: 280px;
-            flex-shrink: 0;
-            padding: 1.2rem;
-            transition: 0.2s;
-            border: 1px solid #efe6db;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-        }
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px -8px rgba(0,0,0,0.1);
-        }
-        .card-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-            color: #2a241e;
-            padding-right: 40px;
-        }
-        .card-region {
-            font-size: 0.65rem;
-            color: #b48b54;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 0.5rem;
-        }
-        .card-desc {
-            font-size: 0.7rem;
-            line-height: 1.4;
-            color: #6e6252;
-            margin: 0.5rem 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .card-link, .no-link-text {
-            font-size: 0.7rem;
-            margin: 0.3rem 0 0.8rem;
-        }
-        .card-link {
-            color: #bc8f5a;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .no-link-text {
-            color: #c1b2a0;
-            font-style: italic;
-        }
-        .card-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: auto;
-            border-top: 1px solid #f1eadf;
-            padding-top: 0.6rem;
-        }
-        .favorite-btn, .delete-btn {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f2efe7; font-family: 'Inter', sans-serif; color: #1f1c18; padding: 2rem 1.5rem; line-height: 1.4; padding-bottom: 100px; }
+        body.modal-open { overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header { margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; }
+        h1 { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.02em; background: linear-gradient(135deg, #c7a16b 0%, #e6c28f 40%, #b3804a 100%); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; }
+        h1::after { content: "☕"; font-size: 1.5rem; color: #c7a16b; margin-left: 0.4rem; display: inline-block; vertical-align: middle; opacity: 0.8; }
+        .header-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+        .btn-icon { background: transparent; border: 1px solid #ddd2c2; padding: 0.4rem 1rem; border-radius: 40px; font-weight: 500; cursor: pointer; color: #8b734f; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-icon.active { background: #c7a16b20; border-color: #c7a16b; color: #c7a16b; }
+        .btn-icon:hover { background: #f3ede5; transform: translateY(-1px); }
+        .random-options { display: inline-flex; gap: 4px; }
+        .search-wrapper { position: relative; flex: 3; min-width: 200px; }
+        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
+        .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0e6da; }
+        .suggestion-item:hover { background: #fef5e8; }
+        .search-bar { background: rgba(255,255,245,0.85); backdrop-filter: blur(2px); border-radius: 60px; padding: 0.4rem 1rem; margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; border: 1px solid #e7dfd1; }
+        .search-input-group { flex: 3; min-width: 160px; display: flex; align-items: center; padding: 0.2rem 0.6rem; position: relative; }
+        .search-input-group i { color: #b48c5c; margin-right: 8px; }
+        .search-input-group input { border: none; background: transparent; padding: 0.6rem 0; width: 100%; outline: none; font-size: 0.9rem; }
+        .filter-group select { width: 100%; padding: 0.5rem 1rem; border-radius: 40px; border: 1px solid #e2d8ca; background: white; font-size: 0.85rem; cursor: pointer; }
+        .clear-filter { background: none; border: none; color: #9b8a72; cursor: pointer; padding: 0.4rem 0.8rem; border-radius: 30px; }
+        .form-card { background: #ffffffd9; border-radius: 28px; padding: 1.2rem 1.5rem; margin-bottom: 2rem; border: 1px solid #ece3d7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .form-grid { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: flex-end; }
+        .input-group { flex: 1; min-width: 130px; }
+        .input-group label { display: block; font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; color: #a28c70; margin-bottom: 0.2rem; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.6rem 0.9rem; border: 1px solid #e2d6c8; border-radius: 24px; font-size: 0.85rem; background: #ffffff; }
+        .btn-primary { background: #c7a16b; border: none; padding: 0.6rem 1.5rem; border-radius: 40px; color: white; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-secondary { background: #e9dfd1; border: none; padding: 0.4rem 1rem; border-radius: 40px; cursor: pointer; color: #7a6233; }
+        .category-section { margin-bottom: 2rem; }
+        .category-header { display: flex; justify-content: space-between; align-items: baseline; border-left: 4px solid #cfb587; padding-left: 0.8rem; margin-bottom: 1rem; }
+        .category-title { font-size: 1.4rem; font-weight: 500; color: #3b3328; cursor: pointer; }
+        .scroll-container { display: flex; overflow-x: auto; gap: 1.2rem; padding-bottom: 0.8rem; scrollbar-width: thin; }
+        .card { background: #ffffff; border-radius: 24px; width: 280px; flex-shrink: 0; padding: 1.2rem; transition: 0.2s; border: 1px solid #efe6db; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -8px rgba(0,0,0,0.1); }
+        .card-name { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.3rem; color: #2a241e; display: flex; justify-content: space-between; }
+        .card-actions { display: flex; gap: 8px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.6rem; justify-content: flex-end; }
+        .favorite-btn, .delete-btn, .edit-btn, .share-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; }
         .favorite-btn { color: #d4bb98; }
         .favorite-btn.active { color: #e2674b; }
         .delete-btn { color: #c6aa86; }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(30,27,22,0.4);
-            backdrop-filter: blur(6px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: #fffef8;
-            border-radius: 32px;
-            width: 90%;
-            max-width: 700px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #f0e5d8;
-            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.2);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid #eee2d4;
-            flex-shrink: 0;
-        }
-        .modal-header h2 {
-            font-size: 1.3rem;
-            font-weight: 500;
-        }
-        .modal-filters {
-            padding: 0.8rem 1.5rem;
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-            border-bottom: 1px solid #eee2d4;
-            background: #fefaf5;
-            flex-shrink: 0;
-        }
-        .modal-filters input, .modal-filters select {
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            border: 1px solid #e2d8ca;
-            font-size: 0.8rem;
-            background: white;
-        }
-        .modal-filters input {
-            flex: 2;
-            min-width: 150px;
-        }
-        .modal-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem 1.5rem;
-        }
-        .small-card {
-            background: #fefaf5;
-            border-radius: 20px;
-            padding: 0.8rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #f0e3d6;
-            cursor: pointer;
-            margin-bottom: 0.7rem;
-        }
-        .small-card:hover {
-            background: #fcf6ed;
-        }
-        .small-card-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        .small-card-meta {
-            font-size: 0.65rem;
-            color: #b2916e;
-            display: flex;
-            gap: 8px;
-            margin-top: 4px;
-        }
-        .small-fav {
-            font-size: 1.2rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #d1b588;
-        }
+        .edit-btn { color: #b88d54; }
+        .share-btn { color: #6f9e7c; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30,27,22,0.4); backdrop-filter: blur(6px); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #fffef8; border-radius: 32px; width: 90%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #eee2d4; }
+        .modal-list { flex: 1; overflow-y: auto; padding: 1rem; }
+        .small-card { background: #fefaf5; border-radius: 20px; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f0e3d6; margin-bottom: 0.7rem; }
+        .small-fav { font-size: 1.2rem; background: none; border: none; cursor: pointer; color: #d1b588; }
         .small-fav.active { color: #e2674b; }
-        .close-modal {
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: #a68d6e;
-            line-height: 1;
-        }
-        .fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #c7a16b;
-            color: white;
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            cursor: pointer;
-            border: none;
-            font-size: 1.5rem;
-            transition: 0.2s;
-            z-index: 99;
-        }
-        .fab:hover {
-            background: #b08854;
-            transform: scale(1.02);
-        }
-        .back-to-top {
-            bottom: 90px;
-            background: #d9c8b6;
-            color: #5e4b34;
-            width: 44px;
-            height: 44px;
-            font-size: 1.2rem;
-        }
-        .scroll-hint {
-            text-align: center;
-            font-size: 0.65rem;
-            color: #bcae97;
-            margin-top: -0.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-        }
-        @media (max-width: 640px) {
-            body { padding: 1rem; padding-bottom: 80px; }
-            .card { width: 260px; }
-            .category-title { font-size: 1.3rem; }
-            .form-card { padding: 1rem; }
-        }
-        .detail-field {
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #f0e6da;
-        }
-        .detail-field strong {
-            color: #b88d54;
-            font-size: 0.7rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        .detail-link {
-            word-break: break-all;
-            color: #b5703a;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #dccdbd;
-            padding: 0.4rem 1rem;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 500;
-        }
+        .close-modal { font-size: 1.8rem; cursor: pointer; color: #a68d6e; }
+        .fab { position: fixed; bottom: 20px; right: 20px; background: #c7a16b; color: white; width: 56px; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; border: none; font-size: 1.5rem; z-index: 99; }
+        .back-to-top { bottom: 90px; background: #d9c8b6; color: #5e4b34; width: 44px; height: 44px; font-size: 1.2rem; }
+        .footer-bar { margin-top: 2rem; padding: 1rem; background: #fffaf2; border-radius: 28px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; border: 1px solid #e7dfd1; }
+        .toast-msg { position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%); background: #1f1c18e6; color: white; padding: 8px 20px; border-radius: 40px; font-size: 0.8rem; z-index: 1100; pointer-events: none; transition: opacity 0.2s; opacity: 0; }
+        @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="header">
         <h1>FEONG的咖啡馆收藏集</h1>
         <div class="header-actions">
-            <button id="randomCafeBtn" class="btn-icon random-btn"><i class="fas fa-dice-d6"></i> 随机推荐</button>
-            <button id="favoritesFilterBtn" class="btn-icon"><i class="fas fa-heart"></i> 我的收藏</button>
+            <div class="random-options">
+                <button id="randomCafeBtn" class="btn-icon"><i class="fas fa-dice-d6"></i> 随机</button>
+                <select id="randomModeSelect" style="border-radius:40px; border:1px solid #ddd2c2; background:transparent; padding:0.4rem 0.8rem; font-size:0.7rem;">
+                    <option value="all">全部</option>
+                    <option value="favorite">仅收藏</option>
+                    <option value="region">按地区</option>
+                    <option value="category">按分类</option>
+                </select>
+            </div>
+            <button id="favoritesFilterBtn" class="btn-icon"><i class="fas fa-heart"></i> 收藏</button>
             <button id="viewAllCafesBtn" class="btn-icon"><i class="fas fa-list-ul"></i> 全部</button>
+            <button id="trashBtn" class="btn-icon"><i class="fas fa-trash-restore"></i> 回收站</button>
         </div>
     </div>
 
     <div class="search-bar">
-        <div class="search-input-group">
+        <div class="search-input-group" style="position:relative;">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchKeyword" placeholder="搜索名称、地区或简介...">
+            <input type="text" id="searchKeyword" placeholder="搜索名称、地区或简介..." autocomplete="off">
+            <div id="suggestionsBox" class="suggestions-box"></div>
         </div>
-        <div class="filter-group">
-            <select id="regionFilter">
-                <option value="">🌍 所有地区</option>
-            </select>
-        </div>
+        <div class="filter-group"><select id="regionFilter"><option value="">🌍 所有地区</option></select></div>
         <button class="clear-filter" id="clearFiltersBtn"><i class="fas fa-eraser"></i> 清除</button>
     </div>
 
     <div class="form-card" id="addForm">
         <div class="form-grid">
-            <div class="input-group"><label>咖啡厅名称 *</label><input type="text" id="cafeName" autocomplete="off"></div>
-            <div class="input-group"><label>地区</label><input type="text" id="cafeRegion" autocomplete="off"></div>
-            <div class="input-group"><label>链接</label><input type="url" id="cafeUrl" placeholder="https://..."></div>
+            <div class="input-group"><label>名称 *</label><input type="text" id="cafeName"></div>
+            <div class="input-group"><label>地区</label><input type="text" id="cafeRegion"></div>
+            <div class="input-group"><label>链接</label><input type="url" id="cafeUrl" placeholder="https://"></div>
             <div class="input-group"><label>分类</label><select id="cafeCategory"></select></div>
-            <div class="input-group" style="min-width: 180px;"><label>简介</label><textarea id="cafeDesc" rows="2"></textarea></div>
-            <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入收藏</button>
+            <div class="input-group"><label>简介</label><textarea id="cafeDesc" rows="2"></textarea></div>
+            <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入</button>
         </div>
     </div>
 
     <div id="categoriesContainer"></div>
-    <div class="scroll-hint"><i class="fas fa-arrow-left"></i> 左右滑动查看更多 <i class="fas fa-arrow-right"></i></div>
-</div>
-
-<!-- 分类模态框 -->
-<div id="categoryModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2 id="modalCategoryTitle">分类</h2><span class="close-modal" id="closeModalBtn">&times;</span></div>
-        <div class="modal-filters">
-            <input type="text" id="modalSearchInput" placeholder="🔍 搜索咖啡馆...">
-            <select id="modalSortSelect">
-                <option value="date">最近添加</option>
-                <option value="name">按名称 A-Z</option>
-                <option value="favorite">按收藏 ♥</option>
-            </select>
-        </div>
-        <div id="modalList" class="modal-list"></div>
-        <div id="modalLoader" style="text-align:center; padding:1rem; display:none;">加载更多...</div>
+    <div class="footer-bar" id="importExportBar">
+        <button id="exportDataBtn" class="btn-secondary"><i class="fas fa-download"></i> 导出JSON</button>
+        <button id="importDataBtn" class="btn-secondary"><i class="fas fa-upload"></i> 导入JSON</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none">
+        <span style="font-size:0.7rem; color:#b29a78;">📦 批量导入会合并（重名跳过）</span>
     </div>
 </div>
 
-<!-- 全部咖啡馆模态框 -->
-<div id="allCafesModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h2>📋 全部咖啡馆 <span id="allCafesCount"></span></h2><span class="close-modal" id="closeAllCafesModalBtn">&times;</span></div>
-        <div class="modal-filters">
-            <input type="text" id="allModalSearchInput" placeholder="🔍 搜索咖啡馆...">
-            <select id="allModalSortSelect">
-                <option value="date">最近添加</option>
-                <option value="name">按名称 A-Z</option>
-                <option value="favorite">按收藏 ♥</option>
-            </select>
-        </div>
-        <div id="allModalList" class="modal-list"></div>
-        <div id="allModalLoader" style="text-align:center; padding:1rem; display:none;">加载更多...</div>
-    </div>
-</div>
+<!-- 模态框: 分类/全部/回收站/编辑/高级随机 -->
+<div id="categoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="modalCategoryTitle"></h2><span class="close-modal closeModalBtn">&times;</span></div><div class="modal-filters" style="padding:0.8rem;display:flex;gap:8px;"><input type="text" id="modalSearchInput" placeholder="🔍 搜索"><select id="modalSortSelect"><option value="date">最近</option><option value="name">名称</option><option value="favorite">收藏</option></select></div><div id="modalList" class="modal-list"></div><div id="modalLoader" style="text-align:center;display:none;">加载中...</div></div></div>
+<div id="allCafesModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>📋 全部咖啡馆 <span id="allCafesCount"></span></h2><span class="close-modal closeModalBtn">&times;</span></div><div class="modal-filters" style="padding:0.8rem;display:flex;gap:8px;"><input type="text" id="allModalSearchInput" placeholder="🔍 搜索"><select id="allModalSortSelect"><option value="date">最近</option><option value="name">名称</option><option value="favorite">收藏</option></select></div><div id="allModalList" class="modal-list"></div></div></div>
+<div id="trashModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>🗑️ 回收站 (可恢复)</h2><span class="close-modal closeModalBtn">&times;</span></div><div id="trashList" class="modal-list"></div><div style="padding:1rem;text-align:center;"><button id="emptyTrashBtn" class="btn-secondary">清空回收站</button></div></div></div>
+<div id="editModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>✏️ 编辑咖啡馆</h2><span class="close-modal closeModalBtn">&times;</span></div><div style="padding:1.5rem; display:flex; flex-direction:column; gap:12px;"><input type="text" id="editName" placeholder="名称"><input type="text" id="editRegion" placeholder="地区"><input type="url" id="editUrl" placeholder="链接"><select id="editCategory"></select><textarea id="editDesc" rows="3" placeholder="简介"></textarea><button id="saveEditBtn" class="btn-primary">保存修改</button></div></div></div>
+<div id="randomAdvancedModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>🎲 高级随机</h2><span class="close-modal closeModalBtn">&times;</span></div><div style="padding:1.5rem; display:flex; flex-direction:column; gap:12px;"><select id="advRandomMode"><option value="all">全部咖啡馆</option><option value="favorite">我的收藏</option><option value="region">按地区</option><option value="category">按分类</option></select><div id="advRandomFilterContainer" style="display:none;"><select id="advRandomRegionSelect"></select><select id="advRandomCategorySelect"></select></div><button id="advRandomGoBtn" class="btn-primary">🎲 随机推荐</button></div></div></div>
 
-<!-- 详情模态框 -->
-<div id="detailModal" class="modal detail-modal">
-    <div class="modal-content"><div class="modal-header"><h2>📄 咖啡馆档案</h2><span class="close-modal" id="closeDetailModalBtn">&times;</span></div><div id="detailContent" style="padding:1rem;"></div></div>
-</div>
-
-<!-- 浮动按钮 -->
+<div id="toastMsg" class="toast-msg"></div>
 <button class="fab" id="fabAddBtn"><i class="fas fa-plus"></i></button>
 <button class="fab back-to-top" id="backToTopBtn"><i class="fas fa-arrow-up"></i></button>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
-        authDomain: "cafe-c55f9.firebaseapp.com",
-        databaseURL: "https://cafe-c55f9-default-rtdb.asia-southeast1.firebasedatabase.app/",
-        projectId: "cafe-c55f9",
-        storageBucket: "cafe-c55f9.firebasestorage.app",
-        messagingSenderId: "328042543743",
-        appId: "1:328042543743:web:0fc175a3aadc7c5a639d4a"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc", authDomain: "cafe-c55f9.firebaseapp.com", databaseURL: "https://cafe-c55f9-default-rtdb.asia-southeast1.firebasedatabase.app/", projectId: "cafe-c55f9", storageBucket: "cafe-c55f9.firebasestorage.app", messagingSenderId: "328042543743", appId: "1:328042543743:web:0fc175a3aadc7c5a639d4a" };
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const cafesRef = database.ref("cafes");
-
-    let allCafes = [];
-    let globalCategories = [];
-    let currentModalCategory = null;
+    let allCafes = [], globalCategories = [], currentEditId = null;
     let searchKeyword = "", selectedRegion = "", onlyFavorites = false;
     let regionSet = new Set();
-    let searchDebounceTimer = null;
+    let debouncedRender;
 
-    const DEFAULT_CATEGORIES = ["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"];
-
+    // helper
+    function showToast(msg, duration=2000) { let t = document.getElementById("toastMsg"); t.innerText = msg; t.style.opacity = "1"; t.style.transition = "opacity 0.2s"; setTimeout(()=> t.style.opacity = "0", duration); }
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-    function isValidUrl(url) { if(!url.trim()) return true; return /^https?:\/\/.+/.test(url.trim()); }
-    function isDuplicateName(name, excludeId=null) { let n = name.trim().toLowerCase(); return allCafes.some(c => c.name.trim().toLowerCase()===n && c.id!==excludeId); }
-    function sortByDate(arr) { return arr.sort((a,b) => (b.createdAt||0) - (a.createdAt||0)); }
-    function sortByName(arr) { return arr.sort((a,b)=>a.name.localeCompare(b.name)); }
     
-    function computeGlobalCategories() {
-        let set = new Set(DEFAULT_CATEGORIES);
-        allCafes.forEach(c=>{ if(c.category) set.add(c.category); });
-        globalCategories = [...set].sort((a,b)=>{
-            let ai=DEFAULT_CATEGORIES.indexOf(a), bi=DEFAULT_CATEGORIES.indexOf(b);
-            if(ai!==-1 && bi!==-1) return ai-bi;
-            if(ai!==-1) return -1; if(bi!==-1) return 1;
-            return a.localeCompare(b);
-        });
-    }
+    // 修复: 同步地区筛选器
     function updateRegionFilter() {
-        regionSet.clear();
-        allCafes.forEach(c=>{ if(c.region && c.region.trim()) regionSet.add(c.region.trim()); });
+        regionSet.clear(); allCafes.forEach(c=>{ if(c.region && !c.deleted) regionSet.add(c.region.trim()); });
         let sel = document.getElementById("regionFilter"), cur = sel.value;
         sel.innerHTML = '<option value="">🌍 所有地区</option>';
         [...regionSet].sort().forEach(r=>{ let opt=document.createElement("option"); opt.value=r; opt.textContent=r; sel.appendChild(opt); });
-        if(cur && regionSet.has(cur)) sel.value=cur; else sel.value="";
+        if(cur && regionSet.has(cur)) sel.value=cur; else { sel.value=""; if(selectedRegion && !regionSet.has(selectedRegion)) selectedRegion=""; }
         selectedRegion = sel.value;
     }
+    function getActiveCafes() { return allCafes.filter(c => !c.deleted); }
     function getFilteredCafes() {
-        let filtered = onlyFavorites ? allCafes.filter(c=>c.favorited) : [...allCafes];
-        if(searchKeyword.trim()){
-            let kw = searchKeyword.trim().toLowerCase();
-            filtered = filtered.filter(c=> c.name.toLowerCase().includes(kw) || (c.region&&c.region.toLowerCase().includes(kw)) || (c.description&&c.description.toLowerCase().includes(kw)));
-        }
+        let filtered = onlyFavorites ? getActiveCafes().filter(c=>c.favorited) : [...getActiveCafes()];
+        if(searchKeyword.trim()){ let kw=searchKeyword.trim().toLowerCase(); filtered = filtered.filter(c=> c.name.toLowerCase().includes(kw) || (c.region&&c.region.toLowerCase().includes(kw)) || (c.description&&c.description.toLowerCase().includes(kw))); }
         if(selectedRegion) filtered = filtered.filter(c=>c.region===selectedRegion);
         return filtered;
     }
     function renderMainView() {
-        let container = document.getElementById("categoriesContainer");
-        if(!container) return;
+        let container = document.getElementById("categoriesContainer"); if(!container) return;
         container.innerHTML = "";
         let filtered = getFilteredCafes();
-        let grouped = new Map();
-        globalCategories.forEach(cat=>grouped.set(cat,[]));
+        let grouped = new Map(); globalCategories.forEach(cat=>grouped.set(cat,[]));
         filtered.forEach(c=>{ let cat=c.category; if(grouped.has(cat)) grouped.get(cat).push(c); else grouped.set(cat,[c]); });
         for(let cat of globalCategories){
             let cafes = grouped.get(cat) || [];
             if(cafes.length===0) continue;
-            cafes = sortByDate(cafes);
+            cafes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
             let sec = document.createElement("div"); sec.className="category-section";
             sec.innerHTML = `<div class="category-header"><div class="category-title" data-cat="${cat}">${escapeHtml(cat)}</div><button class="view-all-btn" data-cat="${cat}">📋 全部 (${cafes.length})</button></div><div class="scroll-container"></div>`;
             container.appendChild(sec);
@@ -653,7 +178,7 @@
             sec.querySelector(".category-title").addEventListener("click",()=>openCategoryModal(cat));
             sec.querySelector(".view-all-btn").addEventListener("click",()=>openCategoryModal(cat));
         }
-        if(container.children.length===0) container.innerHTML = `<div style="padding:2rem;text-align:center;">🔍 没有找到匹配的咖啡厅</div>`;
+        if(container.children.length===0) container.innerHTML = `<div style="padding:2rem;text-align:center;">🔍 没有找到咖啡厅</div>`;
         document.getElementById("favoritesFilterBtn").classList.toggle("active", onlyFavorites);
     }
     function createCardElement(cafe){
@@ -661,108 +186,100 @@
         let isFav = cafe.favorited===true;
         let regionHtml = cafe.region ? `<div class="card-region"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(cafe.region)}</div>` : '';
         let descHtml = cafe.description ? `<div class="card-desc">${escapeHtml(cafe.description.length>70?cafe.description.substring(0,67)+'...':cafe.description)}</div>`:'';
-        let linkHtml = cafe.url && cafe.url.trim() ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> 🔗链接</a>` : `<div class="no-link-text"><i class="fas fa-link-slash"></i> 未提供链接</div>`;
-        div.innerHTML = `<div class="card-name">${escapeHtml(cafe.name)}</div>${regionHtml}${descHtml}${linkHtml}<div class="card-actions"><button class="favorite-btn ${isFav?'active':''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button><button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i></button></div>`;
+        let linkHtml = cafe.url?.trim() ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> 链接</a>` : `<div class="no-link-text">无链接</div>`;
+        div.innerHTML = `<div class="card-name"><span>${escapeHtml(cafe.name)}</span><div style="display:flex;gap:6px;"><button class="edit-btn" data-id="${cafe.id}"><i class="fas fa-pen"></i></button><button class="share-btn" data-id="${cafe.id}"><i class="fas fa-share-alt"></i></button></div></div>${regionHtml}${descHtml}${linkHtml}<div class="card-actions"><button class="favorite-btn ${isFav?'active':''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button><button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i></button></div>`;
         div.querySelector(".favorite-btn").addEventListener("click",e=>{ e.stopPropagation(); toggleFavorite(cafe.id, !cafe.favorited); });
-        div.querySelector(".delete-btn").addEventListener("click",e=>{ e.stopPropagation(); if(confirm(`移除「${cafe.name}」吗？`)) deleteCafe(cafe.id); });
+        div.querySelector(".delete-btn").addEventListener("click",e=>{ e.stopPropagation(); deleteToTrash(cafe.id); });
+        div.querySelector(".edit-btn").addEventListener("click",e=>{ e.stopPropagation(); openEditModal(cafe); });
+        div.querySelector(".share-btn").addEventListener("click",e=>{ e.stopPropagation(); shareCafe(cafe); });
         return div;
     }
-    async function toggleFavorite(id,val){ await cafesRef.child(id).update({ favorited: val }); }
-    async function deleteCafe(id){ await cafesRef.child(id).remove(); }
+    async function toggleFavorite(id,val){ await cafesRef.child(id).update({ favorited: val }); showToast(val?"已收藏":"取消收藏"); }
+    async function deleteToTrash(id){ await cafesRef.child(id).update({ deleted: true, deletedAt: Date.now() }); showToast("已移至回收站"); }
+    async function restoreFromTrash(id){ await cafesRef.child(id).update({ deleted: false }); showToast("已恢复"); }
+    async function permanentDelete(id){ await cafesRef.child(id).remove(); showToast("已永久删除"); }
     async function addCafe(name,url,category,region,desc){
-        let n = name.trim();
-        if(!n){ alert("请填写咖啡厅名称"); return false; }
-        if(isDuplicateName(n)){ alert(`咖啡馆 "${n}" 已存在`); return false; }
-        if(!isValidUrl(url)){ alert("链接格式无效，支持 http/https 或留空"); return false; }
-        await cafesRef.push({ name:n, url:url.trim()||"", category, favorited:false, region:region.trim()||"", description:desc.trim()||"", createdAt:Date.now() });
+        if(!name.trim()){ alert("请填写名称"); return false; }
+        if(getActiveCafes().some(c=>c.name.trim().toLowerCase()===name.trim().toLowerCase())){ alert("名称已存在"); return false; }
+        await cafesRef.push({ name:name.trim(), url:url.trim()||"", category, favorited:false, region:region.trim()||"", description:desc.trim()||"", createdAt:Date.now(), deleted:false });
         return true;
     }
-    function renderCategorySelect(){
-        let sel = document.getElementById("cafeCategory");
+    async function updateCafe(id, data){ await cafesRef.child(id).update(data); showToast("已更新"); }
+    function computeGlobalCategories() {
+        let set = new Set(["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"]);
+        allCafes.forEach(c=>{ if(c.category && !c.deleted) set.add(c.category); });
+        globalCategories = [...set].sort((a,b)=>(["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"].indexOf(a) - ["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"].indexOf(b)) || a.localeCompare(b));
+    }
+    function renderCategorySelect(selectEl=null){
+        let sel = selectEl || document.getElementById("cafeCategory");
         if(!sel) return;
-        sel.innerHTML = "";
-        globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); });
+        sel.innerHTML = ""; globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); });
     }
     
-    // 模态框无限滚动逻辑 (完整保留)
-    let modalCurrentPage = 0, modalPageSize = 20, modalFilteredItems = [], modalObserver = null, modalLoading = false, modalHasMore = true;
-    let currentModalListContainer = null, currentModalSearchInput = null, currentModalSortSelect = null, currentModalLoader = null, currentModalType = null;
-    function resetModalPagination() { modalCurrentPage = 0; modalFilteredItems = []; modalHasMore = true; modalLoading = false; if(currentModalListContainer) currentModalListContainer.innerHTML = ""; if(currentModalLoader) currentModalLoader.style.display = "none"; }
-    function loadMoreItems() { if(modalLoading || !modalHasMore) return; modalLoading = true; if(currentModalLoader) currentModalLoader.style.display = "block"; setTimeout(()=>{ let start = modalCurrentPage * modalPageSize; let newItems = modalFilteredItems.slice(start, start+modalPageSize); if(newItems.length === 0) modalHasMore = false; else { newItems.forEach(item => { if(currentModalListContainer) currentModalListContainer.appendChild(createSmallCardElement(item)); }); modalCurrentPage++; } modalLoading = false; if(currentModalLoader) currentModalLoader.style.display = "none"; if(modalHasMore && currentModalListContainer && currentModalListContainer.scrollHeight - currentModalListContainer.scrollTop - currentModalListContainer.clientHeight < 100) loadMoreItems(); }, 50); }
-    function setupInfiniteScroll(container) { if(modalObserver) modalObserver.disconnect(); modalObserver = new IntersectionObserver((entries) => { if(entries[0].isIntersecting && modalHasMore && !modalLoading) loadMoreItems(); }, { threshold: 0.1, root: container }); let sentinel = document.createElement("div"); sentinel.style.height = "1px"; container.appendChild(sentinel); modalObserver.observe(sentinel); }
-    function refreshModalList() { resetModalPagination(); let searchVal = currentModalSearchInput ? currentModalSearchInput.value.toLowerCase() : ""; let sortType = currentModalSortSelect ? currentModalSortSelect.value : "date"; let source = (currentModalType === 'category') ? allCafes.filter(c=>c.category===currentModalCategory) : allCafes; modalFilteredItems = source.filter(item => item.name.toLowerCase().includes(searchVal) || (item.region && item.region.toLowerCase().includes(searchVal)) || (item.description && item.description.toLowerCase().includes(searchVal))); if(sortType === "name") modalFilteredItems.sort((a,b)=>a.name.localeCompare(b.name)); else if(sortType === "favorite") modalFilteredItems.sort((a,b)=> (b.favorited?1:0) - (a.favorited?1:0)); else modalFilteredItems.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0)); modalHasMore = modalFilteredItems.length > 0; loadMoreItems(); setupInfiniteScroll(currentModalListContainer); }
-    function disableBodyScroll() { document.body.classList.add("modal-open"); }
-    function enableBodyScroll() { document.body.classList.remove("modal-open"); }
-    function openModal(modalElement) { modalElement.style.display = "flex"; disableBodyScroll(); if (!modalElement._clickHandler) { modalElement._clickHandler = function(e) { if (e.target === modalElement) closeModal(modalElement); }; modalElement.addEventListener('click', modalElement._clickHandler); } }
-    function closeModal(modalElement) { modalElement.style.display = "none"; enableBodyScroll(); if(modalObserver && (modalElement.id === "categoryModal" || modalElement.id === "allCafesModal")) modalObserver.disconnect(); }
-    function openCategoryModal(category){ currentModalCategory = category; currentModalType = 'category'; let modal = document.getElementById("categoryModal"); document.getElementById("modalCategoryTitle").innerText = `📌 ${category} · 全部咖啡馆`; currentModalListContainer = document.getElementById("modalList"); currentModalSearchInput = document.getElementById("modalSearchInput"); currentModalSortSelect = document.getElementById("modalSortSelect"); currentModalLoader = document.getElementById("modalLoader"); refreshModalList(); openModal(modal); currentModalSearchInput.oninput = () => refreshModalList(); currentModalSortSelect.onchange = () => refreshModalList(); }
-    function openAllCafesModal(){ currentModalType = 'all'; let modal = document.getElementById("allCafesModal"); document.getElementById("allCafesCount").innerText = `(${allCafes.length})`; currentModalListContainer = document.getElementById("allModalList"); currentModalSearchInput = document.getElementById("allModalSearchInput"); currentModalSortSelect = document.getElementById("allModalSortSelect"); currentModalLoader = document.getElementById("allModalLoader"); refreshModalList(); openModal(modal); currentModalSearchInput.oninput = () => refreshModalList(); currentModalSortSelect.onchange = () => refreshModalList(); }
-    function createSmallCardElement(cafe){ let div = document.createElement("div"); div.className="small-card"; let isFav = cafe.favorited===true; div.innerHTML = `<div class="small-card-info"><div class="small-card-name">${escapeHtml(cafe.name)}</div><div class="small-card-meta">${cafe.region?`<span><i class="fas fa-map-marker-alt"></i> ${escapeHtml(cafe.region)}</span>`:''}<span><i class="fas fa-tag"></i> ${escapeHtml(cafe.category)}</span></div></div><div class="small-card-actions"><button class="small-fav ${isFav?'active':''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button></div>`; let info = div.querySelector(".small-card-info"); info.style.cursor = "pointer"; info.addEventListener("click",()=>showDetailModal(cafe)); let favBtn = div.querySelector(".small-fav"); favBtn.addEventListener("click",(e)=>{ e.stopPropagation(); toggleFavorite(cafe.id, !cafe.favorited); }); return div; }
-    function showDetailModal(cafe){ let modal = document.getElementById("detailModal"); let detail = document.getElementById("detailContent"); let isFav = cafe.favorited; let linkDisplay = (cafe.url&&cafe.url.trim()) ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a>` : '<span>未提供链接</span>'; detail.innerHTML = `<div class="detail-field"><strong>名称</strong><br>${escapeHtml(cafe.name)}</div><div class="detail-field"><strong>地区</strong><br>${cafe.region?escapeHtml(cafe.region):'未填写'}</div><div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div><div class="detail-field"><strong>简介</strong><br>${cafe.description?escapeHtml(cafe.description):'暂无'}</div><div class="detail-field"><strong>链接</strong><br>${linkDisplay}</div><div class="detail-field"><strong>收藏</strong><br>${isFav?'已收藏 ❤️':'未收藏'}</div><hr><div style="display:flex; gap:1rem; justify-content:flex-end;"><button id="detailFavBtn" class="btn-outline"><i class="fas fa-heart"></i> ${isFav?'取消收藏':'收藏'}</button><button id="detailDelBtn" class="btn-outline" style="color:#b1624b;"><i class="fas fa-trash-alt"></i> 移除</button></div>`; openModal(modal); let favBtn = document.getElementById("detailFavBtn"); let delBtn = document.getElementById("detailDelBtn"); favBtn.replaceWith(favBtn.cloneNode(true)); delBtn.replaceWith(delBtn.cloneNode(true)); let newFav = document.getElementById("detailFavBtn"); let newDel = document.getElementById("detailDelBtn"); newFav.addEventListener("click",()=>{ toggleFavorite(cafe.id, !cafe.favorited); closeModal(modal); }); newDel.addEventListener("click",()=>{ if(confirm(`删除「${cafe.name}」？`)) deleteCafe(cafe.id); closeModal(modal); }); }
+    // 智能搜索建议
+    function updateSuggestions() { let kw = document.getElementById("searchKeyword").value.trim().toLowerCase(); let box = document.getElementById("suggestionsBox"); if(!kw){ box.style.display="none"; return; } let matches = getActiveCafes().filter(c=>c.name.toLowerCase().includes(kw) || (c.region&&c.region.toLowerCase().includes(kw))).slice(0,8); if(matches.length===0){ box.style.display="none"; return; } box.innerHTML = matches.map(c=>`<div class="suggestion-item" data-name="${escapeHtml(c.name)}">${escapeHtml(c.name)} ${c.region?`📍${escapeHtml(c.region)}`:''}</div>`).join(""); box.style.display="block"; document.querySelectorAll(".suggestion-item").forEach(el=>{ el.addEventListener("click",()=>{ document.getElementById("searchKeyword").value = el.dataset.name; searchKeyword=el.dataset.name; renderMainView(); box.style.display="none"; }); }); }
     
-    // 一键随机推荐核心功能
-    function randomRecommendation() {
-        if (allCafes.length === 0) {
-            alert("✨ 还没有咖啡馆，先添加一家再随机探索吧～");
-            return;
-        }
-        const randomIndex = Math.floor(Math.random() * allCafes.length);
-        const luckyCafe = allCafes[randomIndex];
-        const detailModal = document.getElementById("detailModal");
-        if (detailModal.style.display === "flex") closeModal(detailModal);
-        showDetailModal(luckyCafe);
-    }
-
+    // 高级随机
+    function advancedRandom() { openModal(document.getElementById("randomAdvancedModal")); }
+    function doAdvancedRandom(mode, filterVal){ let candidates = getActiveCafes(); if(mode==="favorite") candidates = candidates.filter(c=>c.favorited); else if(mode==="region") candidates = candidates.filter(c=>c.region===filterVal); else if(mode==="category") candidates = candidates.filter(c=>c.category===filterVal); if(candidates.length===0){ alert("没有符合条件的咖啡馆"); return; } let lucky = candidates[Math.floor(Math.random()*candidates.length)]; showDetailModal(lucky); }
+    
+    // 分享卡片
+    async function shareCafe(cafe){ let text = `☕ ${cafe.name}\n📍 ${cafe.region||'未知地区'}\n📝 ${cafe.description||'暂无简介'}\n🔗 ${cafe.url||'无链接'}`; if(navigator.share) try{ await navigator.share({title:cafe.name, text:text}); }catch(e){} else { navigator.clipboard.writeText(text); showToast("已复制咖啡馆信息"); } }
+    
+    // 模态框通用
+    function openModal(modal){ modal.style.display="flex"; document.body.classList.add("modal-open"); modal._clickHandler = (e)=>{ if(e.target===modal) closeModal(modal); }; modal.addEventListener("click", modal._clickHandler); }
+    function closeModal(modal){ modal.style.display="none"; document.body.classList.remove("modal-open"); if(modal._clickHandler) modal.removeEventListener("click", modal._clickHandler); }
+    
+    // 详情
+    function showDetailModal(cafe){ let modal = document.getElementById("detailModal"); if(!modal){ let div=document.createElement("div"); div.id="detailModal"; div.className="modal"; div.innerHTML=`<div class="modal-content"><div class="modal-header"><h2>📄 详情</h2><span class="close-modal closeModalBtn">&times;</span></div><div id="detailContent"></div></div>`; document.body.appendChild(div); } document.getElementById("detailContent").innerHTML = `<div>名称:${escapeHtml(cafe.name)}<br>地区:${escapeHtml(cafe.region)}<br>分类:${escapeHtml(cafe.category)}<br>简介:${escapeHtml(cafe.description)}<br>链接:${cafe.url?`<a href="${cafe.url}" target="_blank">${cafe.url}</a>`:'无'}</div>`; openModal(document.getElementById("detailModal")); }
+    
+    // 回收站渲染
+    function renderTrashModal(){ let trash = allCafes.filter(c=>c.deleted===true); let container = document.getElementById("trashList"); container.innerHTML = trash.map(c=>`<div class="small-card"><div><strong>${escapeHtml(c.name)}</strong><div class="small-card-meta">${escapeHtml(c.category)}</div></div><div><button class="small-fav" data-id="${c.id}" data-action="restore"><i class="fas fa-trash-restore"></i> 恢复</button><button class="delete-btn" data-id="${c.id}" data-action="permanent" style="margin-left:8px;"><i class="fas fa-times-circle"></i> 永久</button></div></div>`).join(""); container.querySelectorAll("[data-action='restore']").forEach(btn=> btn.addEventListener("click",()=> restoreFromTrash(btn.dataset.id))); container.querySelectorAll("[data-action='permanent']").forEach(btn=> btn.addEventListener("click",()=> { if(confirm("永久删除不可恢复")) permanentDelete(btn.dataset.id); })); }
+    function openEditModal(cafe){ currentEditId = cafe.id; document.getElementById("editName").value = cafe.name; document.getElementById("editRegion").value = cafe.region||""; document.getElementById("editUrl").value = cafe.url||""; renderCategorySelect(document.getElementById("editCategory")); document.getElementById("editCategory").value = cafe.category; document.getElementById("editDesc").value = cafe.description||""; openModal(document.getElementById("editModal")); }
+    
+    // 批量导入导出
+    function exportData(){ let data = getActiveCafes().map(({id,deleted,deletedAt,...rest})=>rest); let blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="cafes_export.json"; a.click(); }
+    function importData(file){ let reader=new FileReader(); reader.onload=async e=>{ let items=JSON.parse(e.target.result); for(let item of items){ if(!item.name) continue; if(getActiveCafes().some(c=>c.name===item.name)){ showToast(`跳过重复: ${item.name}`); continue; } await cafesRef.push({ ...item, favorited:false, createdAt:Date.now(), deleted:false }); } showToast("导入完成"); }; reader.readAsText(file); }
+    
+    // 监听数据
     function subscribeCafes(){
         cafesRef.on("value",snap=>{
-            let data=snap.val();
-            let arr=[];
-            if(data) Object.keys(data).forEach(k=>{ let it=data[k]; arr.push({ id:k, name:it.name||"未命名", url:it.url||"", category:it.category||"Others", favorited:it.favorited===true, region:it.region||"", description:it.description||"", createdAt:it.createdAt||0 }); });
-            allCafes = arr;
-            computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView();
+            let data=snap.val(); let arr=[];
+            if(data) Object.keys(data).forEach(k=>{ let it=data[k]; arr.push({ id:k, name:it.name||"未命名", url:it.url||"", category:it.category||"Others", favorited:it.favorited===true, region:it.region||"", description:it.description||"", createdAt:it.createdAt||0, deleted:it.deleted===true, deletedAt:it.deletedAt||0 }); });
+            allCafes = arr; computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView(); if(document.getElementById("trashModal").style.display==="flex") renderTrashModal();
+            // 实时更新模态框内收藏状态 (通过简单刷新modalList, 为简化)
         });
     }
-    async function seedExampleData(){
-        let snap = await cafesRef.once("value");
-        if(snap.exists()) return;
-        let ex = [
-            { name:"蓝瓶咖啡", url:"https://bluebottlecoffee.com", category:"Cafe", favorited:true, region:"东京·涩谷", description:"精品咖啡领航者，手冲与冷萃闻名。" },
-            { name:"福来甜品屋", url:"", category:"Dessert", favorited:false, region:"槟城", description:"传统马来甜点+创意西式蛋糕。" },
-            { name:"槟城娘惹餐厅", url:"https://example.com/nyonya", category:"Nyonya", favorited:true, region:"槟城乔治市", description:"正宗娘惹菜，叻沙与小金杯。" },
-            { name:"合艾泰式咖啡", url:"", category:"Hatyai", favorited:false, region:"合艾", description:"泰南风味咖啡，搭配斑斓甜品。" },
-            { name:"喫茶 夜雾", url:"https://example.com/japanese", category:"Japanese", favorited:true, region:"京都", description:"日式深烘，昭和复古喫茶店。" },
-            { name:"老南洋 Kopitiam", url:"", category:"Kopitiam", favorited:false, region:"吉隆坡茨厂街", description:"传统海南咖啡、咖椰吐司。" }
-        ];
-        for(let e of ex) await cafesRef.push({ ...e, createdAt:Date.now() });
-    }
+    
+    // 初始化与事件绑定
+    async function seedData(){ let snap = await cafesRef.once("value"); if(snap.exists()) return; let ex = [{ name:"蓝瓶咖啡",url:"https://bluebottlecoffee.com",category:"Cafe",favorited:true,region:"东京·涩谷",description:"精品咖啡领航者"},{ name:"福来甜品屋",category:"Dessert",region:"槟城",description:"传统马来甜点"},{ name:"槟城娘惹餐厅",url:"https://example.com",category:"Nyonya",favorited:true,region:"槟城乔治市"}]; for(let e of ex) await cafesRef.push({ ...e, createdAt:Date.now(), deleted:false }); }
+    
     function bindEvents(){
-        document.getElementById("addCafeBtn").addEventListener("click",async()=>{
-            let name=document.getElementById("cafeName").value, url=document.getElementById("cafeUrl").value, cat=document.getElementById("cafeCategory").value, reg=document.getElementById("cafeRegion").value, desc=document.getElementById("cafeDesc").value;
-            await addCafe(name,url,cat,reg,desc);
-            document.getElementById("cafeName").value=""; document.getElementById("cafeRegion").value=""; document.getElementById("cafeUrl").value=""; document.getElementById("cafeDesc").value="";
-        });
+        document.getElementById("addCafeBtn").addEventListener("click",async()=>{ let name=document.getElementById("cafeName").value, url=document.getElementById("cafeUrl").value, cat=document.getElementById("cafeCategory").value, reg=document.getElementById("cafeRegion").value, desc=document.getElementById("cafeDesc").value; await addCafe(name,url,cat,reg,desc); document.getElementById("cafeName").value=""; document.getElementById("cafeRegion").value=""; document.getElementById("cafeUrl").value=""; document.getElementById("cafeDesc").value=""; });
         document.getElementById("favoritesFilterBtn").addEventListener("click",()=>{ onlyFavorites=!onlyFavorites; renderMainView(); });
-        document.getElementById("viewAllCafesBtn").addEventListener("click",()=>openAllCafesModal());
+        document.getElementById("viewAllCafesBtn").addEventListener("click",()=>{ openModal(document.getElementById("allCafesModal")); refreshAllModal(); });
+        document.getElementById("trashBtn").addEventListener("click",()=>{ renderTrashModal(); openModal(document.getElementById("trashModal")); });
+        document.getElementById("randomCafeBtn").addEventListener("click",()=>{ let mode=document.getElementById("randomModeSelect").value; if(mode==="all") doAdvancedRandom("all"); else if(mode==="favorite") doAdvancedRandom("favorite"); else if(mode==="region"){ let regions=[...new Set(getActiveCafes().map(c=>c.region).filter(r=>r))]; if(regions.length) doAdvancedRandom("region", regions[Math.floor(Math.random()*regions.length)]); else alert("无地区数据"); } else if(mode==="category"){ let cats=[...new Set(getActiveCafes().map(c=>c.category))]; if(cats.length) doAdvancedRandom("category", cats[Math.floor(Math.random()*cats.length)]); else alert("无分类"); } });
+        document.getElementById("exportDataBtn").addEventListener("click",exportData);
+        document.getElementById("importDataBtn").addEventListener("click",()=>document.getElementById("importFileInput").click());
+        document.getElementById("importFileInput").addEventListener("change",e=>{ if(e.target.files[0]) importData(e.target.files[0]); });
         document.getElementById("backToTopBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
         document.getElementById("fabAddBtn").addEventListener("click",()=>document.getElementById("addForm").scrollIntoView({behavior:"smooth"}));
-        document.getElementById("randomCafeBtn").addEventListener("click", () => randomRecommendation());
-        
-        let searchInp = document.getElementById("searchKeyword"), regionSel = document.getElementById("regionFilter"), clearBtn = document.getElementById("clearFiltersBtn");
-        let performSearch = ()=>{ searchKeyword = searchInp.value; selectedRegion = regionSel.value; renderMainView(); };
-        searchInp.addEventListener("input",()=>{ if(searchDebounceTimer) clearTimeout(searchDebounceTimer); searchDebounceTimer=setTimeout(performSearch,300); });
-        regionSel.addEventListener("change",performSearch);
-        clearBtn.addEventListener("click",()=>{ searchInp.value=""; regionSel.value=""; searchKeyword=""; selectedRegion=""; renderMainView(); });
-        let modalCat = document.getElementById("categoryModal"), closeCat = document.getElementById("closeModalBtn");
-        let modalAll = document.getElementById("allCafesModal"), closeAll = document.getElementById("closeAllCafesModalBtn");
-        let modalDetail = document.getElementById("detailModal"), closeDetail = document.getElementById("closeDetailModalBtn");
-        closeCat.onclick = () => closeModal(modalCat);
-        closeAll.onclick = () => closeModal(modalAll);
-        closeDetail.onclick = () => closeModal(modalDetail);
+        let searchInp = document.getElementById("searchKeyword"); searchInp.addEventListener("input",()=>{ searchKeyword=searchInp.value; updateSuggestions(); if(debouncedRender) clearTimeout(debouncedRender); debouncedRender=setTimeout(()=>renderMainView(),300); });
+        document.getElementById("regionFilter").addEventListener("change",e=>{ selectedRegion=e.target.value; renderMainView(); });
+        document.getElementById("clearFiltersBtn").addEventListener("click",()=>{ document.getElementById("searchKeyword").value=""; searchKeyword=""; document.getElementById("regionFilter").value=""; selectedRegion=""; renderMainView(); });
+        document.querySelectorAll(".closeModalBtn").forEach(btn=>{ btn.addEventListener("click",function(){ let m=this.closest(".modal"); if(m) closeModal(m); }); });
+        document.getElementById("saveEditBtn").addEventListener("click",async()=>{ await updateCafe(currentEditId,{ name:document.getElementById("editName").value, region:document.getElementById("editRegion").value, url:document.getElementById("editUrl").value, category:document.getElementById("editCategory").value, description:document.getElementById("editDesc").value }); closeModal(document.getElementById("editModal")); });
+        document.getElementById("advRandomGoBtn").addEventListener("click",()=>{ let mode=document.getElementById("advRandomMode").value; let filterVal=""; if(mode==="region") filterVal=document.getElementById("advRandomRegionSelect").value; if(mode==="category") filterVal=document.getElementById("advRandomCategorySelect").value; doAdvancedRandom(mode, filterVal); closeModal(document.getElementById("randomAdvancedModal")); });
+        document.getElementById("advRandomMode").addEventListener("change",e=>{ let div=document.getElementById("advRandomFilterContainer"); if(e.target.value==="region"){ let regions=[...new Set(getActiveCafes().map(c=>c.region).filter(r=>r))]; let sel=document.getElementById("advRandomRegionSelect"); sel.innerHTML=regions.map(r=>`<option>${escapeHtml(r)}</option>`).join(""); div.style.display="block"; document.getElementById("advRandomCategorySelect").style.display="none"; } else if(e.target.value==="category"){ let cats=[...new Set(getActiveCafes().map(c=>c.category))]; let sel=document.getElementById("advRandomCategorySelect"); sel.innerHTML=cats.map(c=>`<option>${escapeHtml(c)}</option>`).join(""); div.style.display="block"; document.getElementById("advRandomRegionSelect").style.display="none"; } else div.style.display="none"; });
+        document.getElementById("emptyTrashBtn")?.addEventListener("click",async()=>{ if(confirm("永久清空回收站所有内容？")){ let trash = allCafes.filter(c=>c.deleted); for(let c of trash) await cafesRef.child(c.id).remove(); showToast("已清空回收站"); } });
     }
-    async function init(){
-        computeGlobalCategories(); renderCategorySelect(); bindEvents(); await seedExampleData(); subscribeCafes();
-    }
+    function refreshAllModal(){ let listDiv=document.getElementById("allModalList"); listDiv.innerHTML = getActiveCafes().map(c=>`<div class="small-card"><div><strong>${escapeHtml(c.name)}</strong><div>${escapeHtml(c.category)}</div></div><button class="small-fav ${c.favorited?'active':''}" data-id="${c.id}"><i class="fas fa-heart"></i></button></div>`).join(""); listDiv.querySelectorAll(".small-fav").forEach(btn=>btn.addEventListener("click",()=>toggleFavorite(btn.dataset.id, !btn.classList.contains("active")))); }
+    function openCategoryModal(cat){ let listDiv=document.getElementById("modalList"); let items=getActiveCafes().filter(c=>c.category===cat); listDiv.innerHTML = items.map(c=>`<div class="small-card"><div><strong>${escapeHtml(c.name)}</strong><div>${escapeHtml(c.region||'')}</div></div><button class="small-fav ${c.favorited?'active':''}" data-id="${c.id}"><i class="fas fa-heart"></i></button></div>`).join(""); listDiv.querySelectorAll(".small-fav").forEach(btn=>btn.addEventListener("click",()=>toggleFavorite(btn.dataset.id, !btn.classList.contains("active")))); openModal(document.getElementById("categoryModal")); document.getElementById("modalCategoryTitle").innerText = `📌 ${cat}`; }
+    // 注册Service Worker离线支持
+    if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }); }
     init();
+    async function init(){ await seedData(); subscribeCafes(); bindEvents(); renderCategorySelect(); }
 </script>
 </body>
 </html>
