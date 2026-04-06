@@ -32,32 +32,6 @@
             max-width: 1600px;
             margin: 0 auto;
         }
-        .pull-to-refresh {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #ffffffcc;
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            font-size: 0.85rem;
-            color: #b88d54;
-            transform: translateY(-100%);
-            transition: transform 0.2s ease;
-            z-index: 1001;
-            border-bottom: 1px solid #eee2d4;
-            font-weight: 500;
-        }
-        .pull-to-refresh.show {
-            transform: translateY(0);
-        }
-        .pull-to-refresh i {
-            font-size: 1.2rem;
-        }
         .header {
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
@@ -119,7 +93,6 @@
             background: #f3ede5;
             transform: translateY(-1px);
         }
-        /* 随机按钮专属小动效 */
         .random-btn i {
             transition: transform 0.2s ease;
         }
@@ -495,7 +468,6 @@
             .category-title { font-size: 1.3rem; }
             .form-card { padding: 1rem; }
         }
-        /* 详情弹窗精致样式 */
         .detail-field {
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
@@ -522,15 +494,11 @@
     </style>
 </head>
 <body>
-<div class="pull-to-refresh" id="pullToRefresh">
-    <i class="fas fa-arrow-down"></i> <span>下拉刷新</span>
-</div>
 
 <div class="container">
     <div class="header">
         <h1>FEONG的咖啡馆收藏集</h1>
         <div class="header-actions">
-            <!-- 一键随机推荐按钮 -->
             <button id="randomCafeBtn" class="btn-icon random-btn"><i class="fas fa-dice-d6"></i> 随机推荐</button>
             <button id="favoritesFilterBtn" class="btn-icon"><i class="fas fa-heart"></i> 我的收藏</button>
             <button id="viewAllCafesBtn" class="btn-icon"><i class="fas fa-list-ul"></i> 全部</button>
@@ -629,9 +597,6 @@
     let regionSet = new Set();
     let searchDebounceTimer = null;
 
-    let startY = 0, isRefreshing = false, refreshThreshold = 60;
-    const pullToRefreshEl = document.getElementById("pullToRefresh");
-
     const DEFAULT_CATEGORIES = ["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"];
 
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
@@ -718,28 +683,8 @@
         sel.innerHTML = "";
         globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); });
     }
-    function initPullToRefresh() { /* 保持原有下拉刷新逻辑 */ 
-        let touchStartY = 0; let pulling = false;
-        document.body.addEventListener('touchstart', (e) => { if (window.scrollY === 0 && !isRefreshing) { touchStartY = e.touches[0].clientY; pulling = true; } });
-        document.body.addEventListener('touchmove', (e) => { if (!pulling || isRefreshing) return; let diff = e.touches[0].clientY - touchStartY; if (diff > 0 && window.scrollY === 0) { e.preventDefault(); if (diff >= refreshThreshold) { pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-up'; pullToRefreshEl.querySelector('span').innerText = '松开刷新'; } else { pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-down'; pullToRefreshEl.querySelector('span').innerText = '下拉刷新'; } pullToRefreshEl.style.transform = `translateY(${Math.min(diff, 80)}px)`; } });
-        document.body.addEventListener('touchend', async (e) => { if (!pulling || isRefreshing) return; pulling = false; let diff = e.changedTouches[0].clientY - touchStartY; if (diff >= refreshThreshold && window.scrollY === 0) { await refreshData(); } pullToRefreshEl.style.transform = ''; pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-down'; pullToRefreshEl.querySelector('span').innerText = '下拉刷新'; });
-    }
-    async function refreshData() { 
-        if (isRefreshing) return;
-        isRefreshing = true;
-        pullToRefreshEl.classList.add('show');
-        pullToRefreshEl.querySelector('i').className = 'fas fa-spinner fa-pulse';
-        pullToRefreshEl.querySelector('span').innerText = '刷新中...';
-        const snapshot = await cafesRef.once('value');
-        const data = snapshot.val();
-        let cafesArray = [];
-        if (data) { Object.keys(data).forEach(key => { const item = data[key]; cafesArray.push({ id: key, name: item.name || "未命名", url: item.url || "", category: item.category || "Others", favorited: item.favorited === true, region: item.region || "", description: item.description || "", createdAt: item.createdAt || 0 }); }); }
-        allCafes = cafesArray;
-        computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView();
-        setTimeout(() => { pullToRefreshEl.classList.remove('show'); pullToRefreshEl.querySelector('i').className = 'fas fa-arrow-down'; pullToRefreshEl.querySelector('span').innerText = '下拉刷新'; isRefreshing = false; }, 500);
-    }
     
-    // 模态框无限滚动逻辑 (保留原有完整逻辑)
+    // 模态框无限滚动逻辑 (完整保留)
     let modalCurrentPage = 0, modalPageSize = 20, modalFilteredItems = [], modalObserver = null, modalLoading = false, modalHasMore = true;
     let currentModalListContainer = null, currentModalSearchInput = null, currentModalSortSelect = null, currentModalLoader = null, currentModalType = null;
     function resetModalPagination() { modalCurrentPage = 0; modalFilteredItems = []; modalHasMore = true; modalLoading = false; if(currentModalListContainer) currentModalListContainer.innerHTML = ""; if(currentModalLoader) currentModalLoader.style.display = "none"; }
@@ -763,7 +708,6 @@
         }
         const randomIndex = Math.floor(Math.random() * allCafes.length);
         const luckyCafe = allCafes[randomIndex];
-        // 优雅展示随机结果：先关闭可能已打开的详情弹窗再展示
         const detailModal = document.getElementById("detailModal");
         if (detailModal.style.display === "flex") closeModal(detailModal);
         showDetailModal(luckyCafe);
@@ -801,7 +745,6 @@
         document.getElementById("viewAllCafesBtn").addEventListener("click",()=>openAllCafesModal());
         document.getElementById("backToTopBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
         document.getElementById("fabAddBtn").addEventListener("click",()=>document.getElementById("addForm").scrollIntoView({behavior:"smooth"}));
-        // 随机推荐监听器
         document.getElementById("randomCafeBtn").addEventListener("click", () => randomRecommendation());
         
         let searchInp = document.getElementById("searchKeyword"), regionSel = document.getElementById("regionFilter"), clearBtn = document.getElementById("clearFiltersBtn");
@@ -818,7 +761,6 @@
     }
     async function init(){
         computeGlobalCategories(); renderCategorySelect(); bindEvents(); await seedExampleData(); subscribeCafes();
-        initPullToRefresh();
     }
     init();
 </script>
