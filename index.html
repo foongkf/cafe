@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>FEONG的咖啡厅收藏集 · 云端同步</title>
+    <title>FEONG的咖啡厅收藏集 · 公共云端</title>
     <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <style>
+        /* 样式与之前完全相同，此处省略以节省篇幅，实际使用请保留完整样式 */
         * {
             margin: 0;
             padding: 0;
@@ -638,13 +639,11 @@
         <p></p>
     </div>
 
-    <!-- 云同步状态栏 -->
     <div class="sync-status">
-        <span>☁️ 数据实时云端同步 · 所有设备共享</span>
+        <span>🌍 公共数据池 · 所有人实时共享</span>
         <span id="syncIndicator" class="online-badge">🟢 已连接</span>
     </div>
 
-    <!-- 搜索栏 -->
     <div class="search-bar">
         <div class="search-group" style="flex: 3;">
             <label>🔍 关键词搜索 (名称/地址/描述)</label>
@@ -718,20 +717,18 @@
 </div>
 
 <script>
-    // ==================== Firebase 配置 ====================
-    // ⚠️ 请替换为您的 Firebase 项目配置
+    // ==================== Firebase 配置（请替换为您的项目配置） ====================
     const firebaseConfig = {
         apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
         authDomain: "cafe-c55f9.firebaseapp.com",
-        databaseURL: "https://console.firebase.google.com/u/0/project/cafe-c55f9/database/cafe-c55f9-default-rtdb/data/~2F",
+        databaseURL: "https://cafe-c55f9-default-rtdb.asia-southeast1.firebasedatabase.app/",
         projectId: "cafe-c55f9",
         storageBucket: "cafe-c55f9.firebasestorage.app",
         messagingSenderId: "328042543743",
         appId: "1:328042543743:web:0fc175a3aadc7c5a639d4a"
     };
-    // ======================================================
+    // ========================================================================
 
-    // 初始化 Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const auth = firebase.auth();
@@ -742,7 +739,6 @@
     let currentListCategory = "";
     let searchKeyword = "";
     let searchRegion = "";
-    let currentUserId = null;
 
     // DOM 元素
     const categoriesContainer = document.getElementById('categoriesContainer');
@@ -777,7 +773,7 @@
         return null;
     }
 
-    // 更新地区下拉选项（基于当前 cafes）
+    // 更新地区下拉选项
     function updateRegionOptions() {
         const regions = new Set();
         cafes.forEach(cafe => {
@@ -803,7 +799,7 @@
         }
     }
 
-    // 过滤咖啡馆（应用搜索、地区、只看收藏）
+    // 过滤咖啡馆
     function filterCafes(cafesList) {
         let filtered = [...cafesList];
         if (showOnlyFavorites) filtered = filtered.filter(c => c.favorite);
@@ -960,11 +956,9 @@
         const cafe = cafes.find(c => c.id === cafeId);
         if (cafe) {
             cafe.favorite = !cafe.favorite;
-            // 更新 Firebase
-            if (currentUserId) {
-                database.ref(`users/${currentUserId}/cafes/${cafeId}`).update({ favorite: cafe.favorite });
-            }
-            // 本地立即更新 UI（Firebase 监听会再次同步，但此处先刷新提升体验）
+            // 更新 Firebase 公共节点
+            database.ref(`publicCafes/${cafeId}`).update({ favorite: cafe.favorite });
+            // 本地立即刷新 UI（Firebase 监听会再次同步，但先刷新提升体验）
             renderGroupedCards();
             refreshCurrentListIfOpen();
             if (detailModal.style.display === 'flex' && !fromDetailRefresh) {
@@ -985,9 +979,7 @@
     }
 
     function deleteCafeById(id) {
-        if (currentUserId) {
-            database.ref(`users/${currentUserId}/cafes/${id}`).remove();
-        }
+        database.ref(`publicCafes/${id}`).remove();
         // 本地立即更新（Firebase 监听会同步删除）
         cafes = cafes.filter(c => c.id !== id);
         renderGroupedCards();
@@ -1012,11 +1004,8 @@
             category,
             favorite: false
         };
-        if (currentUserId) {
-            database.ref(`users/${currentUserId}/cafes/${newCafe.id}`).set(newCafe);
-        }
-        // 本地立即添加（Firebase 监听会再次同步，但避免重复，先不 push 到 cafes 数组，等回调）
-        // 实际上 Firebase 的 onChildAdded 会添加，所以这里不要手动添加，避免重复。
+        // 写入 Firebase 公共节点
+        database.ref(`publicCafes/${newCafe.id}`).set(newCafe);
         // 清空表单
         nameInput.value = '';
         addressInput.value = '';
@@ -1077,10 +1066,9 @@
         });
     }
 
-    // Firebase 数据监听
+    // Firebase 数据监听（公共节点）
     function setupFirebaseSync() {
-        if (!currentUserId) return;
-        const cafesRef = database.ref(`users/${currentUserId}/cafes`);
+        const cafesRef = database.ref('publicCafes');
         cafesRef.on('child_added', (snapshot) => {
             const newCafe = snapshot.val();
             if (!cafes.find(c => c.id === newCafe.id)) {
@@ -1115,53 +1103,59 @@
         });
     }
 
-    // 匿名登录
+    // 初始化数据：从 Firebase 加载公共数据，若无则写入默认示例
+    function loadPublicData() {
+        database.ref('publicCafes').once('value').then(snapshot => {
+            const data = snapshot.val();
+            if (data) {
+                cafes = Object.values(data);
+            } else {
+                // 写入默认示例数据（公共数据池首次初始化）
+                const defaultCafes = [
+                    { id: generateId(), name: "森屿咖啡", address: "杭州市西湖区留下街道18号", description: "藏在森林里的玻璃房，手冲瑰夏香气迷人，适合周末发呆。", website: "https://www.senyucoffee.com", category: "Cafe", favorite: true },
+                    { id: generateId(), name: "夜航船咖啡馆", address: "上海市徐汇区衡山路12弄", description: "复古船舱风格，特色海盐焦糖拿铁，晚间有爵士乐。", website: "https://www.nighthawkcoffee.cn", category: "Western", favorite: false },
+                    { id: generateId(), name: "书虫与豆子", address: "成都市青羊区窄巷子9号", description: "独立书店+咖啡，安静阅读区，特调橙香肉桂拿铁必点。", website: "https://www.bookbean.club", category: "Japanese", favorite: true },
+                    { id: generateId(), name: "泰赞冰咖", address: "广州市天河区体育东路", description: "地道泰式奶茶&咖啡，斑斓吐司配泰式冰咖绝配。", website: "https://www.thaiZan.com", category: "Thai", favorite: false },
+                    { id: generateId(), name: "娘惹食堂", address: "槟城路/吉隆坡风格体验馆", description: "南洋咖啡 + 娘惹糕点，独特香料风味。", website: "https://www.nyonyacafe.my", category: "Nyonya", favorite: true }
+                ];
+                cafes = defaultCafes;
+                const updates = {};
+                defaultCafes.forEach(cafe => { updates[`publicCafes/${cafe.id}`] = cafe; });
+                database.ref().update(updates);
+            }
+            updateRegionOptions();
+            renderGroupedCards();
+            setupFirebaseSync();
+        }).catch(err => {
+            console.error(err);
+            syncIndicator.textContent = '⚠️ 连接失败，使用本地缓存';
+            syncIndicator.className = 'offline-badge';
+            // 尝试从 localStorage 读取缓存（如果有）
+            const cached = localStorage.getItem('cafePublicCache');
+            if (cached) {
+                try { cafes = JSON.parse(cached); } catch(e) {}
+            }
+            if (!cafes.length) {
+                cafes = [];
+            }
+            updateRegionOptions();
+            renderGroupedCards();
+        });
+    }
+
+    // 匿名登录（仅用于 Firebase 安全规则，不区分用户）
     function initAuth() {
         auth.signInAnonymously()
-            .then((userCredential) => {
-                currentUserId = userCredential.user.uid;
-                syncIndicator.textContent = '🟢 已连接云端';
+            .then(() => {
+                syncIndicator.textContent = '🟢 公共数据已连接';
                 syncIndicator.className = 'online-badge';
-                // 首次加载数据
-                database.ref(`users/${currentUserId}/cafes`).once('value').then(snapshot => {
-                    const data = snapshot.val();
-                    if (data) {
-                        cafes = Object.values(data);
-                    } else {
-                        // 导入默认示例数据
-                        const defaultData = [
-                            { name: "森屿咖啡", address: "杭州市西湖区留下街道18号", description: "藏在森林里的玻璃房，手冲瑰夏香气迷人，适合周末发呆。", website: "https://www.senyucoffee.com", category: "Cafe", favorite: true, id: generateId() },
-                            { name: "夜航船咖啡馆", address: "上海市徐汇区衡山路12弄", description: "复古船舱风格，特色海盐焦糖拿铁，晚间有爵士乐。", website: "https://www.nighthawkcoffee.cn", category: "Western", favorite: false, id: generateId() },
-                            { name: "书虫与豆子", address: "成都市青羊区窄巷子9号", description: "独立书店+咖啡，安静阅读区，特调橙香肉桂拿铁必点。", website: "https://www.bookbean.club", category: "Japanese", favorite: true, id: generateId() },
-                            { name: "泰赞冰咖", address: "广州市天河区体育东路", description: "地道泰式奶茶&咖啡，斑斓吐司配泰式冰咖绝配。", website: "https://www.thaiZan.com", category: "Thai", favorite: false, id: generateId() },
-                            { name: "娘惹食堂", address: "槟城路/吉隆坡风格体验馆", description: "南洋咖啡 + 娘惹糕点，独特香料风味。", website: "https://www.nyonyacafe.my", category: "Nyonya", favorite: true, id: generateId() }
-                        ];
-                        cafes = defaultData;
-                        const updates = {};
-                        defaultData.forEach(cafe => { updates[`users/${currentUserId}/cafes/${cafe.id}`] = cafe; });
-                        database.ref().update(updates);
-                    }
-                    updateRegionOptions();
-                    renderGroupedCards();
-                    setupFirebaseSync();
-                });
+                loadPublicData();
             })
             .catch((error) => {
                 console.error(error);
-                syncIndicator.textContent = '⚠️ 离线模式 (无法连接云端)';
+                syncIndicator.textContent = '⚠️ 离线模式';
                 syncIndicator.className = 'offline-badge';
-                // 降级使用 localStorage 示例数据
-                const stored = localStorage.getItem('cafeBackup');
-                if (stored) {
-                    try { cafes = JSON.parse(stored); } catch(e) { cafes = []; }
-                }
-                if (!cafes.length) {
-                    cafes = [
-                        { id: generateId(), name: "示例咖啡馆", address: "示例地址", description: "离线模式示例", website: "", category: "Cafe", favorite: false }
-                    ];
-                }
-                updateRegionOptions();
-                renderGroupedCards();
+                loadPublicData(); // 尝试直接读取（如果安全规则允许未登录读取）
             });
     }
 
