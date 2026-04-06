@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>FEONG的咖啡厅收藏集</title>
+    <title>FEONG的咖啡厅收藏集 · 爱心收藏</title>
     <style>
         * {
             margin: 0;
@@ -153,6 +153,14 @@
             background: #c4aa93;
         }
 
+        .btn-fav-active {
+            background: #c28a6b;
+            color: white;
+        }
+        .btn-fav-active:hover {
+            background: #a56645;
+        }
+
         .categories-container {
             display: flex;
             flex-direction: column;
@@ -227,6 +235,7 @@
             border: 1px solid #f0e2d6;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .cafe-card:hover {
@@ -319,10 +328,36 @@
 
         .card-actions {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             padding: 0 1rem 1rem 1rem;
+            gap: 8px;
         }
-
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .favorite-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 40px;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #ab7b60;
+        }
+        .favorite-btn:hover {
+            transform: scale(1.05);
+            background: #fef1e8;
+        }
+        .favorite-btn.active {
+            color: #e2554d;
+            text-shadow: 0 0 2px rgba(226,85,77,0.3);
+        }
         .delete-btn {
             background: none;
             border: 1px solid #e5cfbf;
@@ -369,16 +404,16 @@
         .sync-buttons {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
-        .sync-buttons button {
+        .sync-buttons button, .sync-buttons label {
             padding: 6px 16px;
             font-size: 0.75rem;
             background: #cfa988;
         }
-        .sync-buttons button:hover {
+        .sync-buttons button:hover, .sync-buttons label:hover {
             background: #b87a56;
         }
-
         footer {
             text-align: center;
             margin-top: 2rem;
@@ -406,15 +441,16 @@
 <div class="container">
     <div class="header">
         <h1>☕ FEONG的咖啡厅收藏集</h1>
-        <p>分类横向浏览 · 直达咖啡馆主页</p>
+        <p>分类横向浏览 · 爱心收藏 · 直达主页</p>
     </div>
 
-    <!-- 数据同步提示栏（导入导出） -->
+    <!-- 数据同步提示栏 + 收藏筛选 -->
     <div class="sync-note">
-        <span>📱 数据仅在当前浏览器保存。换设备请导出文件 → 传到手机 → 再导入。</span>
+        <span>📱 数据本地保存 · 导出文件可跨设备同步</span>
         <div class="sync-buttons">
+            <button id="toggleFavBtn" class="btn-secondary">❤️ 只看收藏</button>
             <button id="exportDataBtn" class="btn-secondary">📤 导出数据</button>
-            <label for="importFileInput" class="btn-secondary" style="cursor:pointer; padding:6px 16px; border-radius:40px; background:#cfa988; color:#3a2a1f; display:inline-flex; align-items:center; gap:6px;">📥 导入数据</label>
+            <label for="importFileInput" class="btn-secondary" style="cursor:pointer;">📥 导入数据</label>
             <input type="file" id="importFileInput" accept=".json" style="display:none;">
         </div>
     </div>
@@ -467,50 +503,56 @@
     <!-- 分类横向滚动展示区 -->
     <div id="categoriesContainer" class="categories-container"></div>
 
-    <footer>☕ 按分类横向滑动 · 导出数据可搬家到另一台设备</footer>
+    <footer>☕ 点击 ❤️ 收藏心仪咖啡馆 · 开启「只看收藏」快速筛选</footer>
 </div>
 
 <script>
-    // 默认示例数据
+    // 默认示例数据 (增加 favorite 字段)
     const defaultCafesData = [
         {
             name: "森屿咖啡",
             address: "杭州市西湖区留下街道18号",
             description: "藏在森林里的玻璃房，手冲瑰夏香气迷人，适合周末发呆。",
             website: "https://www.senyucoffee.com",
-            category: "Cafe"
+            category: "Cafe",
+            favorite: true      // 示例收藏
         },
         {
             name: "夜航船咖啡馆",
             address: "上海市徐汇区衡山路12弄",
             description: "复古船舱风格，特色海盐焦糖拿铁，晚间有爵士乐。",
             website: "https://www.nighthawkcoffee.cn",
-            category: "Western"
+            category: "Western",
+            favorite: false
         },
         {
             name: "书虫与豆子",
             address: "成都市青羊区窄巷子9号",
             description: "独立书店+咖啡，安静阅读区，特调橙香肉桂拿铁必点。",
             website: "https://www.bookbean.club",
-            category: "Japanese"
+            category: "Japanese",
+            favorite: true
         },
         {
             name: "泰赞冰咖",
             address: "广州市天河区体育东路",
             description: "地道泰式奶茶&咖啡，斑斓吐司配泰式冰咖绝配。",
             website: "https://www.thaiZan.com",
-            category: "Thai"
+            category: "Thai",
+            favorite: false
         },
         {
             name: "娘惹食堂",
             address: "槟城路/吉隆坡风格体验馆",
             description: "南洋咖啡 + 娘惹糕点，独特香料风味。",
             website: "https://www.nyonyacafe.my",
-            category: "Nyonya"
+            category: "Nyonya",
+            favorite: true
         }
     ];
     
     let cafes = [];
+    let showOnlyFavorites = false;   // 是否只显示收藏的卡片
 
     const categoriesContainer = document.getElementById('categoriesContainer');
     const addBtn = document.getElementById('addBtn');
@@ -521,6 +563,7 @@
     const descInput = document.getElementById('cafeDesc');
     const exportBtn = document.getElementById('exportDataBtn');
     const importFileInput = document.getElementById('importFileInput');
+    const toggleFavBtn = document.getElementById('toggleFavBtn');
 
     function generateId() {
         return Date.now() + '-' + Math.random().toString(36).substring(2, 8);
@@ -531,7 +574,8 @@
             ...cafe,
             id: generateId(),
             website: cafe.website && cafe.website.trim() !== "" ? cafe.website.trim() : "",
-            category: cafe.category && cafe.category.trim() !== "" ? cafe.category.trim() : "Others"
+            category: cafe.category && cafe.category.trim() !== "" ? cafe.category.trim() : "Others",
+            favorite: cafe.favorite === true   // 确保布尔值
         }));
     }
 
@@ -560,15 +604,47 @@
         });
     }
 
+    // 切换收藏状态
+    function toggleFavorite(cafeId) {
+        const cafe = cafes.find(c => c.id === cafeId);
+        if (cafe) {
+            cafe.favorite = !cafe.favorite;
+            saveToLocalStorage();
+            renderGroupedCards();   // 重新渲染 (保持筛选模式)
+        }
+    }
+
+    // 切换只看收藏模式
+    function toggleShowFavorites() {
+        showOnlyFavorites = !showOnlyFavorites;
+        if (showOnlyFavorites) {
+            toggleFavBtn.textContent = '✨ 显示全部';
+            toggleFavBtn.classList.add('btn-fav-active');
+        } else {
+            toggleFavBtn.textContent = '❤️ 只看收藏';
+            toggleFavBtn.classList.remove('btn-fav-active');
+        }
+        renderGroupedCards();
+    }
+
     function renderGroupedCards() {
         if (!categoriesContainer) return;
-        if (cafes.length === 0) {
-            categoriesContainer.innerHTML = `<div class="empty-state">✨ 还没有咖啡厅～ 添加上方表单 ✨</div>`;
+        
+        // 根据筛选条件过滤咖啡馆
+        let filteredCafes = cafes;
+        if (showOnlyFavorites) {
+            filteredCafes = cafes.filter(cafe => cafe.favorite === true);
+        }
+        
+        if (filteredCafes.length === 0) {
+            let emptyMsg = showOnlyFavorites ? '✨ 暂无收藏的咖啡厅，点击卡片上的 ❤️ 标记收藏吧 ✨' : '✨ 还没有咖啡厅～ 添加上方表单 ✨';
+            categoriesContainer.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
             return;
         }
 
+        // 分组
         const groups = new Map();
-        cafes.forEach(cafe => {
+        filteredCafes.forEach(cafe => {
             let cat = (cafe.category && cafe.category.trim() !== "") ? cafe.category.trim() : "Others";
             if (!groups.has(cat)) groups.set(cat, []);
             groups.get(cat).push(cafe);
@@ -584,6 +660,9 @@
                 const safeName = escapeHtml(cafe.name);
                 const safeAddress = escapeHtml(cafe.address || '地址未提供');
                 const safeDesc = escapeHtml(cafe.description || '暂无描述');
+                const isFav = cafe.favorite === true;
+                const favIcon = isFav ? '❤️' : '🤍';
+                const favActiveClass = isFav ? 'active' : '';
                 
                 let websiteHtml = '';
                 const rawWebsite = cafe.website || '';
@@ -623,7 +702,12 @@
                             ${websiteHtml}
                         </div>
                         <div class="card-actions">
-                            <button class="delete-btn" data-id="${cafe.id}">🗑️ 移除</button>
+                            <button class="favorite-btn ${favActiveClass}" data-id="${cafe.id}" data-fav="true">
+                                ${favIcon} 收藏
+                            </button>
+                            <div class="action-buttons">
+                                <button class="delete-btn" data-id="${cafe.id}">🗑️ 移除</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -643,11 +727,19 @@
         }
         categoriesContainer.innerHTML = html;
 
+        // 绑定删除和收藏按钮事件
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const id = btn.getAttribute('data-id');
                 deleteCafeById(id);
+            });
+        });
+        document.querySelectorAll('.favorite-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                toggleFavorite(id);
             });
         });
     }
@@ -679,7 +771,8 @@
             address: address,
             description: description,
             website: website,
-            category: category
+            category: category,
+            favorite: false      // 新添加的默认未收藏
         };
         cafes.unshift(newCafe);
         saveToLocalStorage();
@@ -692,7 +785,7 @@
         nameInput.focus();
     }
 
-    // 导出数据
+    // 导出数据 (包含 favorite 字段)
     function exportData() {
         if (cafes.length === 0) {
             alert('暂无数据可导出。');
@@ -710,18 +803,18 @@
         URL.revokeObjectURL(url);
     }
 
-    // 导入数据（合并，相同id覆盖）
+    // 导入数据 (合并, 并确保 favorite 字段存在)
     function importData(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const imported = JSON.parse(e.target.result);
                 if (!Array.isArray(imported)) throw new Error('数据格式错误');
-                // 合并：用id去重，如果id相同则覆盖
                 const existingIds = new Map(cafes.map(c => [c.id, c]));
                 for (const item of imported) {
                     if (!item.id) item.id = generateId();
                     if (!item.category) item.category = 'Others';
+                    if (item.favorite === undefined) item.favorite = false;   // 兼容旧数据
                     existingIds.set(item.id, item);
                 }
                 cafes = Array.from(existingIds.values());
@@ -744,6 +837,7 @@
                     cafes = parsed.filter(item => item && typeof item === 'object').map(item => {
                         if (!item.id) item.id = generateId();
                         if (!item.category || item.category.trim() === "") item.category = "Others";
+                        if (item.favorite === undefined) item.favorite = false;
                         delete item.imageUrl;
                         return {
                             id: item.id,
@@ -751,7 +845,8 @@
                             address: item.address || "地址未知",
                             description: item.description || "",
                             website: item.website || "",
-                            category: item.category
+                            category: item.category,
+                            favorite: item.favorite
                         };
                     });
                     if (cafes.length > 0) {
@@ -769,10 +864,11 @@
     function setupEventListeners() {
         addBtn.addEventListener('click', addNewCafe);
         exportBtn.addEventListener('click', exportData);
+        toggleFavBtn.addEventListener('click', toggleShowFavorites);
         importFileInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
                 importData(e.target.files[0]);
-                importFileInput.value = ''; // 允许重复导入同一文件
+                importFileInput.value = '';
             }
         });
         
