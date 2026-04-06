@@ -22,7 +22,6 @@
             line-height: 1.4;
             padding-bottom: 80px;
         }
-        /* 禁止背景滚动 */
         body.modal-open {
             overflow: hidden;
             position: fixed;
@@ -317,8 +316,10 @@
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: rgba(30,27,22,0.4);
             backdrop-filter: blur(6px);
             justify-content: center;
@@ -507,9 +508,9 @@
         <div class="modal-filters">
             <input type="text" id="modalSearchInput" placeholder="🔍 搜索咖啡馆...">
             <select id="modalSortSelect">
+                <option value="date">最近添加</option>
                 <option value="name">按名称 A-Z</option>
                 <option value="favorite">按收藏 ♥</option>
-                <option value="date">最近添加</option>
             </select>
         </div>
         <div id="modalList" class="modal-list"></div>
@@ -524,9 +525,9 @@
         <div class="modal-filters">
             <input type="text" id="allModalSearchInput" placeholder="🔍 搜索咖啡馆...">
             <select id="allModalSortSelect">
+                <option value="date">最近添加</option>
                 <option value="name">按名称 A-Z</option>
                 <option value="favorite">按收藏 ♥</option>
-                <option value="date">最近添加</option>
             </select>
         </div>
         <div id="allModalList" class="modal-list"></div>
@@ -569,6 +570,8 @@
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     function isValidUrl(url) { if(!url.trim()) return true; return /^https?:\/\/.+/.test(url.trim()); }
     function isDuplicateName(name, excludeId=null) { let n = name.trim().toLowerCase(); return allCafes.some(c => c.name.trim().toLowerCase()===n && c.id!==excludeId); }
+    // 排序函数：按时间倒序（最近添加）
+    function sortByDate(arr) { return arr.sort((a,b) => (b.createdAt||0) - (a.createdAt||0)); }
     function sortByName(arr) { return arr.sort((a,b)=>a.name.localeCompare(b.name)); }
     
     function computeGlobalCategories() {
@@ -610,7 +613,8 @@
         for(let cat of globalCategories){
             let cafes = grouped.get(cat) || [];
             if(cafes.length===0) continue;
-            cafes = sortByName(cafes);
+            // 每个分类内默认按最近添加排序
+            cafes = sortByDate(cafes);
             let sec = document.createElement("div"); sec.className="category-section";
             sec.innerHTML = `<div class="category-header"><div class="category-title" data-cat="${cat}">${escapeHtml(cat)}</div><button class="view-all-btn" data-cat="${cat}">📋 全部 (${cafes.length})</button></div><div class="scroll-container"></div>`;
             container.appendChild(sec);
@@ -650,7 +654,7 @@
         globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); });
     }
     // 分页加载
-    let modalCurrentPage = 0, modalPageSize = 20, modalTotalItems = [], modalFilteredItems = [], modalObserver = null, modalLoading = false, modalHasMore = true;
+    let modalCurrentPage = 0, modalPageSize = 20, modalFilteredItems = [], modalObserver = null, modalLoading = false, modalHasMore = true;
     let currentModalListContainer = null, currentModalSearchInput = null, currentModalSortSelect = null, currentModalLoader = null, currentModalType = null;
     function resetModalPagination() { modalCurrentPage = 0; modalFilteredItems = []; modalHasMore = true; modalLoading = false; if(currentModalListContainer) currentModalListContainer.innerHTML = ""; if(currentModalLoader) currentModalLoader.style.display = "none"; }
     function loadMoreItems() {
@@ -667,7 +671,7 @@
                 modalCurrentPage++;
             }
             modalLoading = false;
-            if(currentModalLoader) currentModalLoader.style.display = modalHasMore ? "none" : "none";
+            if(currentModalLoader) currentModalLoader.style.display = "none";
             if(modalHasMore && currentModalListContainer && currentModalListContainer.scrollHeight - currentModalListContainer.scrollTop - currentModalListContainer.clientHeight < 100) loadMoreItems();
         }, 50);
     }
@@ -683,27 +687,37 @@
     function refreshModalList() {
         resetModalPagination();
         let searchVal = currentModalSearchInput ? currentModalSearchInput.value.toLowerCase() : "";
-        let sortType = currentModalSortSelect ? currentModalSortSelect.value : "name";
+        let sortType = currentModalSortSelect ? currentModalSortSelect.value : "date";
         let source = (currentModalType === 'category') ? allCafes.filter(c=>c.category===currentModalCategory) : allCafes;
         modalFilteredItems = source.filter(item => item.name.toLowerCase().includes(searchVal) || (item.region && item.region.toLowerCase().includes(searchVal)) || (item.description && item.description.toLowerCase().includes(searchVal)));
         if(sortType === "name") modalFilteredItems.sort((a,b)=>a.name.localeCompare(b.name));
         else if(sortType === "favorite") modalFilteredItems.sort((a,b)=> (b.favorited?1:0) - (a.favorited?1:0));
-        else if(sortType === "date") modalFilteredItems.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+        else modalFilteredItems.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0)); // 默认最近添加
         modalHasMore = modalFilteredItems.length > 0;
         loadMoreItems();
         setupInfiniteScroll(currentModalListContainer);
     }
-    // 控制滚动穿透
+    // 控制滚动穿透 + 移动端点击背景关闭
     function disableBodyScroll() { document.body.classList.add("modal-open"); }
     function enableBodyScroll() { document.body.classList.remove("modal-open"); }
     function openModal(modalElement) {
         modalElement.style.display = "flex";
         disableBodyScroll();
+        // 移动端确保背景点击关闭：给modal添加事件监听（避免重复绑定）
+        if (!modalElement._clickHandler) {
+            modalElement._clickHandler = function(e) {
+                if (e.target === modalElement) closeModal(modalElement);
+            };
+            modalElement.addEventListener('click', modalElement._clickHandler);
+            // 同时也支持 touchend 移动端
+            modalElement.addEventListener('touchend', modalElement._clickHandler);
+        }
     }
     function closeModal(modalElement) {
         modalElement.style.display = "none";
         enableBodyScroll();
         if(modalObserver) modalObserver.disconnect();
+        // 不移除事件，下次打开重新添加即可，但无妨
     }
     function openCategoryModal(category){
         currentModalCategory = category;
@@ -750,8 +764,15 @@
         let linkDisplay = (cafe.url&&cafe.url.trim()) ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a>` : '<span>未提供链接</span>';
         detail.innerHTML = `<div class="detail-field"><strong>名称</strong><br>${escapeHtml(cafe.name)}</div><div class="detail-field"><strong>地区</strong><br>${cafe.region?escapeHtml(cafe.region):'未填写'}</div><div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div><div class="detail-field"><strong>简介</strong><br>${cafe.description?escapeHtml(cafe.description):'暂无'}</div><div class="detail-field"><strong>链接</strong><br>${linkDisplay}</div><div class="detail-field"><strong>收藏</strong><br>${isFav?'已收藏 ❤️':'未收藏'}</div><hr><div style="display:flex; gap:1rem; justify-content:flex-end;"><button id="detailFavBtn" class="btn-outline"><i class="fas fa-heart"></i> ${isFav?'取消收藏':'收藏'}</button><button id="detailDelBtn" class="btn-outline" style="color:#b1624b;"><i class="fas fa-trash-alt"></i> 移除</button></div>`;
         openModal(modal);
-        document.getElementById("detailFavBtn").addEventListener("click",()=>{ toggleFavorite(cafe.id, !cafe.favorited); closeModal(modal); });
-        document.getElementById("detailDelBtn").addEventListener("click",()=>{ if(confirm(`删除「${cafe.name}」？`)) deleteCafe(cafe.id); closeModal(modal); });
+        // 为了避免事件重复绑定，先移除旧的再添加新的（简单起见使用一次性事件）
+        let favBtn = document.getElementById("detailFavBtn");
+        let delBtn = document.getElementById("detailDelBtn");
+        favBtn.replaceWith(favBtn.cloneNode(true));
+        delBtn.replaceWith(delBtn.cloneNode(true));
+        let newFav = document.getElementById("detailFavBtn");
+        let newDel = document.getElementById("detailDelBtn");
+        newFav.addEventListener("click",()=>{ toggleFavorite(cafe.id, !cafe.favorited); closeModal(modal); });
+        newDel.addEventListener("click",()=>{ if(confirm(`删除「${cafe.name}」？`)) deleteCafe(cafe.id); closeModal(modal); });
     }
     function subscribeCafes(){
         cafesRef.on("value",snap=>{
@@ -790,17 +811,14 @@
         searchInp.addEventListener("input",()=>{ if(searchDebounceTimer) clearTimeout(searchDebounceTimer); searchDebounceTimer=setTimeout(performSearch,300); });
         regionSel.addEventListener("change",performSearch);
         clearBtn.addEventListener("click",()=>{ searchInp.value=""; regionSel.value=""; searchKeyword=""; selectedRegion=""; renderMainView(); });
+        // 关闭按钮
         let modalCat = document.getElementById("categoryModal"), closeCat = document.getElementById("closeModalBtn");
         let modalAll = document.getElementById("allCafesModal"), closeAll = document.getElementById("closeAllCafesModalBtn");
         let modalDetail = document.getElementById("detailModal"), closeDetail = document.getElementById("closeDetailModalBtn");
         closeCat.onclick = () => closeModal(modalCat);
         closeAll.onclick = () => closeModal(modalAll);
         closeDetail.onclick = () => closeModal(modalDetail);
-        window.onclick = (e) => {
-            if(e.target === modalCat) closeModal(modalCat);
-            if(e.target === modalAll) closeModal(modalAll);
-            if(e.target === modalDetail) closeModal(modalDetail);
-        };
+        // 全局背景点击已在 openModal 中通过事件监听处理，无需额外 window 监听
     }
     async function init(){
         computeGlobalCategories(); renderCategorySelect(); bindEvents(); await seedExampleData(); subscribeCafes();
