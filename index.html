@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>FEONG的咖啡馆收藏集 · 全能版</title>
+    <title>FEONG的咖啡馆收藏集 · 精炼版</title>
     <link rel="manifest" href="data:application/manifest+json,{ \"name\":\"FEONG咖啡馆\", \"short_name\":\"咖啡馆集\", \"start_url\":\".\", \"display\":\"standalone\", \"theme_color\":\"#c7a16b\", \"background_color\":\"#f2efe7\" }">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,9 +23,6 @@
         .btn-icon { background: transparent; border: none; padding: 0.4rem 0.8rem; border-radius: 32px; font-weight: 500; cursor: pointer; color: #5a4a38; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
         .btn-icon.active { background: #c7a16b20; color: #c7a16b; }
         .btn-icon:hover { background: #e8dfd3; transform: translateY(-1px); }
-        .random-options { display: inline-flex; gap: 4px; align-items: center; background: transparent; }
-        .random-options select { background: transparent; border: none; padding: 0.4rem 0.4rem; font-size: 0.75rem; color: #5a4a38; font-weight: 500; border-radius: 32px; cursor: pointer; }
-        .random-options select:hover { background: #e8dfd3; }
         
         /* 折叠面板通用样式 */
         .collapsible-card { background: #ffffffd9; border-radius: 28px; margin-bottom: 1.2rem; border: 1px solid #ece3d7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden; }
@@ -53,7 +50,7 @@
         .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 0.6rem 0.9rem; border: 1px solid #e2d6c8; border-radius: 24px; font-size: 0.85rem; background: #ffffff; }
         .btn-primary { background: #c7a16b; border: none; padding: 0.6rem 1.5rem; border-radius: 40px; color: white; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary:hover { background: #b08854; }
-        .btn-secondary { background: #e9dfd1; border: none; padding: 0.4rem 1rem; border-radius: 40px; cursor: pointer; color: #7a6233; font-size: 0.8rem; }
+        .btn-secondary { background: #e9dfd1; border: none; padding: 0.4rem 1rem; border-radius: 40px; cursor: pointer; color: #7a6233; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; }
         
         /* 咖啡馆卡片等原有样式 */
         .category-section { margin-bottom: 2rem; }
@@ -64,14 +61,14 @@
         .scroll-container { display: flex; overflow-x: auto; gap: 1.2rem; padding-bottom: 0.8rem; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
         .card { background: #ffffff; border-radius: 24px; width: 280px; flex-shrink: 0; padding: 1.2rem; transition: 0.2s; border: 1px solid #efe6db; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -8px rgba(0,0,0,0.1); }
-        .card-name { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.3rem; color: #2a241e; display: flex; justify-content: space-between; align-items: center; }
+        .card-name { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.3rem; color: #2a241e; }
         .card-region { font-size: 0.65rem; color: #b48b54; display: flex; align-items: center; gap: 4px; margin-bottom: 0.5rem; }
         .card-desc { font-size: 0.7rem; line-height: 1.4; color: #6e6252; margin: 0.5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .card-link, .no-link-text { font-size: 0.7rem; margin: 0.3rem 0 0.8rem; }
         .card-link { color: #bc8f5a; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .no-link-text { color: #c1b2a0; font-style: italic; }
-        .card-actions { display: flex; gap: 8px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.6rem; justify-content: flex-end; }
-        .favorite-btn, .delete-btn, .edit-btn, .share-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; }
+        .card-actions { display: flex; gap: 12px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.6rem; justify-content: flex-end; flex-wrap: wrap; }
+        .card-actions button { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; gap: 4px; color: #8b734f; }
         .favorite-btn { color: #d4bb98; }
         .favorite-btn.active { color: #e2674b; }
         .delete-btn { color: #c6aa86; }
@@ -93,14 +90,15 @@
         .small-fav { font-size: 1.2rem; background: none; border: none; cursor: pointer; color: #d1b588; }
         .small-fav.active { color: #e2674b; }
         .close-modal { font-size: 1.8rem; cursor: pointer; color: #a68d6e; line-height: 1; }
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #c7a16b; color: white; width: 56px; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; border: none; font-size: 1.5rem; z-index: 99; transition: 0.2s; }
-        .fab:hover { background: #b08854; transform: scale(1.02); }
-        .back-to-top { bottom: 90px; background: #d9c8b6; color: #5e4b34; width: 44px; height: 44px; font-size: 1.2rem; }
-        .scroll-hint { text-align: center; font-size: 0.65rem; color: #bcae97; margin-top: -0.5rem; margin-bottom: 1rem; display: flex; justify-content: center; gap: 6px; }
-        .footer-bar { margin-top: 2rem; padding: 1rem; background: #fffaf2; border-radius: 28px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; border: 1px solid #e7dfd1; }
+        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #d9c8b6; color: #5e4b34; width: 44px; height: 44px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; border: none; font-size: 1.2rem; z-index: 99; transition: 0.2s; }
+        .back-to-top:hover { background: #cfc0ae; transform: scale(1.02); }
+        .footer-bar { margin-top: 2rem; padding: 0.8rem 1rem; background: #fffaf2; border-radius: 28px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; border: 1px solid #e7dfd1; }
         .toast-msg { position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%); background: #1f1c18e6; color: white; padding: 8px 20px; border-radius: 40px; font-size: 0.8rem; z-index: 1100; pointer-events: none; transition: opacity 0.2s; opacity: 0; }
         .detail-field { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0e6da; }
         .detail-field strong { color: #b88d54; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; }
+        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
+        .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0e6da; }
+        .suggestion-item:hover { background: #fef5e8; }
         @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } .category-title { font-size: 1.2rem; } }
     </style>
 </head>
@@ -109,22 +107,13 @@
     <div class="header">
         <h1>FEONG的咖啡馆收藏集</h1>
         <div class="header-actions">
-            <div class="random-options">
-                <button id="randomCafeBtn" class="btn-icon"><i class="fas fa-dice-d6"></i> 随机</button>
-                <select id="randomModeSelect">
-                    <option value="all">全部</option>
-                    <option value="favorite">仅收藏</option>
-                    <option value="region">按地区</option>
-                    <option value="category">按分类</option>
-                </select>
-            </div>
+            <button id="randomCafeBtn" class="btn-icon"><i class="fas fa-dice-d6"></i> 随机推荐</button>
             <button id="favoritesFilterBtn" class="btn-icon"><i class="fas fa-heart"></i> 收藏</button>
             <button id="viewAllCafesBtn" class="btn-icon"><i class="fas fa-list-ul"></i> 全部</button>
-            <button id="trashBtn" class="btn-icon"><i class="fas fa-trash-restore"></i> 回收站</button>
         </div>
     </div>
 
-    <!-- 搜索栏：可折叠，默认最小化（折叠） -->
+    <!-- 搜索栏：可折叠，默认最小化 -->
     <div class="collapsible-card" id="searchCollapsible">
         <div class="card-header" id="searchHeader">
             <h3><i class="fas fa-search"></i> 搜索与筛选</h3>
@@ -135,7 +124,7 @@
                 <div class="search-input-group" style="position:relative;">
                     <i class="fas fa-search"></i>
                     <input type="text" id="searchKeyword" placeholder="搜索名称、地区或简介..." autocomplete="off">
-                    <div id="suggestionsBox" class="suggestions-box" style="position:absolute; top:100%; left:0; right:0; background:white; border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,0.1); z-index:100; max-height:200px; overflow-y:auto; display:none; border:1px solid #e2d8ca;"></div>
+                    <div id="suggestionsBox" class="suggestions-box"></div>
                 </div>
                 <div class="filter-group"><select id="regionFilter"><option value="">🌍 所有地区</option></select></div>
                 <button class="clear-filter" id="clearFiltersBtn"><i class="fas fa-eraser"></i> 清除</button>
@@ -143,8 +132,8 @@
         </div>
     </div>
 
-    <!-- 添加资料栏：可折叠，默认展开 -->
-    <div class="collapsible-card" id="addCollapsible">
+    <!-- 添加资料栏：可折叠，默认关闭 -->
+    <div class="collapsible-card collapsed" id="addCollapsible">
         <div class="card-header" id="addHeader">
             <h3><i class="fas fa-plus-circle"></i> 添加新咖啡馆</h3>
             <i class="fas fa-chevron-down toggle-icon"></i>
@@ -162,12 +151,14 @@
     </div>
 
     <div id="categoriesContainer"></div>
-    <div class="scroll-hint"><i class="fas fa-arrow-left"></i> 左右滑动查看更多 <i class="fas fa-arrow-right"></i></div>
+    
+    <!-- 底部工具栏：导入/导出 + 回收站 -->
     <div class="footer-bar" id="importExportBar">
         <button id="exportDataBtn" class="btn-secondary"><i class="fas fa-download"></i> 导出JSON</button>
         <button id="importDataBtn" class="btn-secondary"><i class="fas fa-upload"></i> 导入JSON</button>
         <input type="file" id="importFileInput" accept=".json" style="display:none">
-        <span style="font-size:0.7rem; color:#b29a78;">📦 批量导入会合并（重名跳过）</span>
+        <button id="trashBtn" class="btn-secondary"><i class="fas fa-trash-restore"></i> 回收站</button>
+        <span style="font-size:0.7rem; color:#b29a78;">📦 导入合并，重名跳过</span>
     </div>
 </div>
 
@@ -180,11 +171,10 @@
 <div id="detailModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>📄 咖啡馆档案</h2><span class="close-modal closeModalBtn">&times;</span></div><div id="detailContent" style="padding:1rem;"></div></div></div>
 
 <div id="toastMsg" class="toast-msg"></div>
-<button class="fab" id="fabAddBtn"><i class="fas fa-plus"></i></button>
-<button class="fab back-to-top" id="backToTopBtn"><i class="fas fa-arrow-up"></i></button>
+<button class="back-to-top" id="backToTopBtn"><i class="fas fa-arrow-up"></i></button>
 
 <script>
-    // Firebase 配置 (原样保留)
+    // Firebase 配置
     const firebaseConfig = {
         apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
         authDomain: "cafe-c55f9.firebaseapp.com",
@@ -258,7 +248,12 @@
         let regionHtml = cafe.region ? `<div class="card-region"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(cafe.region)}</div>` : '';
         let descHtml = cafe.description ? `<div class="card-desc">${escapeHtml(cafe.description.length>70?cafe.description.substring(0,67)+'...':cafe.description)}</div>`:'';
         let linkHtml = cafe.url?.trim() ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> 链接</a>` : `<div class="no-link-text">无链接</div>`;
-        div.innerHTML = `<div class="card-name"><span>${escapeHtml(cafe.name)}</span><div style="display:flex;gap:6px;"><button class="edit-btn" data-id="${cafe.id}"><i class="fas fa-pen"></i></button><button class="share-btn" data-id="${cafe.id}"><i class="fas fa-share-alt"></i></button></div></div>${regionHtml}${descHtml}${linkHtml}<div class="card-actions"><button class="favorite-btn ${isFav?'active':''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button><button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i></button></div>`;
+        div.innerHTML = `<div class="card-name">${escapeHtml(cafe.name)}</div>${regionHtml}${descHtml}${linkHtml}<div class="card-actions">
+            <button class="share-btn" data-id="${cafe.id}"><i class="fas fa-share-alt"></i> 分享</button>
+            <button class="edit-btn" data-id="${cafe.id}"><i class="fas fa-pen"></i> 编辑</button>
+            <button class="favorite-btn ${isFav?'active':''}" data-id="${cafe.id}"><i class="fas fa-heart"></i> ${isFav?'已收藏':'收藏'}</button>
+            <button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i> 删除</button>
+        </div>`;
         div.querySelector(".favorite-btn").addEventListener("click",e=>{ e.stopPropagation(); toggleFavorite(cafe.id, !cafe.favorited); });
         div.querySelector(".delete-btn").addEventListener("click",e=>{ e.stopPropagation(); deleteToTrash(cafe.id); });
         div.querySelector(".edit-btn").addEventListener("click",e=>{ e.stopPropagation(); openEditModal(cafe); });
@@ -272,7 +267,12 @@
             if(val) btn.classList.add("active"); else btn.classList.remove("active");
         });
     }
-    async function deleteToTrash(id){ await cafesRef.child(id).update({ deleted: true, deletedAt: Date.now() }); showToast("已移至回收站"); }
+    async function deleteToTrash(id){ 
+        if(confirm("确定要将这家咖啡馆移至回收站吗？")){
+            await cafesRef.child(id).update({ deleted: true, deletedAt: Date.now() }); 
+            showToast("已移至回收站"); 
+        }
+    }
     async function restoreFromTrash(id){ await cafesRef.child(id).update({ deleted: false }); showToast("已恢复"); }
     async function permanentDelete(id){ await cafesRef.child(id).remove(); showToast("已永久删除"); }
     async function addCafe(name,url,category,region,desc){
@@ -301,18 +301,14 @@
         });
     }
     
-    function doAdvancedRandom(mode, filterVal) {
+    // 简化随机推荐：只从全部活跃咖啡馆中随机
+    function simpleRandom() {
         let candidates = getActiveCafes();
-        if (mode === "favorite") candidates = candidates.filter(c => c.favorited);
-        else if (mode === "region") candidates = candidates.filter(c => c.region === filterVal);
-        else if (mode === "category") candidates = candidates.filter(c => c.category === filterVal);
         if (candidates.length === 0) {
-            alert("没有符合条件的咖啡馆");
-            closeModal(document.getElementById("randomAdvancedModal"));
+            alert("还没有咖啡馆，请先添加～");
             return;
         }
         let lucky = candidates[Math.floor(Math.random() * candidates.length)];
-        closeModal(document.getElementById("randomAdvancedModal"));
         showDetailModal(lucky);
     }
     
@@ -419,31 +415,6 @@
         openModal(document.getElementById("categoryModal"));
     }
     
-    function initAdvancedRandomUI(){
-        let modeSelect = document.getElementById("advRandomMode");
-        let regionSel = document.getElementById("advRandomRegionSelect");
-        let categorySel = document.getElementById("advRandomCategorySelect");
-        function update(){
-            let mode = modeSelect.value;
-            if(mode === "region"){
-                regionSel.style.display = "block";
-                categorySel.style.display = "none";
-                let regions = [...new Set(getActiveCafes().map(c=>c.region).filter(r=>r))];
-                regionSel.innerHTML = regions.map(r=>`<option>${escapeHtml(r)}</option>`).join("");
-            } else if(mode === "category"){
-                regionSel.style.display = "none";
-                categorySel.style.display = "block";
-                let cats = [...new Set(getActiveCafes().map(c=>c.category))];
-                categorySel.innerHTML = cats.map(c=>`<option>${escapeHtml(c)}</option>`).join("");
-            } else {
-                regionSel.style.display = "none";
-                categorySel.style.display = "none";
-            }
-        }
-        modeSelect.addEventListener("change", update);
-        update();
-    }
-    
     function subscribeCafes(){
         cafesRef.on("value",snap=>{
             let data=snap.val(); let arr=[];
@@ -481,22 +452,17 @@
         for(let e of ex) await cafesRef.push({ ...e, createdAt:Date.now(), deleted:false }); 
     }
     
-    // 折叠面板逻辑
+    // 折叠面板初始化：搜索栏默认折叠，添加栏默认折叠
     function initCollapsible() {
         const searchCard = document.getElementById("searchCollapsible");
         const addCard = document.getElementById("addCollapsible");
-        // 搜索栏默认折叠（最小化）
         searchCard.classList.add("collapsed");
-        // 添加栏默认展开
-        addCard.classList.remove("collapsed");
+        addCard.classList.add("collapsed");
         
-        const searchHeader = document.getElementById("searchHeader");
-        const addHeader = document.getElementById("addHeader");
-        
-        searchHeader.addEventListener("click", () => {
+        document.getElementById("searchHeader").addEventListener("click", () => {
             searchCard.classList.toggle("collapsed");
         });
-        addHeader.addEventListener("click", () => {
+        document.getElementById("addHeader").addEventListener("click", () => {
             addCard.classList.toggle("collapsed");
         });
     }
@@ -510,22 +476,11 @@
         document.getElementById("favoritesFilterBtn").addEventListener("click",()=>{ onlyFavorites=!onlyFavorites; renderMainView(); });
         document.getElementById("viewAllCafesBtn").addEventListener("click",openAllCafesModal);
         document.getElementById("trashBtn").addEventListener("click",()=>{ renderTrashModal(); openModal(document.getElementById("trashModal")); });
-        document.getElementById("randomCafeBtn").addEventListener("click",()=>{ 
-            let mode=document.getElementById("randomModeSelect").value; 
-            if(mode==="all") doAdvancedRandom("all");
-            else if(mode==="favorite") doAdvancedRandom("favorite");
-            else if(mode==="region"){ let regions=[...new Set(getActiveCafes().map(c=>c.region).filter(r=>r))]; if(regions.length) doAdvancedRandom("region", regions[Math.floor(Math.random()*regions.length)]); else alert("无地区数据"); } 
-            else if(mode==="category"){ let cats=[...new Set(getActiveCafes().map(c=>c.category))]; if(cats.length) doAdvancedRandom("category", cats[Math.floor(Math.random()*cats.length)]); else alert("无分类"); } 
-        });
+        document.getElementById("randomCafeBtn").addEventListener("click", simpleRandom);
         document.getElementById("exportDataBtn").addEventListener("click",exportData);
         document.getElementById("importDataBtn").addEventListener("click",()=>document.getElementById("importFileInput").click());
         document.getElementById("importFileInput").addEventListener("change",e=>{ if(e.target.files[0]) importData(e.target.files[0]); });
         document.getElementById("backToTopBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-        document.getElementById("fabAddBtn").addEventListener("click",()=>{
-            const addCard = document.getElementById("addCollapsible");
-            if(addCard.classList.contains("collapsed")) addCard.classList.remove("collapsed");
-            document.getElementById("addForm").scrollIntoView({behavior:"smooth"});
-        });
         let searchInp = document.getElementById("searchKeyword"); 
         searchInp.addEventListener("input",()=>{ searchKeyword=searchInp.value; updateSuggestions(); if(debouncedRender) clearTimeout(debouncedRender); debouncedRender=setTimeout(()=>renderMainView(),300); });
         document.getElementById("regionFilter").addEventListener("change",e=>{ selectedRegion=e.target.value; renderMainView(); });
@@ -539,13 +494,6 @@
             await updateCafe(currentEditId,{ name:newName, region:document.getElementById("editRegion").value, url:document.getElementById("editUrl").value, category:document.getElementById("editCategory").value, description:document.getElementById("editDesc").value });
             closeModal(document.getElementById("editModal"));
         });
-        document.getElementById("advRandomGoBtn").addEventListener("click",()=>{
-            let mode = document.getElementById("advRandomMode").value;
-            let filterVal = "";
-            if(mode === "region") filterVal = document.getElementById("advRandomRegionSelect").value;
-            if(mode === "category") filterVal = document.getElementById("advRandomCategorySelect").value;
-            doAdvancedRandom(mode, filterVal);
-        });
         document.getElementById("emptyTrashBtn")?.addEventListener("click",async()=>{ if(confirm("永久清空回收站所有内容？")){ let trash = allCafes.filter(c=>c.deleted); for(let c of trash) await cafesRef.child(c.id).remove(); showToast("已清空回收站"); } });
     }
     
@@ -554,7 +502,6 @@
         subscribeCafes();
         bindEvents();
         renderCategorySelect();
-        initAdvancedRandomUI();
         initCollapsible();
     }
     init();
