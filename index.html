@@ -20,13 +20,19 @@
             color: #1f1c18;
             padding: 2rem 1.5rem;
             line-height: 1.4;
-            padding-bottom: 80px; /* 为底部FAB留空间 */
+            padding-bottom: 80px;
+        }
+        /* 禁止背景滚动 */
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
         .container {
             max-width: 1600px;
             margin: 0 auto;
         }
-        /* 头部 */
         .header {
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
@@ -87,7 +93,6 @@
         .btn-icon:hover {
             background: #f3ede5;
         }
-        /* 搜索栏 */
         .search-bar {
             background: rgba(255,255,245,0.85);
             backdrop-filter: blur(2px);
@@ -139,7 +144,6 @@
         .clear-filter:hover {
             background: #e5dbcf;
         }
-        /* 表单卡片 */
         .form-card {
             background: #ffffffd9;
             border-radius: 28px;
@@ -195,7 +199,6 @@
         .btn-primary:hover {
             background: #b08854;
         }
-        /* 分类区块 */
         .category-section {
             margin-bottom: 2rem;
         }
@@ -225,7 +228,6 @@
             padding: 0.2rem 0.7rem;
             border-radius: 40px;
         }
-        /* 横向滚动 */
         .scroll-container {
             display: flex;
             overflow-x: auto;
@@ -238,7 +240,6 @@
             content: '';
             padding-right: 1rem;
         }
-        /* 卡片 */
         .card {
             background: #ffffff;
             border-radius: 24px;
@@ -313,7 +314,6 @@
         .favorite-btn { color: #d4bb98; }
         .favorite-btn.active { color: #e2674b; }
         .delete-btn { color: #c6aa86; }
-        /* 模态框 */
         .modal {
             display: none;
             position: fixed;
@@ -413,7 +413,6 @@
             color: #a68d6e;
             line-height: 1;
         }
-        /* 浮动按钮 */
         .fab {
             position: fixed;
             bottom: 20px;
@@ -501,7 +500,7 @@
     <div class="scroll-hint"><i class="fas fa-arrow-left"></i> 左右滑动查看更多 <i class="fas fa-arrow-right"></i></div>
 </div>
 
-<!-- 分类模态框（含搜索排序+分页） -->
+<!-- 分类模态框 -->
 <div id="categoryModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h2 id="modalCategoryTitle">分类</h2><span class="close-modal" id="closeModalBtn">&times;</span></div>
@@ -518,7 +517,7 @@
     </div>
 </div>
 
-<!-- 全部咖啡馆模态框（复用结构） -->
+<!-- 全部咖啡馆模态框 -->
 <div id="allCafesModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h2>📋 全部咖啡馆 <span id="allCafesCount"></span></h2><span class="close-modal" id="closeAllCafesModalBtn">&times;</span></div>
@@ -650,15 +649,15 @@
         sel.innerHTML = "";
         globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); });
     }
-    // 分页加载辅助
+    // 分页加载
     let modalCurrentPage = 0, modalPageSize = 20, modalTotalItems = [], modalFilteredItems = [], modalObserver = null, modalLoading = false, modalHasMore = true;
-    let currentModalListContainer = null, currentModalSearchInput = null, currentModalSortSelect = null, currentModalLoader = null, currentModalType = null; // 'category' or 'all'
+    let currentModalListContainer = null, currentModalSearchInput = null, currentModalSortSelect = null, currentModalLoader = null, currentModalType = null;
     function resetModalPagination() { modalCurrentPage = 0; modalFilteredItems = []; modalHasMore = true; modalLoading = false; if(currentModalListContainer) currentModalListContainer.innerHTML = ""; if(currentModalLoader) currentModalLoader.style.display = "none"; }
     function loadMoreItems() {
         if(modalLoading || !modalHasMore) return;
         modalLoading = true;
         if(currentModalLoader) currentModalLoader.style.display = "block";
-        setTimeout(()=>{ // 模拟异步渲染
+        setTimeout(()=>{
             let start = modalCurrentPage * modalPageSize;
             let end = start + modalPageSize;
             let newItems = modalFilteredItems.slice(start, end);
@@ -694,6 +693,18 @@
         loadMoreItems();
         setupInfiniteScroll(currentModalListContainer);
     }
+    // 控制滚动穿透
+    function disableBodyScroll() { document.body.classList.add("modal-open"); }
+    function enableBodyScroll() { document.body.classList.remove("modal-open"); }
+    function openModal(modalElement) {
+        modalElement.style.display = "flex";
+        disableBodyScroll();
+    }
+    function closeModal(modalElement) {
+        modalElement.style.display = "none";
+        enableBodyScroll();
+        if(modalObserver) modalObserver.disconnect();
+    }
     function openCategoryModal(category){
         currentModalCategory = category;
         currentModalType = 'category';
@@ -704,7 +715,7 @@
         currentModalSortSelect = document.getElementById("modalSortSelect");
         currentModalLoader = document.getElementById("modalLoader");
         refreshModalList();
-        modal.style.display = "flex";
+        openModal(modal);
         currentModalSearchInput.oninput = () => refreshModalList();
         currentModalSortSelect.onchange = () => refreshModalList();
     }
@@ -717,7 +728,7 @@
         currentModalSortSelect = document.getElementById("allModalSortSelect");
         currentModalLoader = document.getElementById("allModalLoader");
         refreshModalList();
-        modal.style.display = "flex";
+        openModal(modal);
         currentModalSearchInput.oninput = () => refreshModalList();
         currentModalSortSelect.onchange = () => refreshModalList();
     }
@@ -738,9 +749,9 @@
         let isFav = cafe.favorited;
         let linkDisplay = (cafe.url&&cafe.url.trim()) ? `<a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a>` : '<span>未提供链接</span>';
         detail.innerHTML = `<div class="detail-field"><strong>名称</strong><br>${escapeHtml(cafe.name)}</div><div class="detail-field"><strong>地区</strong><br>${cafe.region?escapeHtml(cafe.region):'未填写'}</div><div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div><div class="detail-field"><strong>简介</strong><br>${cafe.description?escapeHtml(cafe.description):'暂无'}</div><div class="detail-field"><strong>链接</strong><br>${linkDisplay}</div><div class="detail-field"><strong>收藏</strong><br>${isFav?'已收藏 ❤️':'未收藏'}</div><hr><div style="display:flex; gap:1rem; justify-content:flex-end;"><button id="detailFavBtn" class="btn-outline"><i class="fas fa-heart"></i> ${isFav?'取消收藏':'收藏'}</button><button id="detailDelBtn" class="btn-outline" style="color:#b1624b;"><i class="fas fa-trash-alt"></i> 移除</button></div>`;
-        modal.style.display = "flex";
-        document.getElementById("detailFavBtn").addEventListener("click",()=>{ toggleFavorite(cafe.id, !cafe.favorited); modal.style.display="none"; });
-        document.getElementById("detailDelBtn").addEventListener("click",()=>{ if(confirm(`删除「${cafe.name}」？`)) deleteCafe(cafe.id); modal.style.display="none"; });
+        openModal(modal);
+        document.getElementById("detailFavBtn").addEventListener("click",()=>{ toggleFavorite(cafe.id, !cafe.favorited); closeModal(modal); });
+        document.getElementById("detailDelBtn").addEventListener("click",()=>{ if(confirm(`删除「${cafe.name}」？`)) deleteCafe(cafe.id); closeModal(modal); });
     }
     function subscribeCafes(){
         cafesRef.on("value",snap=>{
@@ -779,11 +790,17 @@
         searchInp.addEventListener("input",()=>{ if(searchDebounceTimer) clearTimeout(searchDebounceTimer); searchDebounceTimer=setTimeout(performSearch,300); });
         regionSel.addEventListener("change",performSearch);
         clearBtn.addEventListener("click",()=>{ searchInp.value=""; regionSel.value=""; searchKeyword=""; selectedRegion=""; renderMainView(); });
-        let modal = document.getElementById("categoryModal"), closeModal=document.getElementById("closeModalBtn"), allModal=document.getElementById("allCafesModal"), closeAll=document.getElementById("closeAllCafesModalBtn"), detailModal=document.getElementById("detailModal"), closeDetail=document.getElementById("closeDetailModalBtn");
-        closeModal.onclick = ()=>{ modal.style.display="none"; currentModalCategory=null; if(modalObserver) modalObserver.disconnect(); };
-        closeAll.onclick = ()=>{ allModal.style.display="none"; if(modalObserver) modalObserver.disconnect(); };
-        closeDetail.onclick = ()=>{ detailModal.style.display="none"; };
-        window.onclick = (e)=>{ if(e.target===modal){ modal.style.display="none"; currentModalCategory=null; if(modalObserver) modalObserver.disconnect(); } if(e.target===allModal){ allModal.style.display="none"; if(modalObserver) modalObserver.disconnect(); } if(e.target===detailModal) detailModal.style.display="none"; };
+        let modalCat = document.getElementById("categoryModal"), closeCat = document.getElementById("closeModalBtn");
+        let modalAll = document.getElementById("allCafesModal"), closeAll = document.getElementById("closeAllCafesModalBtn");
+        let modalDetail = document.getElementById("detailModal"), closeDetail = document.getElementById("closeDetailModalBtn");
+        closeCat.onclick = () => closeModal(modalCat);
+        closeAll.onclick = () => closeModal(modalAll);
+        closeDetail.onclick = () => closeModal(modalDetail);
+        window.onclick = (e) => {
+            if(e.target === modalCat) closeModal(modalCat);
+            if(e.target === modalAll) closeModal(modalAll);
+            if(e.target === modalDetail) closeModal(modalDetail);
+        };
     }
     async function init(){
         computeGlobalCategories(); renderCategorySelect(); bindEvents(); await seedExampleData(); subscribeCafes();
