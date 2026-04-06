@@ -2,589 +2,388 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>FEONG的咖啡厅收藏集 · 分类列表 + 爱心收藏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>FEONG的咖啡厅收藏集</title>
+    <!-- Font Awesome 6 (免费图标库，用于爱心和删除图标) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts 提升字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Noto Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background: #f9f5f0;
-            color: #2e241f;
+            background: #f7f5f0;
+            color: #2c2a28;
             padding: 2rem 1.5rem;
         }
 
+        /* 主容器 */
         .container {
             max-width: 1600px;
             margin: 0 auto;
         }
 
+        /* 头部 */
         .header {
-            text-align: center;
             margin-bottom: 2rem;
+            border-bottom: 3px solid #e0c3a0;
+            padding-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
-
-        .header h1 {
+        h1 {
             font-size: 2.2rem;
-            letter-spacing: -0.3px;
-            background: linear-gradient(135deg, #5e3c2c, #b97f5c);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #b97f44, #e2b281);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            margin-bottom: 0.5rem;
+        }
+        .sub {
+            color: #7e6a54;
+            font-weight: 500;
         }
 
-        .header p {
-            color: #6b4c3a;
-            font-size: 1rem;
-            border-bottom: 2px solid #e6d5c0;
-            display: inline-block;
-            padding-bottom: 0.4rem;
-        }
-
+        /* 添加表单卡片 */
         .form-card {
             background: white;
-            border-radius: 32px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-            padding: 1.6rem 2rem;
-            margin-bottom: 2.8rem;
-            transition: box-shadow 0.2s;
+            border-radius: 28px;
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            border: 1px solid #ede3d5;
         }
-
-        .form-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #4a2e22;
-        }
-
-        .form-title::before {
-            content: "☕";
-            font-size: 1.6rem;
-        }
-
         .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.2rem;
-            margin-bottom: 1.2rem;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-group label {
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: #5b3e2e;
-            letter-spacing: 0.3px;
-        }
-
-        .input-group input, 
-        .input-group textarea,
-        .input-group select {
-            padding: 12px 14px;
-            border: 1.5px solid #eeddcb;
-            border-radius: 24px;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            background-color: #fffef7;
-            resize: vertical;
-        }
-
-        .input-group input:focus,
-        .input-group textarea:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: #c28a6b;
-            box-shadow: 0 0 0 3px rgba(194, 138, 107, 0.2);
-        }
-
-        .form-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 8px;
-            justify-content: flex-end;
+            gap: 1rem;
+            align-items: flex-end;
         }
-
-        button {
-            background: #5e3c2c;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
+        .input-group {
+            flex: 1;
+            min-width: 160px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
             font-weight: 600;
-            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #b68b5a;
+            margin-bottom: 0.3rem;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e7ddd0;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            background: #fffdfa;
+            transition: 0.2s;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #c99e6c;
+            box-shadow: 0 0 0 2px rgba(201,158,108,0.2);
+        }
+        .btn-primary {
+            background: #c58a4a;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            border-radius: 40px;
             color: white;
+            font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
+            font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-
-        button i {
-            font-style: normal;
-            font-weight: normal;
+        .btn-primary:hover {
+            background: #a76f38;
+            transform: scale(0.97);
         }
-
-        button:hover {
-            background: #794e38;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #d9c2ae;
-            color: #3a2a1f;
-        }
-
-        .btn-secondary:hover {
-            background: #c4aa93;
-        }
-
-        .btn-fav-active {
-            background: #c28a6b;
-            color: white;
-        }
-
-        .categories-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2.2rem;
-        }
-
-        .category-section {
-            background: #fefaf7;
-            border-radius: 28px;
-            padding: 1rem 0 1rem 1rem;
-            transition: all 0.1s;
-        }
-
-        .category-header {
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-            padding: 0 1rem 0.8rem 0.5rem;
-            flex-wrap: wrap;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .category-header:hover {
-            opacity: 0.85;
-        }
-
-        .category-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #4a2e22;
-            letter-spacing: -0.2px;
-            background: #f2e4da;
-            display: inline-block;
-            padding: 4px 18px;
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #d9c6b0;
+            padding: 0.6rem 1.2rem;
             border-radius: 40px;
-        }
-
-        .category-count {
-            font-size: 0.8rem;
-            background: #e7d6ca;
-            padding: 3px 10px;
-            border-radius: 30px;
-            color: #5b3e2e;
             font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #7c5f3f;
         }
-
-        .cards-scroll {
+        .btn-outline:hover {
+            background: #efe2d3;
+        }
+        .category-add {
             display: flex;
-            overflow-x: auto;
-            gap: 1.2rem;
-            padding-bottom: 1rem;
-            padding-right: 1rem;
-            scrollbar-width: thin;
-            scrollbar-color: #c9b29c #f0e2d6;
+            gap: 8px;
+            align-items: center;
         }
-
-        .cards-scroll::-webkit-scrollbar {
-            height: 8px;
-        }
-        .cards-scroll::-webkit-scrollbar-track {
-            background: #f0e2d6;
-            border-radius: 10px;
-        }
-        .cards-scroll::-webkit-scrollbar-thumb {
-            background: #c9b29c;
-            border-radius: 10px;
-        }
-
-        .cafe-card {
-            flex: 0 0 auto;
-            width: 280px;
-            background: white;
-            border-radius: 28px;
-            overflow: hidden;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-            transition: all 0.25s ease;
-            border: 1px solid #f0e2d6;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .cafe-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-content {
-            padding: 1.2rem 1rem 0.8rem;
+        .new-cat-input {
             flex: 1;
+            min-width: 120px;
         }
 
-        .cafe-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 6px;
+        /* 分类区块 */
+        .category-section {
+            margin-bottom: 2.5rem;
+        }
+        .category-header {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            flex-wrap: wrap;
-            gap: 5px;
+            border-left: 6px solid #c99e6c;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
         }
-
-        .cafe-name span {
-            background: #f1e2d6;
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 40px;
-            font-weight: normal;
+        .category-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #4a3520;
+            cursor: pointer;
+            transition: 0.2s;
         }
-
-        .cafe-address {
-            font-size: 0.75rem;
-            color: #9b7a64;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .category-title:hover {
+            color: #b97f44;
+            transform: translateX(4px);
         }
-        .cafe-address::before {
-            content: "📍";
-            font-size: 0.7rem;
-        }
-
-        .cafe-desc {
-            font-size: 0.8rem;
-            line-height: 1.4;
-            color: #4f3a2c;
-            margin-bottom: 12px;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .cafe-website {
-            margin-top: 6px;
-            margin-bottom: 12px;
-            font-size: 0.7rem;
-            background: #fef7f0;
-            padding: 6px 8px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-            word-break: break-all;
-        }
-
-        .cafe-website .link-icon {
-            font-size: 0.8rem;
-        }
-
-        .cafe-website a {
-            color: #b1624b;
-            text-decoration: none;
+        .view-all-btn {
+            background: none;
+            border: none;
+            color: #a67942;
             font-weight: 500;
-            border-bottom: 1px solid #e2cbbd;
-            transition: 0.15s;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            background: #f0e7dd;
+        }
+        .view-all-btn:hover {
+            background: #e2d2c0;
+        }
+
+        /* 横向滚动区域 */
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 1.3rem;
+            padding-bottom: 0.8rem;
+            scrollbar-width: thin;
+        }
+        .scroll-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        .scroll-container::-webkit-scrollbar-track {
+            background: #e8dfd3;
+            border-radius: 10px;
+        }
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: #c99e6c;
+            border-radius: 10px;
+        }
+
+        /* 大卡片样式 */
+        .card {
+            background: white;
+            border-radius: 28px;
+            width: 280px;
+            flex-shrink: 0;
+            padding: 1.2rem;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            border: 1px solid #f0e2d4;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.08);
+        }
+        .card-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #3b2a1c;
+            word-break: break-word;
+            padding-right: 40px;
+        }
+        .card-link {
+            font-size: 0.8rem;
+            color: #c18546;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 1rem;
             word-break: break-all;
-            font-size: 0.7rem;
         }
-        .cafe-website a:hover {
-            color: #5e3c2c;
+        .card-link i {
+            font-size: 0.75rem;
         }
-        .no-link {
-            color: #ab8a72;
+        .card-link:hover {
+            text-decoration: underline;
+            color: #9b5f2a;
+        }
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: auto;
+        }
+        .favorite-btn, .delete-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.1s;
+            padding: 4px;
+        }
+        .favorite-btn {
+            color: #d4af7a;
+        }
+        .favorite-btn.active {
+            color: #e34234;
+        }
+        .delete-btn {
+            color: #b38b6d;
+            font-size: 1.3rem;
+        }
+        .delete-btn:hover {
+            color: #c0392b;
+        }
+        .empty-cat-msg {
+            color: #a18f78;
+            padding: 1rem 0;
             font-style: italic;
         }
 
-        .card-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 1rem 1rem 1rem;
-            gap: 8px;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .favorite-btn {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            cursor: pointer;
-            padding: 5px 8px;
-            border-radius: 40px;
-            transition: 0.1s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #ab7b60;
-            width: 36px;
-        }
-        .favorite-btn:hover {
-            transform: scale(1.08);
-            background: #fef1e8;
-        }
-        .favorite-btn.active {
-            color: #e2554d;
-            text-shadow: 0 0 2px rgba(226,85,77,0.3);
-        }
-        .delete-btn {
-            background: none;
-            border: 1px solid #e5cfbf;
-            color: #a56547;
-            padding: 5px 12px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            border-radius: 60px;
-            box-shadow: none;
-            transition: 0.15s;
-        }
-        .delete-btn:hover {
-            background: #fff0e7;
-            border-color: #c17f5e;
-            color: #b14f2c;
-            transform: scale(0.96);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            background: #fffaf5;
-            border-radius: 48px;
-            color: #ab8a72;
-            font-size: 1rem;
-        }
-
-        .sync-note {
-            background: #e9dfd7;
-            border-radius: 24px;
-            padding: 0.8rem 1.2rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.8rem;
-            color: #4f3929;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .sync-note span {
-            font-weight: 500;
-        }
-        .sync-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .sync-buttons button, .sync-buttons label {
-            padding: 6px 16px;
-            font-size: 0.75rem;
-            background: #cfa988;
-        }
-        .sync-buttons button:hover, .sync-buttons label:hover {
-            background: #b87a56;
-        }
-
-        /* 模态框样式 */
+        /* 模态框 (全分类小卡片列表 + 详情大卡片模态框) */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.6);
-            z-index: 1000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(4px);
+            z-index: 1000;
+            backdrop-filter: blur(3px);
         }
         .modal-content {
-            background: #fffef7;
-            border-radius: 40px;
-            max-width: 90%;
-            width: 600px;
-            max-height: 85%;
+            background: #fffdf8;
+            border-radius: 32px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.25);
-            animation: fadeInUp 0.2s ease;
+            padding: 1.8rem;
+            position: relative;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
         }
         .modal-header {
-            padding: 1.2rem 1.5rem;
-            border-bottom: 1px solid #eeddcb;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #fff4ec;
-            border-radius: 40px 40px 0 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #eedbc8;
+            padding-bottom: 0.6rem;
         }
         .modal-header h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #4a2e22;
+            font-size: 1.6rem;
+            font-weight: 600;
         }
         .close-modal {
-            background: none;
             font-size: 1.8rem;
-            padding: 0;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            cursor: pointer;
+            color: #a07d56;
+        }
+        .small-card-list {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #8b694f;
-            box-shadow: none;
+            flex-direction: column;
+            gap: 0.8rem;
         }
-        .close-modal:hover {
-            background: #e9dbcf;
-            transform: none;
-        }
-        .modal-body {
-            padding: 1.2rem 1.5rem;
-        }
-        .list-item {
-            background: white;
-            border: 1px solid #f0e2d6;
-            border-radius: 24px;
-            padding: 0.8rem 1rem;
-            margin-bottom: 12px;
+        .small-card {
+            background: #fef8f0;
+            border-radius: 20px;
+            padding: 0.9rem 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid #f0e0ce;
             transition: 0.1s;
             cursor: pointer;
         }
-        .list-item:hover {
-            background: #fef7f0;
-            transform: translateX(4px);
+        .small-card:hover {
+            background: #f9efE2;
         }
-        .list-item-info {
+        .small-card-info {
             flex: 1;
         }
-        .list-item-name {
+        .small-card-name {
             font-weight: 700;
-            font-size: 1rem;
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            flex-wrap: wrap;
+            font-size: 1.05rem;
+            margin-bottom: 4px;
         }
-        .list-item-cat {
-            background: #f1e2d6;
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 40px;
-        }
-        .list-item-addr {
+        .small-card-cat {
             font-size: 0.7rem;
-            color: #9b7a64;
-            margin-top: 4px;
+            color: #bc8f5a;
         }
-        .list-item-fav {
+        .small-card-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .small-fav {
+            font-size: 1.4rem;
             background: none;
             border: none;
-            font-size: 1.4rem;
             cursor: pointer;
-            padding: 0 8px;
-            color: #ab7b60;
-            transition: 0.1s;
+            color: #cfb287;
         }
-        .list-item-fav.active {
-            color: #e2554d;
+        .small-fav.active {
+            color: #e34234;
         }
-        .list-item-fav:hover {
-            transform: scale(1.1);
+        .detail-modal .modal-content {
+            max-width: 480px;
+            text-align: left;
         }
-        .detail-card {
-            background: white;
-            border-radius: 28px;
-            padding: 0.2rem;
+        .detail-field {
+            margin: 1rem 0;
         }
-        .detail-card .cafe-name {
-            font-size: 1.4rem;
-            margin-bottom: 12px;
+        .detail-link {
+            color: #bc7a3a;
+            word-break: break-all;
         }
-        .detail-card .cafe-address {
-            font-size: 0.9rem;
-            margin-bottom: 16px;
-        }
-        .detail-card .cafe-desc {
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-        }
-        .detail-card .cafe-website {
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-        }
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        hr {
+            margin: 0.8rem 0;
+            border-color: #eedbc8;
         }
         footer {
             text-align: center;
-            margin-top: 2rem;
-            font-size: 0.7rem;
-            color: #ad8f78;
+            margin-top: 3rem;
+            color: #ac9a82;
+            font-size: 0.75rem;
         }
-        @media (max-width: 620px) {
-            body {
-                padding: 1rem;
-            }
-            .form-card {
-                padding: 1.2rem;
-            }
-            .cafe-card {
-                width: 260px;
-            }
-            .category-title {
-                font-size: 1.2rem;
-            }
-            .favorite-btn {
-                font-size: 1.2rem;
-                width: 32px;
-            }
-            .modal-content {
-                width: 95%;
-            }
+        @media (max-width: 700px) {
+            body { padding: 1.2rem; }
+            .card { width: 260px; }
+            .category-title { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -592,314 +391,435 @@
 <div class="container">
     <div class="header">
         <h1>☕ FEONG的咖啡厅收藏集</h1>
-        <p>分类横向浏览 · 点击分类标题进入列表视图 · 爱心收藏</p>
+        <div class="sub">收藏·探索·品味</div>
     </div>
 
-    <div class="sync-note">
-        <span>📱 数据本地保存 · 导出文件可跨设备同步</span>
-        <div class="sync-buttons">
-            <button id="toggleFavBtn" class="btn-secondary">❤️ 只看收藏</button>
-            <button id="exportDataBtn" class="btn-secondary">📤 导出数据</button>
-            <label for="importFileInput" class="btn-secondary" style="cursor:pointer;">📥 导入数据</label>
-            <input type="file" id="importFileInput" accept=".json" style="display:none;">
-        </div>
-    </div>
-
+    <!-- 添加新咖啡馆的表单 -->
     <div class="form-card">
-        <div class="form-title">录入新发现</div>
         <div class="form-grid">
             <div class="input-group">
-                <label>咖啡馆名称 *</label>
-                <input type="text" id="cafeName" placeholder="例: 小森林咖啡" autocomplete="off">
+                <label>咖啡厅名称</label>
+                <input type="text" id="cafeName" placeholder="例: 墨尔本精品咖啡馆" autocomplete="off">
             </div>
             <div class="input-group">
-                <label>地址 / 区域</label>
-                <input type="text" id="cafeAddress" placeholder="街道, 城市">
+                <label>官网/主页链接</label>
+                <input type="url" id="cafeUrl" placeholder="https://..." autocomplete="off">
             </div>
             <div class="input-group">
-                <label>官网链接 (URL)</label>
-                <input type="url" id="cafeWebsite" placeholder="https://www.cafe-example.com">
+                <label>分类</label>
+                <select id="cafeCategory"></select>
             </div>
-            <div class="input-group">
-                <label>类别 * (支持自定义)</label>
-                <input list="categoryOptions" id="cafeCategory" placeholder="选择或输入新类别" autocomplete="off">
-                <datalist id="categoryOptions">
-                    <option value="Bar"> <option value="Cafe"> <option value="Chinese"> <option value="Dessert">
-                    <option value="Fine Dine"> <option value="Hatyai"> <option value="Japanese"> <option value="Kopitiam">
-                    <option value="Korean"> <option value="Nyonya"> <option value="Thai"> <option value="Western"> <option value="Others">
-                </datalist>
+            <div class="input-group category-add">
+                <div class="new-cat-input">
+                    <input type="text" id="newCategoryName" placeholder="新类别名称">
+                </div>
+                <button type="button" class="btn-outline" id="addCategoryBtn">+ 添加类别</button>
             </div>
-            <div class="input-group">
-                <label>简短描述</label>
-                <textarea id="cafeDesc" rows="2" placeholder="手冲出色 / 安静角落 / 适合办公..."></textarea>
-            </div>
-        </div>
-        <div class="form-actions">
-            <button id="addBtn">➕ 添加咖啡馆</button>
+            <button class="btn-primary" id="addCafeBtn"><i class="fas fa-plus-circle"></i> 加入收藏集</button>
         </div>
     </div>
 
-    <div id="categoriesContainer" class="categories-container"></div>
-    <footer>☕ 点击分类标题 → 纵向列表模式 · 点击列表项查看完整详情</footer>
+    <!-- 动态分类区块将注入到这里 -->
+    <div id="categoriesContainer"></div>
+    <footer>❤️ 点击爱心收藏 · 每个卡片都可单独移除 · 点分类标题查看完整小卡片列表</footer>
 </div>
 
-<!-- 模态框: 分类列表 -->
-<div id="listModal" class="modal">
+<!-- 模态框：展示某分类下全部小卡片 -->
+<div id="categoryModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 id="listModalTitle">分类名称</h2>
-            <button class="close-modal" id="closeListModal">&times;</button>
+            <h2 id="modalCategoryTitle">分类名称</h2>
+            <span class="close-modal" id="closeModalBtn">&times;</span>
         </div>
-        <div id="listModalBody" class="modal-body">
-            <!-- 动态列表项 -->
-        </div>
+        <div id="modalSmallCardList" class="small-card-list">加载中...</div>
     </div>
 </div>
 
-<!-- 模态框: 详情 -->
-<div id="detailModal" class="modal">
+<!-- 详情模态框：点击小卡片后展示完整大卡片资料 -->
+<div id="detailModal" class="modal detail-modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>📄 咖啡馆详情</h2>
-            <button class="close-modal" id="closeDetailModal">&times;</button>
+            <h2>📄 咖啡馆档案</h2>
+            <span class="close-modal" id="closeDetailModalBtn">&times;</span>
         </div>
-        <div id="detailModalBody" class="modal-body">
-            <!-- 动态详情卡片 -->
-        </div>
+        <div id="detailContent"></div>
     </div>
 </div>
 
 <script>
-    const defaultCafesData = [
-        { name: "森屿咖啡", address: "杭州市西湖区留下街道18号", description: "藏在森林里的玻璃房，手冲瑰夏香气迷人，适合周末发呆。", website: "https://www.senyucoffee.com", category: "Cafe", favorite: true },
-        { name: "夜航船咖啡馆", address: "上海市徐汇区衡山路12弄", description: "复古船舱风格，特色海盐焦糖拿铁，晚间有爵士乐。", website: "https://www.nighthawkcoffee.cn", category: "Western", favorite: false },
-        { name: "书虫与豆子", address: "成都市青羊区窄巷子9号", description: "独立书店+咖啡，安静阅读区，特调橙香肉桂拿铁必点。", website: "https://www.bookbean.club", category: "Japanese", favorite: true },
-        { name: "泰赞冰咖", address: "广州市天河区体育东路", description: "地道泰式奶茶&咖啡，斑斓吐司配泰式冰咖绝配。", website: "https://www.thaiZan.com", category: "Thai", favorite: false },
-        { name: "娘惹食堂", address: "槟城路/吉隆坡风格体验馆", description: "南洋咖啡 + 娘惹糕点，独特香料风味。", website: "https://www.nyonyacafe.my", category: "Nyonya", favorite: true }
-    ];
-    
-    let cafes = [];
-    let showOnlyFavorites = false;
-    let currentListCategory = "";
+    // ----------------------------- Firebase 配置 -----------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
+        authDomain: "cafe-c55f9.firebaseapp.com",
+        databaseURL: "https://cafe-c55f9-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        projectId: "cafe-c55f9",
+        storageBucket: "cafe-c55f9.firebasestorage.app",
+        messagingSenderId: "328042543743",
+        appId: "1:328042543743:web:0fc175a3aadc7c5a639d4a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const cafesRef = database.ref("cafes");
 
-    const categoriesContainer = document.getElementById('categoriesContainer');
-    const addBtn = document.getElementById('addBtn');
-    const nameInput = document.getElementById('cafeName');
-    const addressInput = document.getElementById('cafeAddress');
-    const websiteInput = document.getElementById('cafeWebsite');
-    const categoryInput = document.getElementById('cafeCategory');
-    const descInput = document.getElementById('cafeDesc');
-    const exportBtn = document.getElementById('exportDataBtn');
-    const importFileInput = document.getElementById('importFileInput');
-    const toggleFavBtn = document.getElementById('toggleFavBtn');
-    const listModal = document.getElementById('listModal');
-    const detailModal = document.getElementById('detailModal');
-    const closeListModal = document.getElementById('closeListModal');
-    const closeDetailModal = document.getElementById('closeDetailModal');
-    const listModalTitle = document.getElementById('listModalTitle');
-    const listModalBody = document.getElementById('listModalBody');
-    const detailModalBody = document.getElementById('detailModalBody');
+    // ----------------------------- 全局变量 ---------------------------------
+    let allCafes = [];         // 存储 { id, name, url, category, favorited }
+    let globalCategories = []; // 动态类别列表 (预置13类 + 用户新增)
+    let currentModalCategory = null;   // 用于重绘后自动恢复模态框
+    let currentDetailCafe = null;
 
-    function generateId() { return Date.now() + '-' + Math.random().toString(36).substring(2, 8); }
-    function getDefaultCafesWithId() {
-        return defaultCafesData.map(cafe => ({
-            ...cafe, id: generateId(),
-            website: cafe.website?.trim() || "",
-            category: cafe.category?.trim() || "Others",
-            favorite: cafe.favorite === true
-        }));
-    }
-    function saveToLocalStorage() { localStorage.setItem('myCafeList', JSON.stringify(cafes)); }
-    function sanitizeUrl(url) {
-        if (!url) return null;
-        let u = url.trim();
-        if (!u) return null;
-        if (u.startsWith('http://') || u.startsWith('https://')) return u;
-        if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:\d+)?(\/.*)?$/.test(u)) return 'https://' + u;
-        return null;
-    }
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+    // 预置13个基础类别 (顺序自定义)
+    const DEFAULT_CATEGORIES = ["Bar", "Cafe", "Chinese", "Dessert", "Fine Dine", "Hatyai", "Japanese", "Kopitiam", "Korean", "Nyonya", "Thai", "Western", "Others"];
 
-    function toggleFavorite(cafeId) {
-        const cafe = cafes.find(c => c.id === cafeId);
-        if (cafe) { cafe.favorite = !cafe.favorite; saveToLocalStorage(); renderGroupedCards(); refreshCurrentListIfOpen(); }
-    }
-    function refreshCurrentListIfOpen() {
-        if (listModal.style.display === 'flex' && currentListCategory) openCategoryList(currentListCategory);
-    }
-
-    function openCategoryList(category) {
-        currentListCategory = category;
-        const categoryCafes = cafes.filter(c => (c.category?.trim() || "Others") === category);
-        if (showOnlyFavorites) {
-            const favFiltered = categoryCafes.filter(c => c.favorite);
-            if (favFiltered.length === 0 && categoryCafes.length > 0) {
-                listModalBody.innerHTML = `<div style="text-align:center;padding:2rem;">✨ 此分类暂无收藏咖啡馆 ✨</div>`;
-                listModalTitle.innerText = `${category} (收藏模式)`;
-                listModal.style.display = 'flex';
-                return;
-            }
-            renderListItems(favFiltered, category);
-        } else {
-            renderListItems(categoryCafes, category);
+    // 辅助函数: 合并并去重类别 (基于现有咖啡馆 + 基础类别 + 本地存储的新类别)
+    function computeGlobalCategories() {
+        let catsSet = new Set(DEFAULT_CATEGORIES);
+        // 加入现有咖啡馆中的类别
+        allCafes.forEach(cafe => { if(cafe.category) catsSet.add(cafe.category); });
+        // 从 localStorage 读取用户新增的类别 (持久化)
+        const storedExtra = localStorage.getItem("extraCategories");
+        if(storedExtra) {
+            try {
+                const extraArr = JSON.parse(storedExtra);
+                extraArr.forEach(c => catsSet.add(c));
+            } catch(e) {}
         }
-        listModal.style.display = 'flex';
+        // 排序: 保持基础类别在前，然后按字母排其他
+        let sorted = [...catsSet].sort((a,b) => {
+            let aIdx = DEFAULT_CATEGORIES.indexOf(a);
+            let bIdx = DEFAULT_CATEGORIES.indexOf(b);
+            if(aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+            if(aIdx !== -1) return -1;
+            if(bIdx !== -1) return 1;
+            return a.localeCompare(b);
+        });
+        globalCategories = sorted;
+        return globalCategories;
     }
 
-    function renderListItems(cafeList, category) {
-        if (cafeList.length === 0) {
-            listModalBody.innerHTML = `<div style="text-align:center;padding:2rem;">✨ 此分类暂无咖啡馆 ✨</div>`;
-            listModalTitle.innerText = category;
+    // 保存额外类别到 localStorage
+    function saveExtraCategories() {
+        const extra = globalCategories.filter(c => !DEFAULT_CATEGORIES.includes(c));
+        localStorage.setItem("extraCategories", JSON.stringify(extra));
+    }
+
+    // 渲染下拉框
+    function renderCategorySelect() {
+        const select = document.getElementById("cafeCategory");
+        if(!select) return;
+        select.innerHTML = "";
+        globalCategories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+        });
+    }
+
+    // 核心渲染: 根据类别分组展示横向滚动大卡片区块
+    function renderMainView() {
+        const container = document.getElementById("categoriesContainer");
+        if(!container) return;
+        container.innerHTML = "";
+        // 没有类别时提示
+        if(globalCategories.length === 0) {
+            container.innerHTML = "<div style='padding:2rem;text-align:center'>暂无分类，请添加类别或咖啡馆</div>";
             return;
         }
-        listModalTitle.innerText = `${category} · ${cafeList.length}家店铺`;
-        let html = '';
-        cafeList.forEach(cafe => {
-            const isFav = cafe.favorite === true;
-            const favClass = isFav ? 'active' : '';
-            const favIcon = isFav ? '❤️' : '🤍';
-            html += `
-                <div class="list-item" data-id="${cafe.id}">
-                    <div class="list-item-info">
-                        <div class="list-item-name">
-                            ${escapeHtml(cafe.name)}
-                            <span class="list-item-cat">${escapeHtml(cafe.category || 'Others')}</span>
-                        </div>
-                        <div class="list-item-addr">📍 ${escapeHtml(cafe.address || '地址未提供')}</div>
-                    </div>
-                    <button class="list-item-fav ${favClass}" data-id="${cafe.id}" data-fav-toggle>${favIcon}</button>
+        // 按分类分组
+        const grouped = new Map();
+        globalCategories.forEach(cat => { grouped.set(cat, []); });
+        allCafes.forEach(cafe => {
+            const cat = cafe.category;
+            if(grouped.has(cat)) grouped.get(cat).push(cafe);
+            else grouped.set(cat, [cafe]); // 如果新类别未在global中，但一般同步
+        });
+        // 为每个分类创建区块
+        for(let category of globalCategories) {
+            const cafesInCat = grouped.get(category) || [];
+            const sectionDiv = document.createElement("div");
+            sectionDiv.className = "category-section";
+            sectionDiv.setAttribute("data-category", category);
+            // header
+            sectionDiv.innerHTML = `
+                <div class="category-header">
+                    <div class="category-title" data-cat="${category}">${category}</div>
+                    <button class="view-all-btn" data-cat="${category}">📋 查看全部 (${cafesInCat.length})</button>
                 </div>
+                <div class="scroll-container" id="scroll-${category.replace(/[^a-zA-Z0-9]/g, '_')}"></div>
             `;
-        });
-        listModalBody.innerHTML = html;
-        // 绑定列表项点击事件（打开详情）
-        document.querySelectorAll('#listModalBody .list-item').forEach(item => {
-            const id = item.getAttribute('data-id');
-            item.addEventListener('click', (e) => {
-                if (e.target.closest('[data-fav-toggle]')) return;
-                const cafe = cafes.find(c => c.id === id);
-                if (cafe) showDetailModal(cafe);
-            });
-        });
-        // 绑定收藏按钮事件
-        document.querySelectorAll('#listModalBody .list-item-fav').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const id = btn.getAttribute('data-id');
-                toggleFavorite(id);
-            });
-        });
+            container.appendChild(sectionDiv);
+            const scrollDiv = sectionDiv.querySelector(".scroll-container");
+            if(cafesInCat.length === 0) {
+                scrollDiv.innerHTML = `<div class="empty-cat-msg">✨ 暂无咖啡厅，点击上方添加 ✨</div>`;
+            } else {
+                cafesInCat.forEach(cafe => {
+                    const card = createCardElement(cafe);
+                    scrollDiv.appendChild(card);
+                });
+            }
+            // 绑定标题点击事件(查看该分类全部小卡片)
+            const titleDiv = sectionDiv.querySelector(".category-title");
+            const viewBtn = sectionDiv.querySelector(".view-all-btn");
+            const openModalFunc = () => openCategoryModal(category);
+            titleDiv.addEventListener("click", openModalFunc);
+            viewBtn.addEventListener("click", openModalFunc);
+        }
+        // 如果有之前打开的模态框类别，重新打开它（确保数据同步后依然显示）
+        if(currentModalCategory) {
+            openCategoryModal(currentModalCategory);
+        }
     }
 
-    function showDetailModal(cafe) {
-        const isFav = cafe.favorite === true;
-        const favIcon = isFav ? '❤️' : '🤍';
-        let websiteHtml = '';
-        const validUrl = sanitizeUrl(cafe.website);
-        if (validUrl) {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">🔗</span><a href="${escapeHtml(validUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(validUrl)}</a></div>`;
-        } else if (cafe.website && cafe.website.trim() !== "") {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">⚠️</span><span class="no-link">链接无效: ${escapeHtml(cafe.website)}</span></div>`;
-        } else {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">🌐</span><span class="no-link">暂无官网</span></div>`;
-        }
-        detailModalBody.innerHTML = `
-            <div class="detail-card">
-                <div class="cafe-name">
-                    ${escapeHtml(cafe.name)}
-                    <button class="favorite-btn ${isFav ? 'active' : ''}" id="detailFavBtn" style="font-size:1.4rem;">${favIcon}</button>
-                </div>
-                <div class="cafe-address">📍 ${escapeHtml(cafe.address || '地址未提供')}</div>
-                <div class="cafe-desc">${escapeHtml(cafe.description || '暂无描述')}</div>
-                ${websiteHtml}
-                <div style="margin-top:16px; font-size:0.75rem; color:#9b7a64;">🏷️ 分类: ${escapeHtml(cafe.category || 'Others')}</div>
+    // 创建大卡片DOM (横向滚动使用)
+    function createCardElement(cafe) {
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "card";
+        const isFav = cafe.favorited === true;
+        cardDiv.innerHTML = `
+            <div class="card-name">${escapeHtml(cafe.name)}</div>
+            <a href="${escapeHtml(cafe.url)}" target="_blank" class="card-link"><i class="fas fa-external-link-alt"></i> ${escapeHtml(cafe.url.length>35 ? cafe.url.substring(0,32)+'...' : cafe.url)}</a>
+            <div class="card-actions">
+                <button class="favorite-btn ${isFav ? 'active' : ''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button>
+                <button class="delete-btn" data-id="${cafe.id}"><i class="fas fa-trash-alt"></i></button>
             </div>
         `;
-        detailModal.style.display = 'flex';
-        const detailFavBtn = document.getElementById('detailFavBtn');
-        if (detailFavBtn) {
-            detailFavBtn.addEventListener('click', () => {
-                toggleFavorite(cafe.id);
-                showDetailModal(cafes.find(c => c.id === cafe.id) || cafe);
+        const favBtn = cardDiv.querySelector(".favorite-btn");
+        const delBtn = cardDiv.querySelector(".delete-btn");
+        favBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleFavorite(cafe.id, !cafe.favorited);
+        });
+        delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if(confirm(`确定移除「${cafe.name}」吗？`)) {
+                deleteCafe(cafe.id);
+            }
+        });
+        return cardDiv;
+    }
+
+    // 切换收藏状态
+    async function toggleFavorite(id, newState) {
+        await cafesRef.child(id).update({ favorited: newState });
+    }
+
+    async function deleteCafe(id) {
+        await cafesRef.child(id).remove();
+    }
+
+    // 添加新咖啡馆
+    async function addCafe(name, url, category) {
+        if(!name.trim()) { alert("请输入咖啡厅名称"); return false; }
+        if(!url.trim()) { alert("请输入有效链接"); return false; }
+        if(!url.startsWith("http")) { alert("链接需以 http:// 或 https:// 开头"); return false; }
+        const newCafe = {
+            name: name.trim(),
+            url: url.trim(),
+            category: category,
+            favorited: false,
+            createdAt: Date.now()
+        };
+        await cafesRef.push(newCafe);
+        return true;
+    }
+
+    // 添加新类别 (全局)
+    function addNewCategory(catName) {
+        let newCat = catName.trim();
+        if(newCat === "") { alert("请输入类别名称"); return false; }
+        if(globalCategories.includes(newCat)) { alert("该类别已存在"); return false; }
+        globalCategories.push(newCat);
+        // 重新计算保存额外类别
+        saveExtraCategories();
+        renderCategorySelect();
+        renderMainView();  // 刷新主界面
+        return true;
+    }
+
+    // 打开分类模态框 (展示该分类下所有咖啡馆的小卡片)
+    function openCategoryModal(category) {
+        currentModalCategory = category;
+        const modal = document.getElementById("categoryModal");
+        const modalTitle = document.getElementById("modalCategoryTitle");
+        const listContainer = document.getElementById("modalSmallCardList");
+        modalTitle.innerText = `📌 ${category} · 全部咖啡馆`;
+        const cafesInCat = allCafes.filter(c => c.category === category);
+        if(cafesInCat.length === 0) {
+            listContainer.innerHTML = `<div style="padding:2rem;text-align:center">暂无咖啡馆，快去添加吧 ☕</div>`;
+        } else {
+            listContainer.innerHTML = "";
+            cafesInCat.forEach(cafe => {
+                const smallCard = createSmallCardElement(cafe);
+                listContainer.appendChild(smallCard);
             });
+        }
+        modal.style.display = "flex";
+    }
+
+    // 创建小卡片 (一行行展示，右侧爱心，点击卡片区域查看大卡片详情)
+    function createSmallCardElement(cafe) {
+        const div = document.createElement("div");
+        div.className = "small-card";
+        const isFav = cafe.favorited === true;
+        div.innerHTML = `
+            <div class="small-card-info">
+                <div class="small-card-name">${escapeHtml(cafe.name)}</div>
+                <div class="small-card-cat">${escapeHtml(cafe.category)}</div>
+            </div>
+            <div class="small-card-actions">
+                <button class="small-fav ${isFav ? 'active' : ''}" data-id="${cafe.id}"><i class="fas fa-heart"></i></button>
+            </div>
+        `;
+        // 点击小卡片主体 (除去爱心按钮区) 显示详情大卡片
+        const infoArea = div.querySelector(".small-card-info");
+        infoArea.style.cursor = "pointer";
+        infoArea.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showDetailModal(cafe);
+        });
+        // 爱心按钮独立
+        const favSmallBtn = div.querySelector(".small-fav");
+        favSmallBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleFavorite(cafe.id, !cafe.favorited);
+        });
+        return div;
+    }
+
+    // 显示完整资料大卡片模态框 (点击小卡片后)
+    function showDetailModal(cafe) {
+        const modal = document.getElementById("detailModal");
+        const detailContainer = document.getElementById("detailContent");
+        const isFav = cafe.favorited === true;
+        detailContainer.innerHTML = `
+            <div class="detail-field"><strong>🏷️ 名称</strong><br>${escapeHtml(cafe.name)}</div>
+            <div class="detail-field"><strong>📂 分类</strong><br>${escapeHtml(cafe.category)}</div>
+            <div class="detail-field"><strong>🔗 主页链接</strong><br><a href="${escapeHtml(cafe.url)}" target="_blank" class="detail-link">${escapeHtml(cafe.url)}</a></div>
+            <div class="detail-field"><strong>❤️ 收藏状态</strong><br>${isFav ? '已收藏' : '未收藏'}</div>
+            <hr>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 0.5rem;">
+                <button id="detailFavBtn" class="btn-outline" style="background:#f0e2d4;"><i class="fas fa-heart"></i> ${isFav ? '取消收藏' : '收藏'}</button>
+                <button id="detailDelBtn" class="btn-outline" style="color:#b1624b;"><i class="fas fa-trash-alt"></i> 移除卡片</button>
+            </div>
+        `;
+        modal.style.display = "flex";
+        const favDetailBtn = document.getElementById("detailFavBtn");
+        const delDetailBtn = document.getElementById("detailDelBtn");
+        favDetailBtn.addEventListener("click", () => {
+            toggleFavorite(cafe.id, !cafe.favorited);
+            modal.style.display = "none";
+        });
+        delDetailBtn.addEventListener("click", () => {
+            if(confirm(`永久删除「${cafe.name}」？`)) {
+                deleteCafe(cafe.id);
+                modal.style.display = "none";
+            }
+        });
+    }
+
+    // 监听Firebase实时数据变化
+    function subscribeCafes() {
+        cafesRef.on("value", (snapshot) => {
+            const data = snapshot.val();
+            const cafesArray = [];
+            if(data) {
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    cafesArray.push({
+                        id: key,
+                        name: item.name || "未命名",
+                        url: item.url || "#",
+                        category: item.category || "Others",
+                        favorited: item.favorited === true
+                    });
+                });
+            }
+            allCafes = cafesArray;
+            // 更新全局类别 (基于现有cafes+预设+localstorage)
+            computeGlobalCategories();
+            // 重新渲染下拉框 (确保新类别)
+            renderCategorySelect();
+            // 刷新主界面 (若当前有模态框打开，内部会根据currentModalCategory重开)
+            renderMainView();
+        });
+    }
+
+    // 添加示例数据 (仅当数据库为空时写入几个例子)
+    async function seedExampleData() {
+        const snapshot = await cafesRef.once("value");
+        if(snapshot.exists()) return;
+        const examples = [
+            { name: "蓝瓶咖啡", url: "https://bluebottlecoffee.com", category: "Cafe", favorited: true },
+            { name: "福来甜品屋", url: "https://example.com/dessert", category: "Dessert", favorited: false },
+            { name: "槟城娘惹餐厅", url: "https://example.com/nyonya", category: "Nyonya", favorited: true },
+            { name: "合艾泰式咖啡", url: "https://example.com/hatyai", category: "Hatyai", favorited: false },
+            { name: "日式喫茶店", url: "https://example.com/japanese", category: "Japanese", favorited: true },
+            { name: "老南洋 Kopitiam", url: "https://example.com/kopitiam", category: "Kopitiam", favorited: false }
+        ];
+        for(let ex of examples) {
+            await cafesRef.push(ex);
         }
     }
 
-    function renderGroupedCards() {
-        if (!categoriesContainer) return;
-        let filtered = showOnlyFavorites ? cafes.filter(c => c.favorite) : cafes;
-        if (filtered.length === 0) {
-            categoriesContainer.innerHTML = `<div class="empty-state">${showOnlyFavorites ? '✨ 暂无收藏咖啡厅 ✨' : '✨ 还没有咖啡厅～ 添加上方表单 ✨'}</div>`;
-            return;
-        }
-        const groups = new Map();
-        filtered.forEach(cafe => { let cat = cafe.category?.trim() || "Others"; if (!groups.has(cat)) groups.set(cat, []); groups.get(cat).push(cafe); });
-        const sorted = Array.from(groups.keys()).sort((a,b)=>a.localeCompare(b));
-        let html = '';
-        for (let cat of sorted) {
-            const list = groups.get(cat);
-            let cardsHtml = '';
-            list.forEach(cafe => {
-                const isFav = cafe.favorite === true;
-                const favIcon = isFav ? '❤️' : '🤍';
-                const favActive = isFav ? 'active' : '';
-                let websiteHtml = '';
-                const validUrl = sanitizeUrl(cafe.website);
-                if (validUrl) websiteHtml = `<div class="cafe-website"><span class="link-icon">🔗</span><a href="${escapeHtml(validUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(validUrl.length>35?validUrl.substring(0,32)+'...':validUrl)}</a></div>`;
-                else if (cafe.website && cafe.website.trim()) websiteHtml = `<div class="cafe-website"><span class="link-icon">⚠️</span><span class="no-link">链接无效</span></div>`;
-                else websiteHtml = `<div class="cafe-website"><span class="link-icon">🌐</span><span class="no-link">暂无官网</span></div>`;
-                cardsHtml += `
-                    <div class="cafe-card" data-id="${cafe.id}">
-                        <div class="card-content">
-                            <div class="cafe-name">${escapeHtml(cafe.name)}<span>${escapeHtml(cat)}</span></div>
-                            <div class="cafe-address">${escapeHtml(cafe.address || '地址未提供')}</div>
-                            <div class="cafe-desc">${escapeHtml(cafe.description || '暂无描述')}</div>
-                            ${websiteHtml}
-                        </div>
-                        <div class="card-actions">
-                            <button class="favorite-btn ${favActive}" data-id="${cafe.id}">${favIcon}</button>
-                            <div class="action-buttons"><button class="delete-btn" data-id="${cafe.id}">🗑️ 移除</button></div>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `<div class="category-section"><div class="category-header" data-category="${escapeHtml(cat)}"><div class="category-title">${escapeHtml(cat)}</div><div class="category-count">${list.length} 家</div></div><div class="cards-scroll">${cardsHtml}</div></div>`;
-        }
-        categoriesContainer.innerHTML = html;
-        document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); deleteCafeById(btn.getAttribute('data-id')); }));
-        document.querySelectorAll('.favorite-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(btn.getAttribute('data-id')); }));
-        document.querySelectorAll('.category-header').forEach(header => header.addEventListener('click', () => { const cat = header.getAttribute('data-category'); if (cat) openCategoryList(cat); }));
+    // 辅助防XSS
+    function escapeHtml(str) {
+        if(!str) return "";
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
     }
 
-    function deleteCafeById(id) { cafes = cafes.filter(c => c.id !== id); saveToLocalStorage(); renderGroupedCards(); if (listModal.style.display === 'flex') refreshCurrentListIfOpen(); }
-    function addNewCafe() {
-        let name = nameInput.value.trim(); if (!name) { alert('请填写咖啡馆名称'); return; }
-        let address = addressInput.value.trim() || '地址待补充';
-        let website = websiteInput.value.trim();
-        let category = categoryInput.value.trim() || 'Others';
-        let description = descInput.value.trim() || '一家温馨的咖啡厅';
-        const newCafe = { id: generateId(), name, address, description, website, category, favorite: false };
-        cafes.unshift(newCafe); saveToLocalStorage(); renderGroupedCards();
-        nameInput.value = ''; addressInput.value = ''; websiteInput.value = ''; descInput.value = ''; nameInput.focus();
+    // 初始化类别下拉和额外类别加载
+    function initCategories() {
+        const stored = localStorage.getItem("extraCategories");
+        let extra = [];
+        if(stored) try { extra = JSON.parse(stored); } catch(e) {}
+        globalCategories = [...new Set([...DEFAULT_CATEGORIES, ...extra])];
+        renderCategorySelect();
     }
-    function exportData() { if (!cafes.length) { alert('暂无数据'); return; } const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(cafes, null, 2)], {type:'application/json'})); a.download = `cafe_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href); }
-    function importData(file) { const r = new FileReader(); r.onload = e => { try { let imported = JSON.parse(e.target.result); if (!Array.isArray(imported)) throw 0; const map = new Map(cafes.map(c => [c.id, c])); for (let item of imported) { if (!item.id) item.id = generateId(); if (!item.category) item.category = 'Others'; if (item.favorite === undefined) item.favorite = false; map.set(item.id, item); } cafes = Array.from(map.values()); saveToLocalStorage(); renderGroupedCards(); alert(`导入成功！共 ${cafes.length} 家店铺。`); } catch(e) { alert('文件格式错误'); } }; r.readAsText(file); }
-    function loadInitialData() {
-        const stored = localStorage.getItem('myCafeList');
-        if (stored) { try { let p = JSON.parse(stored); if (Array.isArray(p) && p.length) { cafes = p.map(i => ({ id: i.id || generateId(), name: i.name || '未命名', address: i.address || '地址未知', description: i.description || '', website: i.website || '', category: i.category?.trim() || 'Others', favorite: i.favorite === true })); if (cafes.length) { renderGroupedCards(); return; } } } catch(e) {} }
-        cafes = getDefaultCafesWithId(); saveToLocalStorage(); renderGroupedCards();
+
+    // 事件绑定
+    function bindEvents() {
+        document.getElementById("addCafeBtn").addEventListener("click", async () => {
+            const name = document.getElementById("cafeName").value;
+            const url = document.getElementById("cafeUrl").value;
+            const category = document.getElementById("cafeCategory").value;
+            await addCafe(name, url, category);
+            document.getElementById("cafeName").value = "";
+            document.getElementById("cafeUrl").value = "";
+        });
+        document.getElementById("addCategoryBtn").addEventListener("click", () => {
+            const newCatInput = document.getElementById("newCategoryName");
+            const catVal = newCatInput.value;
+            if(addNewCategory(catVal)) {
+                newCatInput.value = "";
+            }
+        });
+        // 关闭模态框事件
+        const modal = document.getElementById("categoryModal");
+        const closeBtn = document.getElementById("closeModalBtn");
+        const detailModal = document.getElementById("detailModal");
+        const closeDetail = document.getElementById("closeDetailModalBtn");
+        closeBtn.onclick = () => { modal.style.display = "none"; currentModalCategory = null; };
+        closeDetail.onclick = () => { detailModal.style.display = "none"; };
+        window.onclick = (e) => {
+            if(e.target === modal) { modal.style.display = "none"; currentModalCategory = null; }
+            if(e.target === detailModal) detailModal.style.display = "none";
+        };
     }
-    function toggleShowFavorites() { showOnlyFavorites = !showOnlyFavorites; toggleFavBtn.textContent = showOnlyFavorites ? '✨ 显示全部' : '❤️ 只看收藏'; showOnlyFavorites ? toggleFavBtn.classList.add('btn-fav-active') : toggleFavBtn.classList.remove('btn-fav-active'); renderGroupedCards(); if (listModal.style.display === 'flex') refreshCurrentListIfOpen(); }
-    function setupEventListeners() {
-        addBtn.addEventListener('click', addNewCafe); exportBtn.addEventListener('click', exportData); toggleFavBtn.addEventListener('click', toggleShowFavorites);
-        importFileInput.addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); importFileInput.value = ''; });
-        [nameInput, addressInput, websiteInput, categoryInput].forEach(i => i.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); addNewCafe(); } }));
-        descInput.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addNewCafe(); } });
-        closeListModal.addEventListener('click', () => listModal.style.display = 'none');
-        closeDetailModal.addEventListener('click', () => detailModal.style.display = 'none');
-        window.addEventListener('click', e => { if (e.target === listModal) listModal.style.display = 'none'; if (e.target === detailModal) detailModal.style.display = 'none'; });
+
+    // 启动
+    async function init() {
+        initCategories();
+        bindEvents();
+        await seedExampleData();
+        subscribeCafes();   // 开始实时监听
     }
-    function init() { loadInitialData(); setupEventListeners(); }
     init();
 </script>
 </body>
