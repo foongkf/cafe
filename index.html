@@ -23,7 +23,6 @@
             margin: 0 auto;
         }
 
-        /* 头部样式 */
         .header {
             text-align: center;
             margin-bottom: 2rem;
@@ -47,7 +46,6 @@
             padding-bottom: 0.4rem;
         }
 
-        /* 表单卡片 */
         .form-card {
             background: white;
             border-radius: 32px;
@@ -146,7 +144,15 @@
             transform: translateY(-2px);
         }
 
-        /* 分类横向滚动区域 */
+        .btn-secondary {
+            background: #d9c2ae;
+            color: #3a2a1f;
+        }
+
+        .btn-secondary:hover {
+            background: #c4aa93;
+        }
+
         .categories-container {
             display: flex;
             flex-direction: column;
@@ -188,7 +194,6 @@
             font-weight: 500;
         }
 
-        /* 横向滚动容器 */
         .cards-scroll {
             display: flex;
             overflow-x: auto;
@@ -211,7 +216,6 @@
             border-radius: 10px;
         }
 
-        /* 卡片样式 (固定宽度，不换行) */
         .cafe-card {
             flex: 0 0 auto;
             width: 280px;
@@ -346,6 +350,35 @@
             font-size: 1rem;
         }
 
+        .sync-note {
+            background: #e9dfd7;
+            border-radius: 24px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.8rem;
+            color: #4f3929;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .sync-note span {
+            font-weight: 500;
+        }
+        .sync-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .sync-buttons button {
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            background: #cfa988;
+        }
+        .sync-buttons button:hover {
+            background: #b87a56;
+        }
+
         footer {
             text-align: center;
             margin-top: 2rem;
@@ -376,7 +409,17 @@
         <p>分类横向浏览 · 直达咖啡馆主页</p>
     </div>
 
-    <!-- 添加新咖啡厅的表单 (增加类别字段) -->
+    <!-- 数据同步提示栏（导入导出） -->
+    <div class="sync-note">
+        <span>📱 数据仅在当前浏览器保存。换设备请导出文件 → 传到手机 → 再导入。</span>
+        <div class="sync-buttons">
+            <button id="exportDataBtn" class="btn-secondary">📤 导出数据</button>
+            <label for="importFileInput" class="btn-secondary" style="cursor:pointer; padding:6px 16px; border-radius:40px; background:#cfa988; color:#3a2a1f; display:inline-flex; align-items:center; gap:6px;">📥 导入数据</label>
+            <input type="file" id="importFileInput" accept=".json" style="display:none;">
+        </div>
+    </div>
+
+    <!-- 添加新咖啡厅的表单 -->
     <div class="form-card">
         <div class="form-title">录入新发现</div>
         <div class="form-grid">
@@ -422,19 +465,13 @@
     </div>
 
     <!-- 分类横向滚动展示区 -->
-    <div id="categoriesContainer" class="categories-container">
-        <!-- 动态生成每个分类区域 -->
-    </div>
+    <div id="categoriesContainer" class="categories-container"></div>
 
-    <footer>☕ 按分类横向滑动 · 轻松管理你的咖啡地图</footer>
+    <footer>☕ 按分类横向滑动 · 导出数据可搬家到另一台设备</footer>
 </div>
 
 <script>
-    // ----------------------------------------------
-    // ✏️ 在这里修改你的默认示例数据 (包含类别 category)
-    // 格式: name, address, description, website, category
-    // 预设类别建议使用下方13种之一，也可以自定义，会自动创建新分组
-    // ----------------------------------------------
+    // 默认示例数据
     const defaultCafesData = [
         {
             name: "森屿咖啡",
@@ -472,28 +509,23 @@
             category: "Nyonya"
         }
     ];
-    // ----------------------------------------------
     
-    // 所有咖啡馆数据
     let cafes = [];
 
-    // DOM 元素
     const categoriesContainer = document.getElementById('categoriesContainer');
     const addBtn = document.getElementById('addBtn');
-
-    // 表单输入
     const nameInput = document.getElementById('cafeName');
     const addressInput = document.getElementById('cafeAddress');
     const websiteInput = document.getElementById('cafeWebsite');
     const categoryInput = document.getElementById('cafeCategory');
     const descInput = document.getElementById('cafeDesc');
+    const exportBtn = document.getElementById('exportDataBtn');
+    const importFileInput = document.getElementById('importFileInput');
 
-    // ---------- 辅助函数 ----------
     function generateId() {
         return Date.now() + '-' + Math.random().toString(36).substring(2, 8);
     }
 
-    // 获取带id的默认数据
     function getDefaultCafesWithId() {
         return defaultCafesData.map(cafe => ({
             ...cafe,
@@ -507,7 +539,6 @@
         localStorage.setItem('myCafeList', JSON.stringify(cafes));
     }
 
-    // 安全处理链接显示
     function sanitizeUrl(url) {
         if (!url || typeof url !== 'string') return null;
         const trimmed = url.trim();
@@ -529,7 +560,6 @@
         });
     }
 
-    // 核心渲染：根据类别分组，每组横向滚动
     function renderGroupedCards() {
         if (!categoriesContainer) return;
         if (cafes.length === 0) {
@@ -537,7 +567,6 @@
             return;
         }
 
-        // 按 category 分组
         const groups = new Map();
         cafes.forEach(cafe => {
             let cat = (cafe.category && cafe.category.trim() !== "") ? cafe.category.trim() : "Others";
@@ -545,14 +574,11 @@
             groups.get(cat).push(cafe);
         });
 
-        // 对分组键进行排序（字母顺序，也可以自定义顺序，这样新类别自然排序）
         const sortedCategories = Array.from(groups.keys()).sort((a, b) => a.localeCompare(b));
-        
         let html = '';
         for (let cat of sortedCategories) {
             const cafeList = groups.get(cat);
             const count = cafeList.length;
-            // 生成该分类下的所有卡片html
             let cardsHtml = '';
             cafeList.forEach(cafe => {
                 const safeName = escapeHtml(cafe.name);
@@ -617,7 +643,6 @@
         }
         categoriesContainer.innerHTML = html;
 
-        // 绑定删除按钮事件 (事件委托)
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -633,7 +658,6 @@
         renderGroupedCards();
     }
 
-    // 添加新咖啡厅 (带 category)
     function addNewCafe() {
         let name = nameInput.value.trim();
         if (!name) {
@@ -647,7 +671,7 @@
 
         if (!address) address = '地址待补充';
         if (!description) description = '一家温馨的咖啡厅，等待你的探索。';
-        if (!category) category = 'Others';   // 默认类别
+        if (!category) category = 'Others';
 
         const newCafe = {
             id: generateId(),
@@ -661,16 +685,56 @@
         saveToLocalStorage();
         renderGroupedCards();
         
-        // 清空表单
         nameInput.value = '';
         addressInput.value = '';
         websiteInput.value = '';
         descInput.value = '';
-        // 类别不清空，方便连续添加同类别，用户可手动修改
         nameInput.focus();
     }
 
-    // 加载初始数据，兼容旧数据没有 category 字段
+    // 导出数据
+    function exportData() {
+        if (cafes.length === 0) {
+            alert('暂无数据可导出。');
+            return;
+        }
+        const dataStr = JSON.stringify(cafes, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cafe_collection_${new Date().toISOString().slice(0,19)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // 导入数据（合并，相同id覆盖）
+    function importData(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (!Array.isArray(imported)) throw new Error('数据格式错误');
+                // 合并：用id去重，如果id相同则覆盖
+                const existingIds = new Map(cafes.map(c => [c.id, c]));
+                for (const item of imported) {
+                    if (!item.id) item.id = generateId();
+                    if (!item.category) item.category = 'Others';
+                    existingIds.set(item.id, item);
+                }
+                cafes = Array.from(existingIds.values());
+                saveToLocalStorage();
+                renderGroupedCards();
+                alert(`导入成功！共 ${cafes.length} 家店铺。`);
+            } catch(err) {
+                alert('文件解析失败，请确保是导出的 JSON 文件。');
+            }
+        };
+        reader.readAsText(file);
+    }
+
     function loadInitialData() {
         const stored = localStorage.getItem('myCafeList');
         if (stored) {
@@ -680,7 +744,6 @@
                     cafes = parsed.filter(item => item && typeof item === 'object').map(item => {
                         if (!item.id) item.id = generateId();
                         if (!item.category || item.category.trim() === "") item.category = "Others";
-                        // 移除历史遗留的imageUrl
                         delete item.imageUrl;
                         return {
                             id: item.id,
@@ -703,9 +766,15 @@
         renderGroupedCards();
     }
 
-    // 事件绑定
     function setupEventListeners() {
         addBtn.addEventListener('click', addNewCafe);
+        exportBtn.addEventListener('click', exportData);
+        importFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                importData(e.target.files[0]);
+                importFileInput.value = ''; // 允许重复导入同一文件
+            }
+        });
         
         const quickInputs = [nameInput, addressInput, websiteInput, categoryInput];
         quickInputs.forEach(input => {
