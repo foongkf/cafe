@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>FEONG的咖啡厅收藏集 · 分类列表 + 爱心收藏</title>
+    <title>FEONG的咖啡厅收藏集 · 云端同步</title>
+    <!-- 引入 Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -38,20 +42,12 @@
             margin-bottom: 0.5rem;
         }
 
-        .header p {
-            color: #6b4c3a;
-            font-size: 1rem;
-            border-bottom: 2px solid #e6d5c0;
-            display: inline-block;
-            padding-bottom: 0.4rem;
-        }
-
         .form-card {
             background: white;
             border-radius: 32px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
             padding: 1.6rem 2rem;
-            margin-bottom: 2.8rem;
+            margin-bottom: 2rem;
             transition: box-shadow 0.2s;
         }
 
@@ -134,11 +130,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        button i {
-            font-style: normal;
-            font-weight: normal;
-        }
-
         button:hover {
             background: #794e38;
             transform: translateY(-2px);
@@ -156,6 +147,52 @@
         .btn-fav-active {
             background: #c28a6b;
             color: white;
+        }
+
+        .search-bar {
+            background: #fefaf7;
+            border-radius: 28px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #f0e2d6;
+        }
+        .search-group {
+            flex: 2;
+            min-width: 180px;
+        }
+        .search-group label {
+            font-size: 0.7rem;
+            color: #9b7a64;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .search-group input, .search-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #eeddcb;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            background: white;
+        }
+        .search-group input:focus, .search-group select:focus {
+            outline: none;
+            border-color: #c28a6b;
+        }
+        .clear-search {
+            background: #e9dbcf;
+            color: #5b3e2e;
+            padding: 8px 18px;
+            font-size: 0.75rem;
+            box-shadow: none;
+        }
+        .clear-search:hover {
+            background: #d9c2ae;
+            transform: none;
         }
 
         .categories-container {
@@ -179,6 +216,7 @@
             flex-wrap: wrap;
             cursor: pointer;
             transition: opacity 0.2s;
+            user-select: none;
         }
         .category-header:hover {
             opacity: 0.85;
@@ -212,6 +250,7 @@
             padding-right: 1rem;
             scrollbar-width: thin;
             scrollbar-color: #c9b29c #f0e2d6;
+            touch-action: pan-x pan-y;
         }
 
         .cards-scroll::-webkit-scrollbar {
@@ -387,37 +426,34 @@
             font-size: 1rem;
         }
 
-        .sync-note {
+        .sync-status {
             background: #e9dfd7;
             border-radius: 24px;
-            padding: 0.8rem 1.2rem;
+            padding: 0.6rem 1.2rem;
             margin-bottom: 1.5rem;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #4f3929;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
-        .sync-note span {
-            font-weight: 500;
+        .online-badge {
+            background: #6b8c5c;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
         }
-        .sync-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .sync-buttons button, .sync-buttons label {
-            padding: 6px 16px;
-            font-size: 0.75rem;
-            background: #cfa988;
-        }
-        .sync-buttons button:hover, .sync-buttons label:hover {
-            background: #b87a56;
+        .offline-badge {
+            background: #b1624b;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
         }
 
-        /* 模态框样式 */
         .modal {
             display: none;
             position: fixed;
@@ -536,6 +572,9 @@
         .detail-card .cafe-name {
             font-size: 1.4rem;
             margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .detail-card .cafe-address {
             font-size: 0.9rem;
@@ -585,6 +624,10 @@
             .modal-content {
                 width: 95%;
             }
+            .search-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -592,17 +635,28 @@
 <div class="container">
     <div class="header">
         <h1>☕ FEONG的咖啡厅收藏集</h1>
-        <p>分类横向浏览 · 点击分类标题进入列表视图 · 爱心收藏</p>
+        <p></p>
     </div>
 
-    <div class="sync-note">
-        <span>📱 数据本地保存 · 导出文件可跨设备同步</span>
-        <div class="sync-buttons">
-            <button id="toggleFavBtn" class="btn-secondary">❤️ 只看收藏</button>
-            <button id="exportDataBtn" class="btn-secondary">📤 导出数据</button>
-            <label for="importFileInput" class="btn-secondary" style="cursor:pointer;">📥 导入数据</label>
-            <input type="file" id="importFileInput" accept=".json" style="display:none;">
+    <!-- 云同步状态栏 -->
+    <div class="sync-status">
+        <span>☁️ 数据实时云端同步 · 所有设备共享</span>
+        <span id="syncIndicator" class="online-badge">🟢 已连接</span>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+        <div class="search-group" style="flex: 3;">
+            <label>🔍 关键词搜索 (名称/地址/描述)</label>
+            <input type="text" id="searchKeyword" placeholder="输入咖啡馆名称、地址或描述..." autocomplete="off">
         </div>
+        <div class="search-group">
+            <label>📍 地区筛选</label>
+            <select id="searchRegion">
+                <option value="">所有地区</option>
+            </select>
+        </div>
+        <button id="clearSearchBtn" class="clear-search">✖️ 清除筛选</button>
     </div>
 
     <div class="form-card">
@@ -643,45 +697,54 @@
     <footer>☕ 点击分类标题 → 纵向列表模式 · 点击列表项查看完整详情</footer>
 </div>
 
-<!-- 模态框: 分类列表 -->
 <div id="listModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="listModalTitle">分类名称</h2>
             <button class="close-modal" id="closeListModal">&times;</button>
         </div>
-        <div id="listModalBody" class="modal-body">
-            <!-- 动态列表项 -->
-        </div>
+        <div id="listModalBody" class="modal-body"></div>
     </div>
 </div>
 
-<!-- 模态框: 详情 -->
 <div id="detailModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h2>📄 咖啡馆详情</h2>
             <button class="close-modal" id="closeDetailModal">&times;</button>
         </div>
-        <div id="detailModalBody" class="modal-body">
-            <!-- 动态详情卡片 -->
-        </div>
+        <div id="detailModalBody" class="modal-body"></div>
     </div>
 </div>
 
 <script>
-    const defaultCafesData = [
-        { name: "森屿咖啡", address: "杭州市西湖区留下街道18号", description: "藏在森林里的玻璃房，手冲瑰夏香气迷人，适合周末发呆。", website: "https://www.senyucoffee.com", category: "Cafe", favorite: true },
-        { name: "夜航船咖啡馆", address: "上海市徐汇区衡山路12弄", description: "复古船舱风格，特色海盐焦糖拿铁，晚间有爵士乐。", website: "https://www.nighthawkcoffee.cn", category: "Western", favorite: false },
-        { name: "书虫与豆子", address: "成都市青羊区窄巷子9号", description: "独立书店+咖啡，安静阅读区，特调橙香肉桂拿铁必点。", website: "https://www.bookbean.club", category: "Japanese", favorite: true },
-        { name: "泰赞冰咖", address: "广州市天河区体育东路", description: "地道泰式奶茶&咖啡，斑斓吐司配泰式冰咖绝配。", website: "https://www.thaiZan.com", category: "Thai", favorite: false },
-        { name: "娘惹食堂", address: "槟城路/吉隆坡风格体验馆", description: "南洋咖啡 + 娘惹糕点，独特香料风味。", website: "https://www.nyonyacafe.my", category: "Nyonya", favorite: true }
-    ];
-    
+    // ==================== Firebase 配置 ====================
+    // ⚠️ 请替换为您的 Firebase 项目配置
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
+        authDomain: "cafe-c55f9.firebaseapp.com",
+        databaseURL: "https://console.firebase.google.com/u/0/project/cafe-c55f9/database/cafe-c55f9-default-rtdb/data/~2F",
+        projectId: "cafe-c55f9",
+        storageBucket: "cafe-c55f9.firebasestorage.app",
+        messagingSenderId: "328042543743",
+        appId: "1:328042543743:web:0fc175a3aadc7c5a639d4a"
+    };
+    // ======================================================
+
+    // 初始化 Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+
+    // 全局数据
     let cafes = [];
     let showOnlyFavorites = false;
     let currentListCategory = "";
+    let searchKeyword = "";
+    let searchRegion = "";
+    let currentUserId = null;
 
+    // DOM 元素
     const categoriesContainer = document.getElementById('categoriesContainer');
     const addBtn = document.getElementById('addBtn');
     const nameInput = document.getElementById('cafeName');
@@ -689,8 +752,6 @@
     const websiteInput = document.getElementById('cafeWebsite');
     const categoryInput = document.getElementById('cafeCategory');
     const descInput = document.getElementById('cafeDesc');
-    const exportBtn = document.getElementById('exportDataBtn');
-    const importFileInput = document.getElementById('importFileInput');
     const toggleFavBtn = document.getElementById('toggleFavBtn');
     const listModal = document.getElementById('listModal');
     const detailModal = document.getElementById('detailModal');
@@ -699,17 +760,14 @@
     const listModalTitle = document.getElementById('listModalTitle');
     const listModalBody = document.getElementById('listModalBody');
     const detailModalBody = document.getElementById('detailModalBody');
+    const searchKeywordInput = document.getElementById('searchKeyword');
+    const searchRegionSelect = document.getElementById('searchRegion');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const syncIndicator = document.getElementById('syncIndicator');
 
+    // 辅助函数
     function generateId() { return Date.now() + '-' + Math.random().toString(36).substring(2, 8); }
-    function getDefaultCafesWithId() {
-        return defaultCafesData.map(cafe => ({
-            ...cafe, id: generateId(),
-            website: cafe.website?.trim() || "",
-            category: cafe.category?.trim() || "Others",
-            favorite: cafe.favorite === true
-        }));
-    }
-    function saveToLocalStorage() { localStorage.setItem('myCafeList', JSON.stringify(cafes)); }
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
     function sanitizeUrl(url) {
         if (!url) return null;
         let u = url.trim();
@@ -718,118 +776,60 @@
         if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:\d+)?(\/.*)?$/.test(u)) return 'https://' + u;
         return null;
     }
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-    function toggleFavorite(cafeId) {
-        const cafe = cafes.find(c => c.id === cafeId);
-        if (cafe) { cafe.favorite = !cafe.favorite; saveToLocalStorage(); renderGroupedCards(); refreshCurrentListIfOpen(); }
-    }
-    function refreshCurrentListIfOpen() {
-        if (listModal.style.display === 'flex' && currentListCategory) openCategoryList(currentListCategory);
-    }
-
-    function openCategoryList(category) {
-        currentListCategory = category;
-        const categoryCafes = cafes.filter(c => (c.category?.trim() || "Others") === category);
-        if (showOnlyFavorites) {
-            const favFiltered = categoryCafes.filter(c => c.favorite);
-            if (favFiltered.length === 0 && categoryCafes.length > 0) {
-                listModalBody.innerHTML = `<div style="text-align:center;padding:2rem;">✨ 此分类暂无收藏咖啡馆 ✨</div>`;
-                listModalTitle.innerText = `${category} (收藏模式)`;
-                listModal.style.display = 'flex';
-                return;
+    // 更新地区下拉选项（基于当前 cafes）
+    function updateRegionOptions() {
+        const regions = new Set();
+        cafes.forEach(cafe => {
+            if (cafe.address && cafe.address.trim()) {
+                let region = cafe.address.trim();
+                if (region.length > 20) region = region.substring(0, 20) + '...';
+                regions.add(region);
             }
-            renderListItems(favFiltered, category);
+        });
+        const currentVal = searchRegionSelect.value;
+        searchRegionSelect.innerHTML = '<option value="">所有地区</option>';
+        Array.from(regions).sort().forEach(region => {
+            const option = document.createElement('option');
+            option.value = region;
+            option.textContent = region;
+            searchRegionSelect.appendChild(option);
+        });
+        if (currentVal && regions.has(currentVal)) {
+            searchRegionSelect.value = currentVal;
         } else {
-            renderListItems(categoryCafes, category);
-        }
-        listModal.style.display = 'flex';
-    }
-
-    function renderListItems(cafeList, category) {
-        if (cafeList.length === 0) {
-            listModalBody.innerHTML = `<div style="text-align:center;padding:2rem;">✨ 此分类暂无咖啡馆 ✨</div>`;
-            listModalTitle.innerText = category;
-            return;
-        }
-        listModalTitle.innerText = `${category} · ${cafeList.length}家店铺`;
-        let html = '';
-        cafeList.forEach(cafe => {
-            const isFav = cafe.favorite === true;
-            const favClass = isFav ? 'active' : '';
-            const favIcon = isFav ? '❤️' : '🤍';
-            html += `
-                <div class="list-item" data-id="${cafe.id}">
-                    <div class="list-item-info">
-                        <div class="list-item-name">
-                            ${escapeHtml(cafe.name)}
-                            <span class="list-item-cat">${escapeHtml(cafe.category || 'Others')}</span>
-                        </div>
-                        <div class="list-item-addr">📍 ${escapeHtml(cafe.address || '地址未提供')}</div>
-                    </div>
-                    <button class="list-item-fav ${favClass}" data-id="${cafe.id}" data-fav-toggle>${favIcon}</button>
-                </div>
-            `;
-        });
-        listModalBody.innerHTML = html;
-        // 绑定列表项点击事件（打开详情）
-        document.querySelectorAll('#listModalBody .list-item').forEach(item => {
-            const id = item.getAttribute('data-id');
-            item.addEventListener('click', (e) => {
-                if (e.target.closest('[data-fav-toggle]')) return;
-                const cafe = cafes.find(c => c.id === id);
-                if (cafe) showDetailModal(cafe);
-            });
-        });
-        // 绑定收藏按钮事件
-        document.querySelectorAll('#listModalBody .list-item-fav').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const id = btn.getAttribute('data-id');
-                toggleFavorite(id);
-            });
-        });
-    }
-
-    function showDetailModal(cafe) {
-        const isFav = cafe.favorite === true;
-        const favIcon = isFav ? '❤️' : '🤍';
-        let websiteHtml = '';
-        const validUrl = sanitizeUrl(cafe.website);
-        if (validUrl) {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">🔗</span><a href="${escapeHtml(validUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(validUrl)}</a></div>`;
-        } else if (cafe.website && cafe.website.trim() !== "") {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">⚠️</span><span class="no-link">链接无效: ${escapeHtml(cafe.website)}</span></div>`;
-        } else {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">🌐</span><span class="no-link">暂无官网</span></div>`;
-        }
-        detailModalBody.innerHTML = `
-            <div class="detail-card">
-                <div class="cafe-name">
-                    ${escapeHtml(cafe.name)}
-                    <button class="favorite-btn ${isFav ? 'active' : ''}" id="detailFavBtn" style="font-size:1.4rem;">${favIcon}</button>
-                </div>
-                <div class="cafe-address">📍 ${escapeHtml(cafe.address || '地址未提供')}</div>
-                <div class="cafe-desc">${escapeHtml(cafe.description || '暂无描述')}</div>
-                ${websiteHtml}
-                <div style="margin-top:16px; font-size:0.75rem; color:#9b7a64;">🏷️ 分类: ${escapeHtml(cafe.category || 'Others')}</div>
-            </div>
-        `;
-        detailModal.style.display = 'flex';
-        const detailFavBtn = document.getElementById('detailFavBtn');
-        if (detailFavBtn) {
-            detailFavBtn.addEventListener('click', () => {
-                toggleFavorite(cafe.id);
-                showDetailModal(cafes.find(c => c.id === cafe.id) || cafe);
-            });
+            searchRegionSelect.value = "";
+            searchRegion = "";
         }
     }
 
+    // 过滤咖啡馆（应用搜索、地区、只看收藏）
+    function filterCafes(cafesList) {
+        let filtered = [...cafesList];
+        if (showOnlyFavorites) filtered = filtered.filter(c => c.favorite);
+        if (searchKeyword.trim() !== "") {
+            const kw = searchKeyword.trim().toLowerCase();
+            filtered = filtered.filter(c => 
+                c.name.toLowerCase().includes(kw) ||
+                (c.address && c.address.toLowerCase().includes(kw)) ||
+                (c.description && c.description.toLowerCase().includes(kw))
+            );
+        }
+        if (searchRegion !== "") {
+            filtered = filtered.filter(c => {
+                if (!c.address) return false;
+                return c.address.includes(searchRegion) || searchRegion.includes(c.address);
+            });
+        }
+        return filtered;
+    }
+
+    // 渲染主页面（横向卡片）
     function renderGroupedCards() {
         if (!categoriesContainer) return;
-        let filtered = showOnlyFavorites ? cafes.filter(c => c.favorite) : cafes;
+        let filtered = filterCafes(cafes);
         if (filtered.length === 0) {
-            categoriesContainer.innerHTML = `<div class="empty-state">${showOnlyFavorites ? '✨ 暂无收藏咖啡厅 ✨' : '✨ 还没有咖啡厅～ 添加上方表单 ✨'}</div>`;
+            categoriesContainer.innerHTML = `<div class="empty-state">✨ 没有找到符合条件的咖啡馆 ✨</div>`;
             return;
         }
         const groups = new Map();
@@ -866,40 +866,323 @@
             html += `<div class="category-section"><div class="category-header" data-category="${escapeHtml(cat)}"><div class="category-title">${escapeHtml(cat)}</div><div class="category-count">${list.length} 家</div></div><div class="cards-scroll">${cardsHtml}</div></div>`;
         }
         categoriesContainer.innerHTML = html;
+        // 绑定事件
         document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); deleteCafeById(btn.getAttribute('data-id')); }));
         document.querySelectorAll('.favorite-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(btn.getAttribute('data-id')); }));
         document.querySelectorAll('.category-header').forEach(header => header.addEventListener('click', () => { const cat = header.getAttribute('data-category'); if (cat) openCategoryList(cat); }));
+        attachScrollGuard();
     }
 
-    function deleteCafeById(id) { cafes = cafes.filter(c => c.id !== id); saveToLocalStorage(); renderGroupedCards(); if (listModal.style.display === 'flex') refreshCurrentListIfOpen(); }
+    // 列表视图
+    function openCategoryList(category) {
+        currentListCategory = category;
+        let categoryCafes = cafes.filter(c => (c.category?.trim() || "Others") === category);
+        let displayList = filterCafes(categoryCafes);
+        if (displayList.length === 0) {
+            listModalBody.innerHTML = `<div style="text-align:center;padding:2rem;">✨ 此分类暂无符合筛选的咖啡馆 ✨</div>`;
+            listModalTitle.innerText = category;
+            listModal.style.display = 'flex';
+            return;
+        }
+        listModalTitle.innerText = `${category} · ${displayList.length}家店铺`;
+        let html = '';
+        displayList.forEach(cafe => {
+            const isFav = cafe.favorite === true;
+            const favClass = isFav ? 'active' : '';
+            const favIcon = isFav ? '❤️' : '🤍';
+            html += `
+                <div class="list-item" data-id="${cafe.id}">
+                    <div class="list-item-info">
+                        <div class="list-item-name">
+                            ${escapeHtml(cafe.name)}
+                            <span class="list-item-cat">${escapeHtml(cafe.category || 'Others')}</span>
+                        </div>
+                        <div class="list-item-addr">📍 ${escapeHtml(cafe.address || '地址未提供')}</div>
+                    </div>
+                    <button class="list-item-fav ${favClass}" data-id="${cafe.id}" data-fav-toggle>${favIcon}</button>
+                </div>
+            `;
+        });
+        listModalBody.innerHTML = html;
+        document.querySelectorAll('#listModalBody .list-item').forEach(item => {
+            const id = item.getAttribute('data-id');
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('[data-fav-toggle]')) return;
+                const cafe = cafes.find(c => c.id === id);
+                if (cafe) showDetailModal(cafe);
+            });
+        });
+        document.querySelectorAll('#listModalBody .list-item-fav').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-id');
+                toggleFavorite(id);
+            });
+        });
+        listModal.style.display = 'flex';
+    }
+
+    function showDetailModal(cafe) {
+        const isFav = cafe.favorite === true;
+        const favIcon = isFav ? '❤️' : '🤍';
+        let websiteHtml = '';
+        const validUrl = sanitizeUrl(cafe.website);
+        if (validUrl) {
+            websiteHtml = `<div class="cafe-website"><span class="link-icon">🔗</span><a href="${escapeHtml(validUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(validUrl)}</a></div>`;
+        } else if (cafe.website && cafe.website.trim() !== "") {
+            websiteHtml = `<div class="cafe-website"><span class="link-icon">⚠️</span><span class="no-link">链接无效: ${escapeHtml(cafe.website)}</span></div>`;
+        } else {
+            websiteHtml = `<div class="cafe-website"><span class="link-icon">🌐</span><span class="no-link">暂无官网</span></div>`;
+        }
+        detailModalBody.setAttribute('data-current-id', cafe.id);
+        detailModalBody.innerHTML = `
+            <div class="detail-card">
+                <div class="cafe-name">
+                    ${escapeHtml(cafe.name)}
+                    <button class="favorite-btn ${isFav ? 'active' : ''}" id="detailFavBtn" style="font-size:1.4rem;">${favIcon}</button>
+                </div>
+                <div class="cafe-address">📍 ${escapeHtml(cafe.address || '地址未提供')}</div>
+                <div class="cafe-desc">${escapeHtml(cafe.description || '暂无描述')}</div>
+                ${websiteHtml}
+                <div style="margin-top:16px; font-size:0.75rem; color:#9b7a64;">🏷️ 分类: ${escapeHtml(cafe.category || 'Others')}</div>
+            </div>
+        `;
+        detailModal.style.display = 'flex';
+        const detailFavBtn = document.getElementById('detailFavBtn');
+        if (detailFavBtn) {
+            detailFavBtn.addEventListener('click', () => {
+                toggleFavorite(cafe.id, true);
+            });
+        }
+    }
+
+    function toggleFavorite(cafeId, fromDetailRefresh = false) {
+        const cafe = cafes.find(c => c.id === cafeId);
+        if (cafe) {
+            cafe.favorite = !cafe.favorite;
+            // 更新 Firebase
+            if (currentUserId) {
+                database.ref(`users/${currentUserId}/cafes/${cafeId}`).update({ favorite: cafe.favorite });
+            }
+            // 本地立即更新 UI（Firebase 监听会再次同步，但此处先刷新提升体验）
+            renderGroupedCards();
+            refreshCurrentListIfOpen();
+            if (detailModal.style.display === 'flex' && !fromDetailRefresh) {
+                const currentId = detailModalBody.getAttribute('data-current-id');
+                if (currentId === cafeId) {
+                    const favBtn = document.getElementById('detailFavBtn');
+                    if (favBtn) {
+                        favBtn.innerHTML = cafe.favorite ? '❤️' : '🤍';
+                        favBtn.classList.toggle('active', cafe.favorite);
+                    }
+                }
+            }
+        }
+    }
+
+    function refreshCurrentListIfOpen() {
+        if (listModal.style.display === 'flex' && currentListCategory) openCategoryList(currentListCategory);
+    }
+
+    function deleteCafeById(id) {
+        if (currentUserId) {
+            database.ref(`users/${currentUserId}/cafes/${id}`).remove();
+        }
+        // 本地立即更新（Firebase 监听会同步删除）
+        cafes = cafes.filter(c => c.id !== id);
+        renderGroupedCards();
+        if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
+        if (detailModal.style.display === 'flex') detailModal.style.display = 'none';
+        updateRegionOptions();
+    }
+
     function addNewCafe() {
-        let name = nameInput.value.trim(); if (!name) { alert('请填写咖啡馆名称'); return; }
+        let name = nameInput.value.trim();
+        if (!name) { alert('请填写咖啡馆名称'); return; }
         let address = addressInput.value.trim() || '地址待补充';
         let website = websiteInput.value.trim();
         let category = categoryInput.value.trim() || 'Others';
         let description = descInput.value.trim() || '一家温馨的咖啡厅';
-        const newCafe = { id: generateId(), name, address, description, website, category, favorite: false };
-        cafes.unshift(newCafe); saveToLocalStorage(); renderGroupedCards();
-        nameInput.value = ''; addressInput.value = ''; websiteInput.value = ''; descInput.value = ''; nameInput.focus();
+        const newCafe = {
+            id: generateId(),
+            name,
+            address,
+            description,
+            website,
+            category,
+            favorite: false
+        };
+        if (currentUserId) {
+            database.ref(`users/${currentUserId}/cafes/${newCafe.id}`).set(newCafe);
+        }
+        // 本地立即添加（Firebase 监听会再次同步，但避免重复，先不 push 到 cafes 数组，等回调）
+        // 实际上 Firebase 的 onChildAdded 会添加，所以这里不要手动添加，避免重复。
+        // 清空表单
+        nameInput.value = '';
+        addressInput.value = '';
+        websiteInput.value = '';
+        descInput.value = '';
+        nameInput.focus();
     }
-    function exportData() { if (!cafes.length) { alert('暂无数据'); return; } const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(cafes, null, 2)], {type:'application/json'})); a.download = `cafe_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href); }
-    function importData(file) { const r = new FileReader(); r.onload = e => { try { let imported = JSON.parse(e.target.result); if (!Array.isArray(imported)) throw 0; const map = new Map(cafes.map(c => [c.id, c])); for (let item of imported) { if (!item.id) item.id = generateId(); if (!item.category) item.category = 'Others'; if (item.favorite === undefined) item.favorite = false; map.set(item.id, item); } cafes = Array.from(map.values()); saveToLocalStorage(); renderGroupedCards(); alert(`导入成功！共 ${cafes.length} 家店铺。`); } catch(e) { alert('文件格式错误'); } }; r.readAsText(file); }
-    function loadInitialData() {
-        const stored = localStorage.getItem('myCafeList');
-        if (stored) { try { let p = JSON.parse(stored); if (Array.isArray(p) && p.length) { cafes = p.map(i => ({ id: i.id || generateId(), name: i.name || '未命名', address: i.address || '地址未知', description: i.description || '', website: i.website || '', category: i.category?.trim() || 'Others', favorite: i.favorite === true })); if (cafes.length) { renderGroupedCards(); return; } } } catch(e) {} }
-        cafes = getDefaultCafesWithId(); saveToLocalStorage(); renderGroupedCards();
+
+    function toggleShowFavorites() {
+        showOnlyFavorites = !showOnlyFavorites;
+        toggleFavBtn.textContent = showOnlyFavorites ? '✨ 显示全部' : '❤️ 只看收藏';
+        showOnlyFavorites ? toggleFavBtn.classList.add('btn-fav-active') : toggleFavBtn.classList.remove('btn-fav-active');
+        renderGroupedCards();
+        if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
     }
-    function toggleShowFavorites() { showOnlyFavorites = !showOnlyFavorites; toggleFavBtn.textContent = showOnlyFavorites ? '✨ 显示全部' : '❤️ 只看收藏'; showOnlyFavorites ? toggleFavBtn.classList.add('btn-fav-active') : toggleFavBtn.classList.remove('btn-fav-active'); renderGroupedCards(); if (listModal.style.display === 'flex') refreshCurrentListIfOpen(); }
+
+    // 搜索防抖
+    let searchTimeout;
+    function onSearchChange() {
+        if (searchTimeout) clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchKeyword = searchKeywordInput.value;
+            searchRegion = searchRegionSelect.value;
+            renderGroupedCards();
+            if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
+        }, 300);
+    }
+    function clearSearch() {
+        searchKeywordInput.value = "";
+        searchRegionSelect.value = "";
+        searchKeyword = "";
+        searchRegion = "";
+        renderGroupedCards();
+        if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
+    }
+
+    // 横向滚动防误触
+    function attachScrollGuard() {
+        document.querySelectorAll('.cards-scroll').forEach(scrollContainer => {
+            let startX = 0, startY = 0, isScrolling = false;
+            scrollContainer.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isScrolling = false;
+            }, { passive: true });
+            scrollContainer.addEventListener('touchmove', (e) => {
+                if (!isScrolling) {
+                    const deltaX = Math.abs(e.touches[0].clientX - startX);
+                    const deltaY = Math.abs(e.touches[0].clientY - startY);
+                    if (deltaX > 5 && deltaX > deltaY) {
+                        isScrolling = true;
+                    }
+                }
+            }, { passive: true });
+            scrollContainer.addEventListener('click', (e) => {
+                if (isScrolling) e.stopPropagation();
+            });
+        });
+    }
+
+    // Firebase 数据监听
+    function setupFirebaseSync() {
+        if (!currentUserId) return;
+        const cafesRef = database.ref(`users/${currentUserId}/cafes`);
+        cafesRef.on('child_added', (snapshot) => {
+            const newCafe = snapshot.val();
+            if (!cafes.find(c => c.id === newCafe.id)) {
+                cafes.push(newCafe);
+                updateRegionOptions();
+                renderGroupedCards();
+                if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
+            }
+        });
+        cafesRef.on('child_changed', (snapshot) => {
+            const updated = snapshot.val();
+            const index = cafes.findIndex(c => c.id === updated.id);
+            if (index !== -1) {
+                cafes[index] = updated;
+                updateRegionOptions();
+                renderGroupedCards();
+                if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
+                if (detailModal.style.display === 'flex' && detailModalBody.getAttribute('data-current-id') === updated.id) {
+                    showDetailModal(updated);
+                }
+            }
+        });
+        cafesRef.on('child_removed', (snapshot) => {
+            const removedId = snapshot.key;
+            cafes = cafes.filter(c => c.id !== removedId);
+            updateRegionOptions();
+            renderGroupedCards();
+            if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
+            if (detailModal.style.display === 'flex' && detailModalBody.getAttribute('data-current-id') === removedId) {
+                detailModal.style.display = 'none';
+            }
+        });
+    }
+
+    // 匿名登录
+    function initAuth() {
+        auth.signInAnonymously()
+            .then((userCredential) => {
+                currentUserId = userCredential.user.uid;
+                syncIndicator.textContent = '🟢 已连接云端';
+                syncIndicator.className = 'online-badge';
+                // 首次加载数据
+                database.ref(`users/${currentUserId}/cafes`).once('value').then(snapshot => {
+                    const data = snapshot.val();
+                    if (data) {
+                        cafes = Object.values(data);
+                    } else {
+                        // 导入默认示例数据
+                        const defaultData = [
+                            { name: "森屿咖啡", address: "杭州市西湖区留下街道18号", description: "藏在森林里的玻璃房，手冲瑰夏香气迷人，适合周末发呆。", website: "https://www.senyucoffee.com", category: "Cafe", favorite: true, id: generateId() },
+                            { name: "夜航船咖啡馆", address: "上海市徐汇区衡山路12弄", description: "复古船舱风格，特色海盐焦糖拿铁，晚间有爵士乐。", website: "https://www.nighthawkcoffee.cn", category: "Western", favorite: false, id: generateId() },
+                            { name: "书虫与豆子", address: "成都市青羊区窄巷子9号", description: "独立书店+咖啡，安静阅读区，特调橙香肉桂拿铁必点。", website: "https://www.bookbean.club", category: "Japanese", favorite: true, id: generateId() },
+                            { name: "泰赞冰咖", address: "广州市天河区体育东路", description: "地道泰式奶茶&咖啡，斑斓吐司配泰式冰咖绝配。", website: "https://www.thaiZan.com", category: "Thai", favorite: false, id: generateId() },
+                            { name: "娘惹食堂", address: "槟城路/吉隆坡风格体验馆", description: "南洋咖啡 + 娘惹糕点，独特香料风味。", website: "https://www.nyonyacafe.my", category: "Nyonya", favorite: true, id: generateId() }
+                        ];
+                        cafes = defaultData;
+                        const updates = {};
+                        defaultData.forEach(cafe => { updates[`users/${currentUserId}/cafes/${cafe.id}`] = cafe; });
+                        database.ref().update(updates);
+                    }
+                    updateRegionOptions();
+                    renderGroupedCards();
+                    setupFirebaseSync();
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+                syncIndicator.textContent = '⚠️ 离线模式 (无法连接云端)';
+                syncIndicator.className = 'offline-badge';
+                // 降级使用 localStorage 示例数据
+                const stored = localStorage.getItem('cafeBackup');
+                if (stored) {
+                    try { cafes = JSON.parse(stored); } catch(e) { cafes = []; }
+                }
+                if (!cafes.length) {
+                    cafes = [
+                        { id: generateId(), name: "示例咖啡馆", address: "示例地址", description: "离线模式示例", website: "", category: "Cafe", favorite: false }
+                    ];
+                }
+                updateRegionOptions();
+                renderGroupedCards();
+            });
+    }
+
+    // 事件绑定
     function setupEventListeners() {
-        addBtn.addEventListener('click', addNewCafe); exportBtn.addEventListener('click', exportData); toggleFavBtn.addEventListener('click', toggleShowFavorites);
-        importFileInput.addEventListener('change', e => { if (e.target.files[0]) importData(e.target.files[0]); importFileInput.value = ''; });
+        addBtn.addEventListener('click', addNewCafe);
+        toggleFavBtn.addEventListener('click', toggleShowFavorites);
+        searchKeywordInput.addEventListener('input', onSearchChange);
+        searchRegionSelect.addEventListener('change', onSearchChange);
+        clearSearchBtn.addEventListener('click', clearSearch);
         [nameInput, addressInput, websiteInput, categoryInput].forEach(i => i.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); addNewCafe(); } }));
         descInput.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addNewCafe(); } });
         closeListModal.addEventListener('click', () => listModal.style.display = 'none');
         closeDetailModal.addEventListener('click', () => detailModal.style.display = 'none');
         window.addEventListener('click', e => { if (e.target === listModal) listModal.style.display = 'none'; if (e.target === detailModal) detailModal.style.display = 'none'; });
     }
-    function init() { loadInitialData(); setupEventListeners(); }
+
+    function init() {
+        setupEventListeners();
+        initAuth();
+    }
     init();
 </script>
 </body>
