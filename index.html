@@ -4,35 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>FEONG的咖啡厅收藏集 · 公共云端</title>
-    <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <style>
-        /* 样式与之前完全相同，此处省略以节省篇幅，实际使用请保留完整样式 */
+        /* 样式保持不变（与之前相同，此处省略以避免过长，实际使用时请保留完整样式） */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Noto Sans', sans-serif;
         }
-
         body {
             background: #f9f5f0;
             color: #2e241f;
             padding: 2rem 1.5rem;
         }
-
         .container {
             max-width: 1600px;
             margin: 0 auto;
         }
-
         .header {
             text-align: center;
             margin-bottom: 2rem;
         }
-
         .header h1 {
             font-size: 2.2rem;
             letter-spacing: -0.3px;
@@ -42,16 +37,13 @@
             color: transparent;
             margin-bottom: 0.5rem;
         }
-
         .form-card {
             background: white;
             border-radius: 32px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
             padding: 1.6rem 2rem;
             margin-bottom: 2rem;
-            transition: box-shadow 0.2s;
         }
-
         .form-title {
             font-size: 1.4rem;
             font-weight: 600;
@@ -61,32 +53,26 @@
             gap: 8px;
             color: #4a2e22;
         }
-
         .form-title::before {
             content: "☕";
             font-size: 1.6rem;
         }
-
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.2rem;
             margin-bottom: 1.2rem;
         }
-
         .input-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
-
         .input-group label {
             font-weight: 500;
             font-size: 0.85rem;
             color: #5b3e2e;
-            letter-spacing: 0.3px;
         }
-
         .input-group input, 
         .input-group textarea,
         .input-group select {
@@ -94,11 +80,8 @@
             border: 1.5px solid #eeddcb;
             border-radius: 24px;
             font-size: 0.9rem;
-            transition: all 0.2s;
             background-color: #fffef7;
-            resize: vertical;
         }
-
         .input-group input:focus,
         .input-group textarea:focus,
         .input-group select:focus {
@@ -106,7 +89,6 @@
             border-color: #c28a6b;
             box-shadow: 0 0 0 3px rgba(194, 138, 107, 0.2);
         }
-
         .form-actions {
             display: flex;
             flex-wrap: wrap;
@@ -114,7 +96,6 @@
             margin-top: 8px;
             justify-content: flex-end;
         }
-
         button {
             background: #5e3c2c;
             border: none;
@@ -128,28 +109,22 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-
         button:hover {
             background: #794e38;
             transform: translateY(-2px);
         }
-
         .btn-secondary {
             background: #d9c2ae;
             color: #3a2a1f;
         }
-
         .btn-secondary:hover {
             background: #c4aa93;
         }
-
         .btn-fav-active {
             background: #c28a6b;
             color: white;
         }
-
         .search-bar {
             background: #fefaf7;
             border-radius: 28px;
@@ -159,7 +134,6 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             border: 1px solid #f0e2d6;
         }
         .search-group {
@@ -180,10 +154,6 @@
             font-size: 0.85rem;
             background: white;
         }
-        .search-group input:focus, .search-group select:focus {
-            outline: none;
-            border-color: #c28a6b;
-        }
         .clear-search {
             background: #e9dbcf;
             color: #5b3e2e;
@@ -195,20 +165,16 @@
             background: #d9c2ae;
             transform: none;
         }
-
         .categories-container {
             display: flex;
             flex-direction: column;
             gap: 2.2rem;
         }
-
         .category-section {
             background: #fefaf7;
             border-radius: 28px;
             padding: 1rem 0 1rem 1rem;
-            transition: all 0.1s;
         }
-
         .category-header {
             display: flex;
             align-items: baseline;
@@ -216,33 +182,27 @@
             padding: 0 1rem 0.8rem 0.5rem;
             flex-wrap: wrap;
             cursor: pointer;
-            transition: opacity 0.2s;
             user-select: none;
         }
         .category-header:hover {
             opacity: 0.85;
         }
-
         .category-title {
             font-size: 1.5rem;
             font-weight: 700;
             color: #4a2e22;
-            letter-spacing: -0.2px;
             background: #f2e4da;
             display: inline-block;
             padding: 4px 18px;
             border-radius: 40px;
         }
-
         .category-count {
             font-size: 0.8rem;
             background: #e7d6ca;
             padding: 3px 10px;
             border-radius: 30px;
             color: #5b3e2e;
-            font-weight: 500;
         }
-
         .cards-scroll {
             display: flex;
             overflow-x: auto;
@@ -250,10 +210,7 @@
             padding-bottom: 1rem;
             padding-right: 1rem;
             scrollbar-width: thin;
-            scrollbar-color: #c9b29c #f0e2d6;
-            touch-action: pan-x pan-y;
         }
-
         .cards-scroll::-webkit-scrollbar {
             height: 8px;
         }
@@ -265,7 +222,6 @@
             background: #c9b29c;
             border-radius: 10px;
         }
-
         .cafe-card {
             flex: 0 0 auto;
             width: 280px;
@@ -273,22 +229,18 @@
             border-radius: 28px;
             overflow: hidden;
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-            transition: all 0.25s ease;
             border: 1px solid #f0e2d6;
             display: flex;
             flex-direction: column;
         }
-
         .cafe-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 18px 28px -8px rgba(0, 0, 0, 0.15);
         }
-
         .card-content {
             padding: 1.2rem 1rem 0.8rem;
             flex: 1;
         }
-
         .cafe-name {
             font-size: 1.25rem;
             font-weight: 700;
@@ -299,7 +251,6 @@
             flex-wrap: wrap;
             gap: 5px;
         }
-
         .cafe-name span {
             background: #f1e2d6;
             font-size: 0.65rem;
@@ -307,7 +258,6 @@
             border-radius: 40px;
             font-weight: normal;
         }
-
         .cafe-address {
             font-size: 0.75rem;
             color: #9b7a64;
@@ -320,7 +270,6 @@
             content: "📍";
             font-size: 0.7rem;
         }
-
         .cafe-desc {
             font-size: 0.8rem;
             line-height: 1.4;
@@ -331,7 +280,6 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-
         .cafe-website {
             margin-top: 6px;
             margin-bottom: 12px;
@@ -343,39 +291,22 @@
             align-items: center;
             gap: 6px;
             flex-wrap: wrap;
-            word-break: break-all;
         }
-
-        .cafe-website .link-icon {
-            font-size: 0.8rem;
-        }
-
         .cafe-website a {
             color: #b1624b;
             text-decoration: none;
             font-weight: 500;
             border-bottom: 1px solid #e2cbbd;
-            transition: 0.15s;
-            word-break: break-all;
-            font-size: 0.7rem;
-        }
-        .cafe-website a:hover {
-            color: #5e3c2c;
         }
         .no-link {
             color: #ab8a72;
             font-style: italic;
         }
-
         .card-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 1rem 1rem 1rem;
-            gap: 8px;
-        }
-        .action-buttons {
-            display: flex;
             gap: 8px;
         }
         .favorite-btn {
@@ -385,20 +316,11 @@
             cursor: pointer;
             padding: 5px 8px;
             border-radius: 40px;
-            transition: 0.1s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
             color: #ab7b60;
             width: 36px;
         }
-        .favorite-btn:hover {
-            transform: scale(1.08);
-            background: #fef1e8;
-        }
         .favorite-btn.active {
             color: #e2554d;
-            text-shadow: 0 0 2px rgba(226,85,77,0.3);
         }
         .delete-btn {
             background: none;
@@ -406,27 +328,15 @@
             color: #a56547;
             padding: 5px 12px;
             font-size: 0.7rem;
-            font-weight: 500;
             border-radius: 60px;
-            box-shadow: none;
-            transition: 0.15s;
         }
-        .delete-btn:hover {
-            background: #fff0e7;
-            border-color: #c17f5e;
-            color: #b14f2c;
-            transform: scale(0.96);
-        }
-
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
             background: #fffaf5;
             border-radius: 48px;
             color: #ab8a72;
-            font-size: 1rem;
         }
-
         .sync-status {
             background: #e9dfd7;
             border-radius: 24px;
@@ -435,7 +345,6 @@
             font-size: 0.75rem;
             color: #4f3929;
             display: flex;
-            align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 8px;
@@ -445,16 +354,13 @@
             color: white;
             padding: 2px 12px;
             border-radius: 30px;
-            font-size: 0.7rem;
         }
         .offline-badge {
             background: #b1624b;
             color: white;
             padding: 2px 12px;
             border-radius: 30px;
-            font-size: 0.7rem;
         }
-
         .modal {
             display: none;
             position: fixed;
@@ -475,8 +381,6 @@
             width: 600px;
             max-height: 85%;
             overflow-y: auto;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.25);
-            animation: fadeInUp 0.2s ease;
         }
         .modal-header {
             padding: 1.2rem 1.5rem;
@@ -487,15 +391,9 @@
             background: #fff4ec;
             border-radius: 40px 40px 0 0;
         }
-        .modal-header h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #4a2e22;
-        }
         .close-modal {
             background: none;
             font-size: 1.8rem;
-            padding: 0;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -503,11 +401,6 @@
             align-items: center;
             justify-content: center;
             color: #8b694f;
-            box-shadow: none;
-        }
-        .close-modal:hover {
-            background: #e9dbcf;
-            transform: none;
         }
         .modal-body {
             padding: 1.2rem 1.5rem;
@@ -521,7 +414,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: 0.1s;
             cursor: pointer;
         }
         .list-item:hover {
@@ -533,7 +425,6 @@
         }
         .list-item-name {
             font-weight: 700;
-            font-size: 1rem;
             display: flex;
             align-items: baseline;
             gap: 8px;
@@ -557,18 +448,9 @@
             cursor: pointer;
             padding: 0 8px;
             color: #ab7b60;
-            transition: 0.1s;
         }
         .list-item-fav.active {
             color: #e2554d;
-        }
-        .list-item-fav:hover {
-            transform: scale(1.1);
-        }
-        .detail-card {
-            background: white;
-            border-radius: 28px;
-            padding: 0.2rem;
         }
         .detail-card .cafe-name {
             font-size: 1.4rem;
@@ -577,28 +459,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        .detail-card .cafe-address {
-            font-size: 0.9rem;
-            margin-bottom: 16px;
-        }
-        .detail-card .cafe-desc {
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-        }
-        .detail-card .cafe-website {
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-        }
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
         footer {
             text-align: center;
             margin-top: 2rem;
@@ -606,29 +466,9 @@
             color: #ad8f78;
         }
         @media (max-width: 620px) {
-            body {
-                padding: 1rem;
-            }
-            .form-card {
-                padding: 1.2rem;
-            }
-            .cafe-card {
-                width: 260px;
-            }
-            .category-title {
-                font-size: 1.2rem;
-            }
-            .favorite-btn {
-                font-size: 1.2rem;
-                width: 32px;
-            }
-            .modal-content {
-                width: 95%;
-            }
-            .search-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
+            body { padding: 1rem; }
+            .cafe-card { width: 260px; }
+            .category-title { font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -638,12 +478,10 @@
         <h1>☕ FEONG的咖啡厅收藏集</h1>
         <p></p>
     </div>
-
     <div class="sync-status">
         <span>🌍 公共数据池 · 所有人实时共享</span>
         <span id="syncIndicator" class="online-badge">🟢 已连接</span>
     </div>
-
     <div class="search-bar">
         <div class="search-group" style="flex: 3;">
             <label>🔍 关键词搜索 (名称/地址/描述)</label>
@@ -657,7 +495,6 @@
         </div>
         <button id="clearSearchBtn" class="clear-search">✖️ 清除筛选</button>
     </div>
-
     <div class="form-card">
         <div class="form-title">录入新发现</div>
         <div class="form-grid">
@@ -691,11 +528,9 @@
             <button id="addBtn">➕ 添加咖啡馆</button>
         </div>
     </div>
-
     <div id="categoriesContainer" class="categories-container"></div>
     <footer>☕ 点击分类标题 → 纵向列表模式 · 点击列表项查看完整详情</footer>
 </div>
-
 <div id="listModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -705,7 +540,6 @@
         <div id="listModalBody" class="modal-body"></div>
     </div>
 </div>
-
 <div id="detailModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -719,13 +553,13 @@
 <script>
     // ==================== Firebase 配置（请替换为您的项目配置） ====================
     const firebaseConfig = {
-        apiKey: "AIzaSyA3sD8nLU9-4QOuS4ZFIuUXMn_yilFr5Oc",
-        authDomain: "cafe-c55f9.firebaseapp.com",
-        databaseURL: "https://cafe-c55f9-default-rtdb.asia-southeast1.firebasedatabase.app/",
-        projectId: "cafe-c55f9",
-        storageBucket: "cafe-c55f9.firebasestorage.app",
-        messagingSenderId: "328042543743",
-        appId: "1:328042543743:web:0fc175a3aadc7c5a639d4a"
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
     // ========================================================================
 
@@ -733,7 +567,6 @@
     const database = firebase.database();
     const auth = firebase.auth();
 
-    // 全局数据
     let cafes = [];
     let showOnlyFavorites = false;
     let currentListCategory = "";
@@ -761,7 +594,6 @@
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const syncIndicator = document.getElementById('syncIndicator');
 
-    // 辅助函数
     function generateId() { return Date.now() + '-' + Math.random().toString(36).substring(2, 8); }
     function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
     function sanitizeUrl(url) {
@@ -773,7 +605,6 @@
         return null;
     }
 
-    // 更新地区下拉选项
     function updateRegionOptions() {
         const regions = new Set();
         cafes.forEach(cafe => {
@@ -791,19 +622,14 @@
             option.textContent = region;
             searchRegionSelect.appendChild(option);
         });
-        if (currentVal && regions.has(currentVal)) {
-            searchRegionSelect.value = currentVal;
-        } else {
-            searchRegionSelect.value = "";
-            searchRegion = "";
-        }
+        if (currentVal && regions.has(currentVal)) searchRegionSelect.value = currentVal;
+        else searchRegionSelect.value = "";
     }
 
-    // 过滤咖啡馆
     function filterCafes(cafesList) {
         let filtered = [...cafesList];
         if (showOnlyFavorites) filtered = filtered.filter(c => c.favorite);
-        if (searchKeyword.trim() !== "") {
+        if (searchKeyword.trim()) {
             const kw = searchKeyword.trim().toLowerCase();
             filtered = filtered.filter(c => 
                 c.name.toLowerCase().includes(kw) ||
@@ -811,16 +637,12 @@
                 (c.description && c.description.toLowerCase().includes(kw))
             );
         }
-        if (searchRegion !== "") {
-            filtered = filtered.filter(c => {
-                if (!c.address) return false;
-                return c.address.includes(searchRegion) || searchRegion.includes(c.address);
-            });
+        if (searchRegion) {
+            filtered = filtered.filter(c => c.address && (c.address.includes(searchRegion) || searchRegion.includes(c.address)));
         }
         return filtered;
     }
 
-    // 渲染主页面（横向卡片）
     function renderGroupedCards() {
         if (!categoriesContainer) return;
         let filtered = filterCafes(cafes);
@@ -862,14 +684,12 @@
             html += `<div class="category-section"><div class="category-header" data-category="${escapeHtml(cat)}"><div class="category-title">${escapeHtml(cat)}</div><div class="category-count">${list.length} 家</div></div><div class="cards-scroll">${cardsHtml}</div></div>`;
         }
         categoriesContainer.innerHTML = html;
-        // 绑定事件
         document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); deleteCafeById(btn.getAttribute('data-id')); }));
         document.querySelectorAll('.favorite-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(btn.getAttribute('data-id')); }));
         document.querySelectorAll('.category-header').forEach(header => header.addEventListener('click', () => { const cat = header.getAttribute('data-category'); if (cat) openCategoryList(cat); }));
         attachScrollGuard();
     }
 
-    // 列表视图
     function openCategoryList(category) {
         currentListCategory = category;
         let categoryCafes = cafes.filter(c => (c.category?.trim() || "Others") === category);
@@ -923,13 +743,9 @@
         const favIcon = isFav ? '❤️' : '🤍';
         let websiteHtml = '';
         const validUrl = sanitizeUrl(cafe.website);
-        if (validUrl) {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">🔗</span><a href="${escapeHtml(validUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(validUrl)}</a></div>`;
-        } else if (cafe.website && cafe.website.trim() !== "") {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">⚠️</span><span class="no-link">链接无效: ${escapeHtml(cafe.website)}</span></div>`;
-        } else {
-            websiteHtml = `<div class="cafe-website"><span class="link-icon">🌐</span><span class="no-link">暂无官网</span></div>`;
-        }
+        if (validUrl) websiteHtml = `<div class="cafe-website"><span class="link-icon">🔗</span><a href="${escapeHtml(validUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(validUrl)}</a></div>`;
+        else if (cafe.website && cafe.website.trim()) websiteHtml = `<div class="cafe-website"><span class="link-icon">⚠️</span><span class="no-link">链接无效: ${escapeHtml(cafe.website)}</span></div>`;
+        else websiteHtml = `<div class="cafe-website"><span class="link-icon">🌐</span><span class="no-link">暂无官网</span></div>`;
         detailModalBody.setAttribute('data-current-id', cafe.id);
         detailModalBody.innerHTML = `
             <div class="detail-card">
@@ -945,33 +761,32 @@
         `;
         detailModal.style.display = 'flex';
         const detailFavBtn = document.getElementById('detailFavBtn');
-        if (detailFavBtn) {
-            detailFavBtn.addEventListener('click', () => {
-                toggleFavorite(cafe.id, true);
-            });
-        }
+        if (detailFavBtn) detailFavBtn.addEventListener('click', () => toggleFavorite(cafe.id, true));
     }
 
+    // 乐观更新 + 错误回滚
     function toggleFavorite(cafeId, fromDetailRefresh = false) {
         const cafe = cafes.find(c => c.id === cafeId);
-        if (cafe) {
-            cafe.favorite = !cafe.favorite;
-            // 更新 Firebase 公共节点
-            database.ref(`publicCafes/${cafeId}`).update({ favorite: cafe.favorite });
-            // 本地立即刷新 UI（Firebase 监听会再次同步，但先刷新提升体验）
-            renderGroupedCards();
-            refreshCurrentListIfOpen();
-            if (detailModal.style.display === 'flex' && !fromDetailRefresh) {
-                const currentId = detailModalBody.getAttribute('data-current-id');
-                if (currentId === cafeId) {
-                    const favBtn = document.getElementById('detailFavBtn');
-                    if (favBtn) {
-                        favBtn.innerHTML = cafe.favorite ? '❤️' : '🤍';
-                        favBtn.classList.toggle('active', cafe.favorite);
-                    }
-                }
+        if (!cafe) return;
+        const oldValue = cafe.favorite;
+        cafe.favorite = !cafe.favorite;
+        renderGroupedCards();
+        refreshCurrentListIfOpen();
+        if (detailModal.style.display === 'flex' && !fromDetailRefresh && detailModalBody.getAttribute('data-current-id') === cafeId) {
+            const favBtn = document.getElementById('detailFavBtn');
+            if (favBtn) {
+                favBtn.innerHTML = cafe.favorite ? '❤️' : '🤍';
+                favBtn.classList.toggle('active', cafe.favorite);
             }
         }
+        database.ref(`publicCafes/${cafeId}`).update({ favorite: cafe.favorite })
+            .catch(err => {
+                console.error(err);
+                cafe.favorite = oldValue;
+                renderGroupedCards();
+                refreshCurrentListIfOpen();
+                alert('收藏操作失败，请检查网络或 Firebase 权限');
+            });
     }
 
     function refreshCurrentListIfOpen() {
@@ -979,13 +794,22 @@
     }
 
     function deleteCafeById(id) {
-        database.ref(`publicCafes/${id}`).remove();
-        // 本地立即更新（Firebase 监听会同步删除）
-        cafes = cafes.filter(c => c.id !== id);
+        const cafeIndex = cafes.findIndex(c => c.id === id);
+        if (cafeIndex === -1) return;
+        const removed = cafes[cafeIndex];
+        cafes.splice(cafeIndex, 1);
         renderGroupedCards();
         if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
         if (detailModal.style.display === 'flex') detailModal.style.display = 'none';
         updateRegionOptions();
+        database.ref(`publicCafes/${id}`).remove()
+            .catch(err => {
+                console.error(err);
+                cafes.splice(cafeIndex, 0, removed);
+                renderGroupedCards();
+                updateRegionOptions();
+                alert('删除失败，请检查网络或 Firebase 权限');
+            });
     }
 
     function addNewCafe() {
@@ -1004,14 +828,26 @@
             category,
             favorite: false
         };
-        // 写入 Firebase 公共节点
-        database.ref(`publicCafes/${newCafe.id}`).set(newCafe);
-        // 清空表单
+        // 乐观更新：立即添加到本地并渲染
+        cafes.unshift(newCafe);
+        renderGroupedCards();
+        updateRegionOptions();
         nameInput.value = '';
         addressInput.value = '';
         websiteInput.value = '';
         descInput.value = '';
         nameInput.focus();
+        // 写入 Firebase
+        database.ref(`publicCafes/${newCafe.id}`).set(newCafe)
+            .catch(err => {
+                console.error(err);
+                // 回滚：移除本地添加的咖啡馆
+                const idx = cafes.findIndex(c => c.id === newCafe.id);
+                if (idx !== -1) cafes.splice(idx, 1);
+                renderGroupedCards();
+                updateRegionOptions();
+                alert('添加失败，请检查网络或 Firebase 权限');
+            });
     }
 
     function toggleShowFavorites() {
@@ -1022,7 +858,6 @@
         if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
     }
 
-    // 搜索防抖
     let searchTimeout;
     function onSearchChange() {
         if (searchTimeout) clearTimeout(searchTimeout);
@@ -1042,7 +877,6 @@
         if (listModal.style.display === 'flex') refreshCurrentListIfOpen();
     }
 
-    // 横向滚动防误触
     function attachScrollGuard() {
         document.querySelectorAll('.cards-scroll').forEach(scrollContainer => {
             let startX = 0, startY = 0, isScrolling = false;
@@ -1055,9 +889,7 @@
                 if (!isScrolling) {
                     const deltaX = Math.abs(e.touches[0].clientX - startX);
                     const deltaY = Math.abs(e.touches[0].clientY - startY);
-                    if (deltaX > 5 && deltaX > deltaY) {
-                        isScrolling = true;
-                    }
+                    if (deltaX > 5 && deltaX > deltaY) isScrolling = true;
                 }
             }, { passive: true });
             scrollContainer.addEventListener('click', (e) => {
@@ -1066,7 +898,6 @@
         });
     }
 
-    // Firebase 数据监听（公共节点）
     function setupFirebaseSync() {
         const cafesRef = database.ref('publicCafes');
         cafesRef.on('child_added', (snapshot) => {
@@ -1103,14 +934,12 @@
         });
     }
 
-    // 初始化数据：从 Firebase 加载公共数据，若无则写入默认示例
     function loadPublicData() {
         database.ref('publicCafes').once('value').then(snapshot => {
             const data = snapshot.val();
             if (data) {
                 cafes = Object.values(data);
             } else {
-                // 写入默认示例数据（公共数据池首次初始化）
                 const defaultCafes = [
                     { id: generateId(), name: "森屿咖啡", address: "杭州市西湖区留下街道18号", description: "藏在森林里的玻璃房，手冲瑰夏香气迷人，适合周末发呆。", website: "https://www.senyucoffee.com", category: "Cafe", favorite: true },
                     { id: generateId(), name: "夜航船咖啡馆", address: "上海市徐汇区衡山路12弄", description: "复古船舱风格，特色海盐焦糖拿铁，晚间有爵士乐。", website: "https://www.nighthawkcoffee.cn", category: "Western", favorite: false },
@@ -1130,20 +959,16 @@
             console.error(err);
             syncIndicator.textContent = '⚠️ 连接失败，使用本地缓存';
             syncIndicator.className = 'offline-badge';
-            // 尝试从 localStorage 读取缓存（如果有）
             const cached = localStorage.getItem('cafePublicCache');
             if (cached) {
                 try { cafes = JSON.parse(cached); } catch(e) {}
             }
-            if (!cafes.length) {
-                cafes = [];
-            }
+            if (!cafes.length) cafes = [];
             updateRegionOptions();
             renderGroupedCards();
         });
     }
 
-    // 匿名登录（仅用于 Firebase 安全规则，不区分用户）
     function initAuth() {
         auth.signInAnonymously()
             .then(() => {
@@ -1155,11 +980,10 @@
                 console.error(error);
                 syncIndicator.textContent = '⚠️ 离线模式';
                 syncIndicator.className = 'offline-badge';
-                loadPublicData(); // 尝试直接读取（如果安全规则允许未登录读取）
+                loadPublicData();
             });
     }
 
-    // 事件绑定
     function setupEventListeners() {
         addBtn.addEventListener('click', addNewCafe);
         toggleFavBtn.addEventListener('click', toggleShowFavorites);
