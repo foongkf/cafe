@@ -95,7 +95,6 @@
         .small-wish.active { color: #4c9f70; }
         .close-modal { font-size: 1.8rem; cursor: pointer; color: #a68d6e; line-height: 1; }
         
-        /* 修复：回到顶部按钮固定定位增强，确保始终在右下角 */
         .back-to-top {
             position: fixed !important;
             bottom: 20px;
@@ -358,39 +357,81 @@
         div.querySelector(".share-btn").addEventListener("click",e=>{ e.stopPropagation(); shareCafe(cafe); });
         return div;
     }
-    function refreshAllOpenedModals() {
+    
+    // 辅助函数：更新所有可见模态框中的收藏/想去按钮状态
+    function updateFavoriteButtonsInOpenModals(id, isFavorited) {
+        document.querySelectorAll(".modal .small-fav").forEach(btn => {
+            if (btn.dataset.id === id) {
+                if (isFavorited) btn.classList.add("active");
+                else btn.classList.remove("active");
+            }
+        });
+        // 同时也更新主页卡片上的按钮（已在 toggleFavorite 中处理，但这里再确保一次）
+        const cardBtn = document.querySelector(`.card .favorite-btn[data-id="${id}"]`);
+        if(cardBtn) {
+            if(isFavorited) cardBtn.classList.add("active");
+            else cardBtn.classList.remove("active");
+        }
+    }
+    function updateWishlistButtonsInOpenModals(id, isWishlisted) {
+        document.querySelectorAll(".modal .small-wish").forEach(btn => {
+            if (btn.dataset.id === id) {
+                if (isWishlisted) btn.classList.add("active");
+                else btn.classList.remove("active");
+            }
+        });
+        const cardBtn = document.querySelector(`.card .wishlist-btn[data-id="${id}"]`);
+        if(cardBtn) {
+            if(isWishlisted) cardBtn.classList.add("active");
+            else cardBtn.classList.remove("active");
+        }
+    }
+    
+    // 刷新所有复杂模态框（全部咖啡馆、分类）因为它们的列表需要根据新数据重建（例如添加/删除/编辑后）
+    function refreshComplexModals() {
         const allModal = document.getElementById("allCafesModal");
         if (allModal.style.display === "flex" && allModal.refreshFunc) allModal.refreshFunc();
         const catModal = document.getElementById("categoryModal");
         if (catModal.style.display === "flex" && catModal.refreshFunc) catModal.refreshFunc();
-        if (document.getElementById("wishlistModal").style.display === "flex") renderWishlistModal();
-        if (document.getElementById("favoritesModal").style.display === "flex") renderFavoritesModal();
     }
+    
     async function toggleFavorite(id, val) {
-        await cafesRef.child(id).update({ favorited: val });
-        showToast(val ? "已收藏" : "取消收藏");
-        document.querySelectorAll(`.small-fav[data-id="${id}"]`).forEach(btn => {
-            if(val) btn.classList.add("active"); else btn.classList.remove("active");
-        });
-        const cardBtn = document.querySelector(`.card .favorite-btn[data-id="${id}"]`);
-        if(cardBtn) { if(val) cardBtn.classList.add("active"); else cardBtn.classList.remove("active"); }
-        refreshAllOpenedModals();
+        try {
+            await cafesRef.child(id).update({ favorited: val });
+            showToast(val ? "已收藏" : "取消收藏");
+            // 更新所有可见的按钮
+            updateFavoriteButtonsInOpenModals(id, val);
+            // 刷新复杂模态框（因为这些模态框内的列表项可能因为排序方式（按收藏）而需要重新排序）
+            refreshComplexModals();
+        } catch(err) {
+            showToast("操作失败，请检查网络");
+            console.error(err);
+        }
     }
     async function toggleWishlist(id, val) {
-        await cafesRef.child(id).update({ wishlisted: val });
-        showToast(val ? "已加入想去列表" : "已移出去想列表");
-        document.querySelectorAll(`.small-wish[data-id="${id}"]`).forEach(btn => {
-            if(val) btn.classList.add("active"); else btn.classList.remove("active");
-        });
-        const cardBtn = document.querySelector(`.card .wishlist-btn[data-id="${id}"]`);
-        if(cardBtn) { if(val) cardBtn.classList.add("active"); else cardBtn.classList.remove("active"); }
-        refreshAllOpenedModals();
+        try {
+            await cafesRef.child(id).update({ wishlisted: val });
+            showToast(val ? "已加入想去列表" : "已移出去想列表");
+            updateWishlistButtonsInOpenModals(id, val);
+            refreshComplexModals();
+        } catch(err) {
+            showToast("操作失败，请检查网络");
+            console.error(err);
+        }
     }
     async function deleteToTrash(id){ 
         if(confirm("确定要将这家咖啡馆移至回收站吗？")){
-            await cafesRef.child(id).update({ deleted: true, deletedAt: Date.now() }); 
-            showToast("已移至回收站"); 
-            refreshAllOpenedModals();
+            try {
+                await cafesRef.child(id).update({ deleted: true, deletedAt: Date.now() }); 
+                showToast("已移至回收站"); 
+                // 关闭可能打开的详情模态框
+                closeModal(document.getElementById("detailModal"));
+                refreshComplexModals();
+                // 如果回收站模态框打开，刷新它
+                if(document.getElementById("trashModal").style.display === "flex") renderTrashModal();
+            } catch(err) {
+                showToast("操作失败，请检查网络");
+            }
         }
     }
     async function restoreFromTrash(id){ 
@@ -401,28 +442,52 @@
             showToast(`恢复失败：名为“${cafe.name}”的咖啡馆已存在，请先删除或重命名现有的咖啡馆`, 3000);
             return;
         }
-        await cafesRef.child(id).update({ deleted: false }); 
-        showToast("已恢复");
-        closeModal(document.getElementById("trashModal"));
-        refreshAllOpenedModals();
+        try {
+            await cafesRef.child(id).update({ deleted: false }); 
+            showToast("已恢复");
+            closeModal(document.getElementById("trashModal"));
+            refreshComplexModals();
+        } catch(err) {
+            showToast("操作失败，请检查网络");
+        }
     }
     async function permanentDelete(id, skipConfirm = false){ 
         if(skipConfirm || confirm("永久删除不可恢复，确定吗？")){
-            await cafesRef.child(id).remove(); 
-            showToast("已永久删除"); 
-            refreshAllOpenedModals();
+            try {
+                await cafesRef.child(id).remove(); 
+                showToast("已永久删除"); 
+                if(document.getElementById("trashModal").style.display === "flex") renderTrashModal();
+                refreshComplexModals();
+            } catch(err) {
+                showToast("操作失败，请检查网络");
+            }
         }
     }
     async function addCafe(name,url,category,region,desc){
         if(!name.trim()){ alert("请填写名称"); return false; }
         if(getActiveCafes().some(c=>c.name.trim().toLowerCase()===name.trim().toLowerCase())){ alert("名称已存在"); return false; }
-        await cafesRef.push({ name:name.trim(), url:url.trim()||"", category, favorited:false, wishlisted:false, region:region.trim()||"", description:desc.trim()||"", createdAt:Date.now(), deleted:false });
-        return true;
+        try {
+            await cafesRef.push({ name:name.trim(), url:url.trim()||"", category, favorited:false, wishlisted:false, region:region.trim()||"", description:desc.trim()||"", createdAt:Date.now(), deleted:false });
+            return true;
+        } catch(err) {
+            showToast("添加失败，请检查网络");
+            return false;
+        }
     }
     async function updateCafe(id, data){ 
-        await cafesRef.child(id).update(data); 
-        showToast("已更新"); 
-        refreshAllOpenedModals();
+        try {
+            await cafesRef.child(id).update(data); 
+            showToast("已更新"); 
+            refreshComplexModals();
+            // 如果详情模态框打开且显示的是当前编辑的咖啡馆，更新其内容
+            const detailModal = document.getElementById("detailModal");
+            if (detailModal.style.display === "flex") {
+                const cafe = allCafes.find(c => c.id === id);
+                if (cafe) showDetailModal(cafe);
+            }
+        } catch(err) {
+            showToast("更新失败，请检查网络");
+        }
     }
     
     function updateSuggestions() { 
@@ -436,6 +501,7 @@
         document.querySelectorAll(".suggestion-item").forEach(el=>{ 
             el.addEventListener("click",()=>{ 
                 document.getElementById("searchKeyword").value = el.dataset.name; 
+                document.getElementById("searchKeyword").blur(); // 收起键盘
                 searchKeyword=el.dataset.name; 
                 renderMainView(); 
                 box.style.display="none"; 
@@ -470,6 +536,8 @@
         if(modal.style.display === "flex") return;
         modal.style.display="flex"; 
         document.body.classList.add("modal-open"); 
+        // 隐藏回到顶部按钮
+        document.getElementById("backToTopBtn").style.display = "none";
         if(modal._clickHandler) modal.removeEventListener("click", modal._clickHandler);
         modal._clickHandler = (e)=>{ if(e.target===modal) closeModal(modal); }; 
         modal.addEventListener("click", modal._clickHandler); 
@@ -479,6 +547,8 @@
         let anyOpen = Array.from(document.querySelectorAll(".modal")).some(m => m.style.display === "flex");
         if (!anyOpen) {
             document.body.classList.remove("modal-open");
+            // 恢复回到顶部按钮（如果滚动位置超过一定高度可显示，但简单恢复显示）
+            document.getElementById("backToTopBtn").style.display = "flex";
         }
         if(modal._clickHandler) {
             modal.removeEventListener("click", modal._clickHandler);
@@ -489,6 +559,7 @@
             window._pendingRestoreModal = null;
             restoreModal.style.display = "flex";
             document.body.classList.add("modal-open");
+            document.getElementById("backToTopBtn").style.display = "none";
             if (!restoreModal._clickHandler) {
                 restoreModal._clickHandler = (e) => { if (e.target === restoreModal) closeModal(restoreModal); };
                 restoreModal.addEventListener("click", restoreModal._clickHandler);
@@ -498,6 +569,11 @@
     }
     
     function showDetailModal(cafe){
+        const detailModal = document.getElementById("detailModal");
+        // 如果详情模态框已打开，先关闭它（触发恢复逻辑）
+        if (detailModal.style.display === "flex") {
+            closeModal(detailModal);
+        }
         let otherModals = Array.from(document.querySelectorAll(".modal")).filter(m => m.style.display === "flex" && m.id !== "detailModal");
         if (otherModals.length) {
             window._pendingRestoreModal = otherModals[0];
@@ -509,13 +585,13 @@
                                    <div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div>
                                    <div class="detail-field"><strong>简介</strong><br>${escapeHtml(cafe.description||'暂无')}</div>
                                    <div class="detail-field"><strong>链接</strong><br>${cafe.url?`<a href="${cafe.url}" target="_blank">${cafe.url}</a>`:'无'}</div>`;
-        let detail = document.getElementById("detailModal");
-        if (detail.style.display !== "flex") {
-            detail.style.display = "flex";
+        if (detailModal.style.display !== "flex") {
+            detailModal.style.display = "flex";
             document.body.classList.add("modal-open");
-            if (!detail._clickHandler) {
-                detail._clickHandler = (e) => { if (e.target === detail) closeModal(detail); };
-                detail.addEventListener("click", detail._clickHandler);
+            document.getElementById("backToTopBtn").style.display = "none";
+            if (!detailModal._clickHandler) {
+                detailModal._clickHandler = (e) => { if (e.target === detailModal) closeModal(detailModal); };
+                detailModal.addEventListener("click", detailModal._clickHandler);
             }
         }
     }
@@ -584,6 +660,12 @@
         openModal(document.getElementById("favoritesModal"));
     }
     function openEditModal(cafe){ 
+        // 记录当前父模态框（如果有）
+        let parentModal = Array.from(document.querySelectorAll(".modal")).find(m => m.style.display === "flex" && m.id !== "editModal" && m.id !== "detailModal");
+        if (parentModal) {
+            window._pendingRestoreModal = parentModal;
+            parentModal.style.display = "none";
+        }
         currentEditId = cafe.id; 
         document.getElementById("editName").value = cafe.name; 
         document.getElementById("editRegion").value = cafe.region||""; 
@@ -591,7 +673,7 @@
         renderCategorySelect(document.getElementById("editCategory")); 
         document.getElementById("editCategory").value = cafe.category; 
         document.getElementById("editDesc").value = cafe.description||""; 
-        openModal(document.getElementById("editModal")); 
+        openModal(document.getElementById("editModal"), true); 
     }
     
     function exportData(){ 
@@ -604,6 +686,10 @@
         reader.onload=async e=>{ 
             try {
                 let items=JSON.parse(e.target.result); 
+                if (!Array.isArray(items)) {
+                    showToast("文件格式错误：根数据应为数组");
+                    return;
+                }
                 for(let item of items){ 
                     if(!item.name) continue; 
                     const exists = getAllCafesIncludeDeleted().some(c => c.name.toLowerCase() === item.name.toLowerCase());
@@ -691,10 +777,8 @@
             allCafes = arr;
             computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView();
             if(document.getElementById("trashModal").style.display === "flex") renderTrashModal();
-            const allModal = document.getElementById("allCafesModal");
-            if (allModal.style.display === "flex" && allModal.refreshFunc) allModal.refreshFunc();
-            const catModal = document.getElementById("categoryModal");
-            if (catModal.style.display === "flex" && catModal.refreshFunc) catModal.refreshFunc();
+            refreshComplexModals();
+            // 如果想去/收藏模态框打开，刷新它们（因为可能数据变化影响列表内容）
             if(document.getElementById("wishlistModal").style.display === "flex") renderWishlistModal();
             if(document.getElementById("favoritesModal").style.display === "flex") renderFavoritesModal();
         });
@@ -746,10 +830,20 @@
         document.getElementById("saveEditBtn").addEventListener("click",async()=>{
             let newName = document.getElementById("editName").value.trim();
             if(!newName){ alert("名称不能为空"); return; }
-            let duplicate = getActiveCafes().some(c => c.id !== currentEditId && c.name.toLowerCase() === newName.toLowerCase());
-            if(duplicate){ alert("名称已存在"); return; }
+            // 检查所有咖啡馆（包括已删除）的重名，排除当前编辑的
+            let duplicate = allCafes.some(c => c.id !== currentEditId && c.name.toLowerCase() === newName.toLowerCase());
+            if(duplicate){ alert("名称已存在（包括回收站中）"); return; }
             await updateCafe(currentEditId,{ name:newName, region:document.getElementById("editRegion").value, url:document.getElementById("editUrl").value, category:document.getElementById("editCategory").value, description:document.getElementById("editDesc").value });
             closeModal(document.getElementById("editModal"));
+            // 恢复父模态框（如果有）
+            if (window._pendingRestoreModal) {
+                let restoreModal = window._pendingRestoreModal;
+                window._pendingRestoreModal = null;
+                restoreModal.style.display = "flex";
+                document.body.classList.add("modal-open");
+                document.getElementById("backToTopBtn").style.display = "none";
+                if (restoreModal.refreshFunc) restoreModal.refreshFunc();
+            }
         });
         document.getElementById("emptyTrashBtn")?.addEventListener("click",async()=>{ 
             if(confirm("永久清空回收站所有内容？")){ 
