@@ -50,10 +50,14 @@
         
         .category-section { margin-bottom: 2rem; }
         .category-header { display: flex; justify-content: space-between; align-items: baseline; border-left: 4px solid #cfb587; padding-left: 0.8rem; margin-bottom: 1rem; }
-        .category-title { font-size: 1.3rem; font-weight: 500; color: #3b3328; cursor: pointer; }
-        .category-title:hover { color: #b88d54; }
+        .category-title-wrapper { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
+        .category-title { font-size: 1.3rem; font-weight: 500; color: #3b3328; }
+        .category-title-wrapper:hover .category-title { color: #b88d54; }
+        .category-toggle-icon { font-size: 0.9rem; color: #b88d54; transition: transform 0.2s; width: 20px; text-align: center; }
+        .category-toggle-icon.collapsed { transform: rotate(-90deg); }
         .view-all-btn { background: #f0e9e0; border: none; color: #ad8f6b; cursor: pointer; font-size: 0.7rem; padding: 0.2rem 0.7rem; border-radius: 40px; }
         .scroll-container { display: flex; overflow-x: auto; gap: 1.2rem; padding-bottom: 0.8rem; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .scroll-container.collapsed { display: none; }
         .card { background: #ffffff; border-radius: 24px; width: 280px; flex-shrink: 0; padding: 1rem; transition: 0.2s; border: 1px solid #efe6db; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -8px rgba(0,0,0,0.1); }
         .card-name { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.3rem; color: #2a241e; }
@@ -63,7 +67,6 @@
         .card-link { color: #bc8f5a; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .no-link-text { color: #c1b2a0; font-style: italic; }
         
-        /* 操作栏 - 紧凑设计，确保手机上一行显示 */
         .card-actions { display: flex; gap: 6px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.5rem; justify-content: space-around; flex-wrap: nowrap; }
         .card-actions button { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 4px; width: 32px; height: 32px; border-radius: 28px; display: inline-flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .card-actions button:hover { background: #f0e9df; }
@@ -113,6 +116,7 @@
             <button id="favoritesFilterBtn" class="btn-icon"><i class="fas fa-heart"></i> 收藏</button>
             <button id="wishlistBtn" class="btn-icon"><i class="fas fa-shopping-basket"></i> 想去</button>
             <button id="viewAllCafesBtn" class="btn-icon"><i class="fas fa-list-ul"></i> 全部</button>
+            <button id="toggleAllCategoriesBtn" class="btn-icon"><i class="fas fa-compress-alt"></i> 全部伸缩</button>
         </div>
     </div>
 
@@ -195,6 +199,8 @@
     let regionSet = new Set();
     let debouncedRender;
     let randomClickTimer = null;
+    // 存储每个分类的折叠状态，key为分类名，value为是否折叠（true=折叠）
+    let categoryCollapsedState = {};
 
     function showToast(msg, duration=2000) { let t = document.getElementById("toastMsg"); t.innerText = msg; t.style.opacity = "1"; setTimeout(()=> t.style.opacity = "0", duration); }
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
@@ -224,6 +230,52 @@
         if(!sel) return;
         sel.innerHTML = ""; globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); });
     }
+    function toggleCategory(catName) {
+        const container = document.querySelector(`.category-section[data-category="${catName}"] .scroll-container`);
+        const icon = document.querySelector(`.category-section[data-category="${catName}"] .category-toggle-icon`);
+        if (container) {
+            container.classList.toggle("collapsed");
+            icon.classList.toggle("collapsed");
+            categoryCollapsedState[catName] = container.classList.contains("collapsed");
+        }
+    }
+    function expandAllCategories() {
+        document.querySelectorAll(".category-section").forEach(section => {
+            const cat = section.dataset.category;
+            const container = section.querySelector(".scroll-container");
+            const icon = section.querySelector(".category-toggle-icon");
+            if (container && container.classList.contains("collapsed")) {
+                container.classList.remove("collapsed");
+                icon.classList.remove("collapsed");
+                categoryCollapsedState[cat] = false;
+            }
+        });
+    }
+    function collapseAllCategories() {
+        document.querySelectorAll(".category-section").forEach(section => {
+            const cat = section.dataset.category;
+            const container = section.querySelector(".scroll-container");
+            const icon = section.querySelector(".category-toggle-icon");
+            if (container && !container.classList.contains("collapsed")) {
+                container.classList.add("collapsed");
+                icon.classList.add("collapsed");
+                categoryCollapsedState[cat] = true;
+            }
+        });
+    }
+    function toggleAllCategories() {
+        const anyExpanded = Array.from(document.querySelectorAll(".category-section")).some(section => {
+            const container = section.querySelector(".scroll-container");
+            return container && !container.classList.contains("collapsed");
+        });
+        if (anyExpanded) {
+            collapseAllCategories();
+            showToast("已折叠所有分类");
+        } else {
+            expandAllCategories();
+            showToast("已展开所有分类");
+        }
+    }
     function renderMainView() {
         let container = document.getElementById("categoriesContainer"); if(!container) return;
         container.innerHTML = "";
@@ -235,12 +287,27 @@
             if(cafes.length===0) continue;
             cafes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
             let sec = document.createElement("div"); sec.className="category-section";
-            sec.innerHTML = `<div class="category-header"><div class="category-title" data-cat="${cat}">${escapeHtml(cat)}</div><button class="view-all-btn" data-cat="${cat}">📋 全部 (${cafes.length})</button></div><div class="scroll-container"></div>`;
+            sec.dataset.category = cat;
+            // 恢复折叠状态（默认展开）
+            const isCollapsed = categoryCollapsedState[cat] === true;
+            const collapsedClass = isCollapsed ? "collapsed" : "";
+            sec.innerHTML = `<div class="category-header">
+                <div class="category-title-wrapper">
+                    <i class="fas fa-chevron-down category-toggle-icon ${collapsedClass}"></i>
+                    <span class="category-title">${escapeHtml(cat)}</span>
+                </div>
+                <button class="view-all-btn" data-cat="${cat}">📋 全部 (${cafes.length})</button>
+            </div>
+            <div class="scroll-container ${collapsedClass}"></div>`;
             container.appendChild(sec);
             let scroll = sec.querySelector(".scroll-container");
             cafes.forEach(c=> scroll.appendChild(createCardElement(c)));
-            sec.querySelector(".category-title").addEventListener("click",()=>openCategoryModal(cat));
-            sec.querySelector(".view-all-btn").addEventListener("click",()=>openCategoryModal(cat));
+            const titleWrapper = sec.querySelector(".category-title-wrapper");
+            titleWrapper.addEventListener("click", () => toggleCategory(cat));
+            sec.querySelector(".view-all-btn").addEventListener("click", (e) => {
+                e.stopPropagation();
+                openCategoryModal(cat);
+            });
         }
         if(container.children.length===0) container.innerHTML = `<div style="padding:2rem;text-align:center;">🔍 没有找到咖啡厅</div>`;
         document.getElementById("favoritesFilterBtn").classList.toggle("active", onlyFavorites);
@@ -564,6 +631,7 @@
         document.getElementById("importDataBtn").addEventListener("click",()=>document.getElementById("importFileInput").click());
         document.getElementById("importFileInput").addEventListener("change",e=>{ if(e.target.files[0]) importData(e.target.files[0]); });
         document.getElementById("backToTopBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+        document.getElementById("toggleAllCategoriesBtn").addEventListener("click", toggleAllCategories);
         let searchInp = document.getElementById("searchKeyword"); 
         searchInp.addEventListener("input",()=>{ searchKeyword=searchInp.value; updateSuggestions(); if(debouncedRender) clearTimeout(debouncedRender); debouncedRender=setTimeout(()=>renderMainView(),300); });
         document.getElementById("regionFilter").addEventListener("change",e=>{ selectedRegion=e.target.value; renderMainView(); });
