@@ -20,7 +20,6 @@
         h1::after { content: "☕"; font-size: 1.3rem; color: #c7a16b; margin-left: 0.3rem; display: inline-block; vertical-align: middle; opacity: 0.8; }
         .header-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
         .btn-icon { background: transparent; border: none; padding: 0.4rem 0.8rem; border-radius: 32px; font-weight: 500; cursor: pointer; color: #5a4a38; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-icon.active { background: #c7a16b20; color: #c7a16b; }
         .btn-icon:hover { background: #e8dfd3; transform: translateY(-1px); }
         
         .collapsible-card { background: #ffffffd9; border-radius: 28px; margin-bottom: 1.2rem; border: 1px solid #ece3d7; box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden; }
@@ -112,11 +111,11 @@
     <div class="header">
         <h1>FEONG的咖啡馆收藏集</h1>
         <div class="header-actions">
-            <button id="randomCafeBtn" class="btn-icon"><i class="fas fa-dice-d6"></i> 随机推荐</button>
-            <button id="favoritesFilterBtn" class="btn-icon"><i class="fas fa-heart"></i> 收藏</button>
+            <button id="randomCafeBtn" class="btn-icon"><i class="fas fa-dice-d6"></i> 随机</button>
+            <button id="favoritesBtn" class="btn-icon"><i class="fas fa-heart"></i> 收藏</button>
             <button id="wishlistBtn" class="btn-icon"><i class="fas fa-shopping-basket"></i> 想去</button>
             <button id="viewAllCafesBtn" class="btn-icon"><i class="fas fa-list-ul"></i> 全部</button>
-            <button id="toggleAllCategoriesBtn" class="btn-icon"><i class="fas fa-compress-alt"></i> 全部伸缩</button>
+            <button id="toggleAllCategoriesBtn" class="btn-icon"><i class="fas fa-compress-alt"></i> 伸缩</button>
         </div>
     </div>
 
@@ -170,12 +169,13 @@
 </div>
 
 <!-- 模态框 -->
-<div id="categoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="modalCategoryTitle"></h2><span class="close-modal closeModalBtn">&times;</span></div><div class="modal-filters"><input type="text" id="modalSearchInput" placeholder="🔍 搜索"><select id="modalSortSelect"><option value="date">最近</option><option value="name">名称</option><option value="favorite">收藏</option></select></div><div id="modalList" class="modal-list"></div></div></div>
+<div id="categoryModal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="modalCategoryTitle"></h2><span class="close-modal closeModalBtn">&times;</span></div><div class="modal-filters"><input type="text" id="modalSearchInput" placeholder="🔍 搜索"><select id="modalSortSelect"><option value="date">最近</option><option value="name">名称</option><option value="favorite">收藏</option><option value="wishlist">想去</option></select></div><div id="modalList" class="modal-list"></div></div></div>
 <div id="allCafesModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>📋 全部咖啡馆 <span id="allCafesCount"></span></h2><span class="close-modal closeModalBtn">&times;</span></div><div class="modal-filters"><input type="text" id="allModalSearchInput" placeholder="🔍 搜索"><select id="allModalSortSelect"><option value="date">最近</option><option value="name">名称</option><option value="favorite">收藏</option><option value="wishlist">想去</option></select></div><div id="allModalList" class="modal-list"></div></div></div>
 <div id="trashModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>🗑️ 回收站 (可恢复)</h2><span class="close-modal closeModalBtn">&times;</span></div><div id="trashList" class="modal-list"></div><div style="padding:1rem;text-align:center;"><button id="emptyTrashBtn" class="btn-secondary">清空回收站</button></div></div></div>
 <div id="editModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>✏️ 编辑咖啡馆</h2><span class="close-modal closeModalBtn">&times;</span></div><div style="padding:1.5rem; display:flex; flex-direction:column; gap:12px;"><input type="text" id="editName" placeholder="名称"><input type="text" id="editRegion" placeholder="地区"><input type="url" id="editUrl" placeholder="链接"><select id="editCategory"></select><textarea id="editDesc" rows="3" placeholder="简介"></textarea><button id="saveEditBtn" class="btn-primary">保存修改</button></div></div></div>
 <div id="detailModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>📄 咖啡馆档案</h2><span class="close-modal closeModalBtn">&times;</span></div><div id="detailContent" style="padding:1rem;"></div></div></div>
 <div id="wishlistModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>🛒 想去列表</h2><span class="close-modal closeModalBtn">&times;</span></div><div class="modal-filters"><input type="text" id="wishlistSearchInput" placeholder="🔍 搜索想去的地点"><select id="wishlistSortSelect"><option value="date">最近添加</option><option value="name">名称</option></select></div><div id="wishlistList" class="modal-list"></div></div></div>
+<div id="favoritesModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>❤️ 收藏列表</h2><span class="close-modal closeModalBtn">&times;</span></div><div class="modal-filters"><input type="text" id="favoritesSearchInput" placeholder="🔍 搜索收藏的地点"><select id="favoritesSortSelect"><option value="date">最近添加</option><option value="name">名称</option></select></div><div id="favoritesList" class="modal-list"></div></div></div>
 
 <div id="toastMsg" class="toast-msg"></div>
 <button class="back-to-top" id="backToTopBtn"><i class="fas fa-arrow-up"></i></button>
@@ -195,11 +195,10 @@
     const cafesRef = database.ref("cafes");
 
     let allCafes = [], globalCategories = [], currentEditId = null;
-    let searchKeyword = "", selectedRegion = "", onlyFavorites = false;
+    let searchKeyword = "", selectedRegion = "";
     let regionSet = new Set();
     let debouncedRender;
     let randomClickTimer = null;
-    // 存储每个分类的折叠状态，key为分类名，value为是否折叠（true=折叠）
     let categoryCollapsedState = {};
 
     function showToast(msg, duration=2000) { let t = document.getElementById("toastMsg"); t.innerText = msg; t.style.opacity = "1"; setTimeout(()=> t.style.opacity = "0", duration); }
@@ -207,7 +206,7 @@
     
     function getActiveCafes() { return allCafes.filter(c => !c.deleted); }
     function getFilteredCafes() {
-        let filtered = onlyFavorites ? getActiveCafes().filter(c=>c.favorited) : [...getActiveCafes()];
+        let filtered = [...getActiveCafes()];
         if(searchKeyword.trim()){ let kw=searchKeyword.trim().toLowerCase(); filtered = filtered.filter(c=> c.name.toLowerCase().includes(kw) || (c.region&&c.region.toLowerCase().includes(kw)) || (c.description&&c.description.toLowerCase().includes(kw))); }
         if(selectedRegion) filtered = filtered.filter(c=>c.region===selectedRegion);
         return filtered;
@@ -288,7 +287,6 @@
             cafes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
             let sec = document.createElement("div"); sec.className="category-section";
             sec.dataset.category = cat;
-            // 恢复折叠状态（默认展开）
             const isCollapsed = categoryCollapsedState[cat] === true;
             const collapsedClass = isCollapsed ? "collapsed" : "";
             sec.innerHTML = `<div class="category-header">
@@ -310,7 +308,6 @@
             });
         }
         if(container.children.length===0) container.innerHTML = `<div style="padding:2rem;text-align:center;">🔍 没有找到咖啡厅</div>`;
-        document.getElementById("favoritesFilterBtn").classList.toggle("active", onlyFavorites);
     }
     function createCardElement(cafe){
         let div = document.createElement("div"); div.className="card";
@@ -341,6 +338,8 @@
         });
         const cardBtn = document.querySelector(`.card .favorite-btn[data-id="${id}"]`);
         if(cardBtn) { if(val) cardBtn.classList.add("active"); else cardBtn.classList.remove("active"); }
+        // 如果收藏模态框打开，刷新它
+        if(document.getElementById("favoritesModal").style.display === "flex") renderFavoritesModal();
     }
     async function toggleWishlist(id, val) {
         await cafesRef.child(id).update({ wishlisted: val });
@@ -478,6 +477,34 @@
         sortSelect.onchange = refresh;
         openModal(document.getElementById("wishlistModal"));
     }
+    function renderFavoritesModal(){
+        let favItems = getActiveCafes().filter(c => c.favorited === true);
+        let container = document.getElementById("favoritesList");
+        let searchInput = document.getElementById("favoritesSearchInput");
+        let sortSelect = document.getElementById("favoritesSortSelect");
+        function refresh(){
+            let search = searchInput.value.toLowerCase();
+            let sort = sortSelect.value;
+            let filtered = favItems.filter(c => c.name.toLowerCase().includes(search) || (c.region && c.region.toLowerCase().includes(search)));
+            if(sort === "name") filtered.sort((a,b)=>a.name.localeCompare(b.name));
+            else filtered.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+            container.innerHTML = filtered.map(c=>`<div class="small-card" data-id="${c.id}"><div class="small-card-info"><div class="small-card-name">${escapeHtml(c.name)}</div><div class="small-card-meta">${escapeHtml(c.category)}${c.region?` · ${escapeHtml(c.region)}`:''}</div></div><button class="small-fav active" data-id="${c.id}"><i class="fas fa-heart"></i></button></div>`).join("");
+            container.querySelectorAll(".small-card").forEach(card=>{
+                let id = card.dataset.id;
+                card.querySelector(".small-card-info").addEventListener("click",()=>{
+                    let cafe = allCafes.find(c=>c.id===id);
+                    if(cafe) showDetailModal(cafe);
+                });
+            });
+            container.querySelectorAll(".small-fav").forEach(btn=>{
+                btn.addEventListener("click",(e)=>{ e.stopPropagation(); toggleFavorite(btn.dataset.id, false); });
+            });
+        }
+        refresh();
+        searchInput.oninput = refresh;
+        sortSelect.onchange = refresh;
+        openModal(document.getElementById("favoritesModal"));
+    }
     function openEditModal(cafe){ 
         currentEditId = cafe.id; 
         document.getElementById("editName").value = cafe.name; 
@@ -591,6 +618,7 @@
                 fillModalList(document.getElementById("modalList"), filtered, sort);
             }
             if(document.getElementById("wishlistModal").style.display === "flex") renderWishlistModal();
+            if(document.getElementById("favoritesModal").style.display === "flex") renderFavoritesModal();
         });
     }
     
@@ -622,7 +650,7 @@
             await addCafe(name,url,cat,reg,desc); 
             document.getElementById("cafeName").value=""; document.getElementById("cafeRegion").value=""; document.getElementById("cafeUrl").value=""; document.getElementById("cafeDesc").value=""; 
         });
-        document.getElementById("favoritesFilterBtn").addEventListener("click",()=>{ onlyFavorites=!onlyFavorites; renderMainView(); });
+        document.getElementById("favoritesBtn").addEventListener("click",()=> renderFavoritesModal());
         document.getElementById("viewAllCafesBtn").addEventListener("click",openAllCafesModal);
         document.getElementById("wishlistBtn").addEventListener("click",()=> renderWishlistModal());
         document.getElementById("trashBtn").addEventListener("click",()=>{ renderTrashModal(); openModal(document.getElementById("trashModal")); });
