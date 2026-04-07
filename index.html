@@ -54,7 +54,7 @@
         .category-title:hover { color: #b88d54; }
         .view-all-btn { background: #f0e9e0; border: none; color: #ad8f6b; cursor: pointer; font-size: 0.7rem; padding: 0.2rem 0.7rem; border-radius: 40px; }
         .scroll-container { display: flex; overflow-x: auto; gap: 1.2rem; padding-bottom: 0.8rem; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
-        .card { background: #ffffff; border-radius: 24px; width: 280px; flex-shrink: 0; padding: 1.2rem; transition: 0.2s; border: 1px solid #efe6db; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .card { background: #ffffff; border-radius: 24px; width: 280px; flex-shrink: 0; padding: 1rem; transition: 0.2s; border: 1px solid #efe6db; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 20px -8px rgba(0,0,0,0.1); }
         .card-name { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.3rem; color: #2a241e; }
         .card-region { font-size: 0.65rem; color: #b48b54; display: flex; align-items: center; gap: 4px; margin-bottom: 0.5rem; }
@@ -62,8 +62,10 @@
         .card-link, .no-link-text { font-size: 0.7rem; margin: 0.3rem 0 0.8rem; }
         .card-link { color: #bc8f5a; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .no-link-text { color: #c1b2a0; font-style: italic; }
-        .card-actions { display: flex; gap: 12px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.6rem; justify-content: flex-end; flex-wrap: wrap; }
-        .card-actions button { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 6px; width: 36px; height: 36px; border-radius: 30px; display: inline-flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        
+        /* 操作栏 - 紧凑设计，确保手机上一行显示 */
+        .card-actions { display: flex; gap: 6px; margin-top: auto; border-top: 1px solid #f1eadf; padding-top: 0.5rem; justify-content: space-around; flex-wrap: nowrap; }
+        .card-actions button { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 4px; width: 32px; height: 32px; border-radius: 28px; display: inline-flex; align-items: center; justify-content: center; transition: background 0.2s; }
         .card-actions button:hover { background: #f0e9df; }
         .favorite-btn { color: #d4bb98; }
         .favorite-btn.active { color: #e2674b; }
@@ -84,7 +86,7 @@
         .small-card-info { flex: 1; }
         .small-card-name { font-weight: 600; font-size: 0.95rem; }
         .small-card-meta { font-size: 0.65rem; color: #b2916e; display: flex; gap: 8px; margin-top: 4px; }
-        .small-fav, .small-wish { font-size: 1.2rem; background: none; border: none; cursor: pointer; padding: 4px; }
+        .small-fav, .small-wish { font-size: 1.1rem; background: none; border: none; cursor: pointer; padding: 4px; }
         .small-fav { color: #d1b588; }
         .small-fav.active { color: #e2674b; }
         .small-wish { color: #b0a090; }
@@ -99,7 +101,7 @@
         .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
         .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0e6da; }
         .suggestion-item:hover { background: #fef5e8; }
-        @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } .category-title { font-size: 1.2rem; } }
+        @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } .category-title { font-size: 1.2rem; } .card-actions button { width: 30px; height: 30px; font-size: 0.85rem; } }
     </style>
 </head>
 <body>
