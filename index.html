@@ -12,7 +12,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #f2efe7; font-family: 'Inter', sans-serif; color: #1f1c18; padding: 1.5rem 1.2rem; line-height: 1.4; padding-bottom: 100px; }
-        body.modal-open { overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        body.modal-open { overflow: hidden; }
         .container { max-width: 1600px; margin: 0 auto; }
         
         .header { margin-bottom: 1.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; }
@@ -32,7 +32,7 @@
         .collapsed .toggle-icon { transform: rotate(-90deg); }
         
         .search-body { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
-        .search-input-group { flex: 3; min-width: 160px; display: flex; align-items: center; padding: 0.2rem 0.6rem; background: #ffffff; border-radius: 40px; border: 1px solid #e2d8ca; }
+        .search-input-group { flex: 3; min-width: 160px; display: flex; align-items: center; padding: 0.2rem 0.6rem; background: #ffffff; border-radius: 40px; border: 1px solid #e2d8ca; position: relative; z-index: 10; }
         .search-input-group i { color: #b48c5c; margin-right: 8px; }
         .search-input-group input { border: none; background: transparent; padding: 0.6rem 0; width: 100%; outline: none; font-size: 0.9rem; }
         .filter-group select { width: 100%; padding: 0.5rem 1rem; border-radius: 40px; border: 1px solid #e2d8ca; background: white; font-size: 0.85rem; cursor: pointer; }
@@ -94,13 +94,37 @@
         .small-wish { color: #b0a090; }
         .small-wish.active { color: #4c9f70; }
         .close-modal { font-size: 1.8rem; cursor: pointer; color: #a68d6e; line-height: 1; }
-        .back-to-top { position: fixed; bottom: 20px; right: 20px; background: #d9c8b6; color: #5e4b34; width: 44px; height: 44px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; border: none; font-size: 1.2rem; z-index: 99; transition: 0.2s; }
+        
+        /* 修复：回到顶部按钮固定定位增强，确保始终在右下角 */
+        .back-to-top {
+            position: fixed !important;
+            bottom: 20px;
+            right: 20px;
+            background: #d9c8b6;
+            color: #5e4b34;
+            width: 44px;
+            height: 44px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            border: none;
+            font-size: 1.2rem;
+            z-index: 99;
+            transition: 0.2s;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            will-change: transform;
+        }
         .back-to-top:hover { background: #cfc0ae; transform: scale(1.02); }
+        
         .footer-bar { margin-top: 2rem; padding: 0.8rem 1rem; background: #fffaf2; border-radius: 28px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; border: 1px solid #e7dfd1; }
         .toast-msg { position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%); background: #1f1c18e6; color: white; padding: 8px 20px; border-radius: 40px; font-size: 0.8rem; z-index: 1100; pointer-events: none; transition: opacity 0.2s; opacity: 0; }
         .detail-field { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0e6da; }
         .detail-field strong { color: #b88d54; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; }
-        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
+        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 20; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
         .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0e6da; }
         .suggestion-item:hover { background: #fef5e8; }
         @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } .category-title { font-size: 1.2rem; } .card-actions button { width: 30px; height: 30px; font-size: 0.85rem; } }
@@ -205,6 +229,7 @@
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     
     function getActiveCafes() { return allCafes.filter(c => !c.deleted); }
+    function getAllCafesIncludeDeleted() { return allCafes; }
     function getFilteredCafes() {
         let filtered = [...getActiveCafes()];
         if(searchKeyword.trim()){ let kw=searchKeyword.trim().toLowerCase(); filtered = filtered.filter(c=> c.name.toLowerCase().includes(kw) || (c.region&&c.region.toLowerCase().includes(kw)) || (c.description&&c.description.toLowerCase().includes(kw))); }
@@ -219,10 +244,13 @@
         if(cur && regionSet.has(cur)) sel.value=cur; else { sel.value=""; if(selectedRegion && !regionSet.has(selectedRegion)) selectedRegion=""; }
         selectedRegion = sel.value;
     }
+    // 所有分类按英文字母排序
     function computeGlobalCategories() {
-        let set = new Set(["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"]);
+        let set = new Set();
+        let defaultCategories = ["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"];
+        defaultCategories.forEach(c => set.add(c));
         getActiveCafes().forEach(c=>{ if(c.category) set.add(c.category); });
-        globalCategories = [...set].sort((a,b)=>(["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"].indexOf(a) - ["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"].indexOf(b)) || a.localeCompare(b));
+        globalCategories = [...set].sort((a,b)=>a.localeCompare(b));
     }
     function renderCategorySelect(selectEl=null){
         let sel = selectEl || document.getElementById("cafeCategory");
@@ -330,6 +358,14 @@
         div.querySelector(".share-btn").addEventListener("click",e=>{ e.stopPropagation(); shareCafe(cafe); });
         return div;
     }
+    function refreshAllOpenedModals() {
+        const allModal = document.getElementById("allCafesModal");
+        if (allModal.style.display === "flex" && allModal.refreshFunc) allModal.refreshFunc();
+        const catModal = document.getElementById("categoryModal");
+        if (catModal.style.display === "flex" && catModal.refreshFunc) catModal.refreshFunc();
+        if (document.getElementById("wishlistModal").style.display === "flex") renderWishlistModal();
+        if (document.getElementById("favoritesModal").style.display === "flex") renderFavoritesModal();
+    }
     async function toggleFavorite(id, val) {
         await cafesRef.child(id).update({ favorited: val });
         showToast(val ? "已收藏" : "取消收藏");
@@ -338,8 +374,7 @@
         });
         const cardBtn = document.querySelector(`.card .favorite-btn[data-id="${id}"]`);
         if(cardBtn) { if(val) cardBtn.classList.add("active"); else cardBtn.classList.remove("active"); }
-        // 如果收藏模态框打开，刷新它
-        if(document.getElementById("favoritesModal").style.display === "flex") renderFavoritesModal();
+        refreshAllOpenedModals();
     }
     async function toggleWishlist(id, val) {
         await cafesRef.child(id).update({ wishlisted: val });
@@ -349,23 +384,33 @@
         });
         const cardBtn = document.querySelector(`.card .wishlist-btn[data-id="${id}"]`);
         if(cardBtn) { if(val) cardBtn.classList.add("active"); else cardBtn.classList.remove("active"); }
-        if(document.getElementById("wishlistModal").style.display === "flex") renderWishlistModal();
+        refreshAllOpenedModals();
     }
     async function deleteToTrash(id){ 
         if(confirm("确定要将这家咖啡馆移至回收站吗？")){
             await cafesRef.child(id).update({ deleted: true, deletedAt: Date.now() }); 
             showToast("已移至回收站"); 
+            refreshAllOpenedModals();
         }
     }
     async function restoreFromTrash(id){ 
+        const cafe = allCafes.find(c => c.id === id);
+        if (!cafe) return;
+        const activeSameName = getActiveCafes().some(c => c.name.toLowerCase() === cafe.name.toLowerCase() && c.id !== id);
+        if (activeSameName) {
+            showToast(`恢复失败：名为“${cafe.name}”的咖啡馆已存在，请先删除或重命名现有的咖啡馆`, 3000);
+            return;
+        }
         await cafesRef.child(id).update({ deleted: false }); 
         showToast("已恢复");
         closeModal(document.getElementById("trashModal"));
+        refreshAllOpenedModals();
     }
     async function permanentDelete(id, skipConfirm = false){ 
         if(skipConfirm || confirm("永久删除不可恢复，确定吗？")){
             await cafesRef.child(id).remove(); 
             showToast("已永久删除"); 
+            refreshAllOpenedModals();
         }
     }
     async function addCafe(name,url,category,region,desc){
@@ -375,13 +420,9 @@
         return true;
     }
     async function updateCafe(id, data){ 
-        const cafe = allCafes.find(c => c.id === id);
-        if(cafe && cafe.name === data.name && cafe.region === data.region && cafe.url === data.url && cafe.category === data.category && cafe.description === data.description) {
-            showToast("未检测到修改");
-            return;
-        }
         await cafesRef.child(id).update(data); 
         showToast("已更新"); 
+        refreshAllOpenedModals();
     }
     
     function updateSuggestions() { 
@@ -420,7 +461,12 @@
         else { navigator.clipboard.writeText(text); showToast("已复制咖啡馆信息"); } 
     }
     
-    function openModal(modal){ 
+    function openModal(modal, closeOthers = true) { 
+        if (closeOthers) {
+            document.querySelectorAll(".modal").forEach(m => {
+                if (m !== modal && m.style.display === "flex") closeModal(m);
+            });
+        }
         if(modal.style.display === "flex") return;
         modal.style.display="flex"; 
         document.body.classList.add("modal-open"); 
@@ -429,17 +475,49 @@
         modal.addEventListener("click", modal._clickHandler); 
     }
     function closeModal(modal){ 
-        modal.style.display="none"; 
-        document.body.classList.remove("modal-open"); 
-        if(modal._clickHandler) modal.removeEventListener("click", modal._clickHandler);
-        delete modal._clickHandler;
+        modal.style.display = "none";
+        let anyOpen = Array.from(document.querySelectorAll(".modal")).some(m => m.style.display === "flex");
+        if (!anyOpen) {
+            document.body.classList.remove("modal-open");
+        }
+        if(modal._clickHandler) {
+            modal.removeEventListener("click", modal._clickHandler);
+            delete modal._clickHandler;
+        }
+        if (modal.id === "detailModal" && window._pendingRestoreModal) {
+            let restoreModal = window._pendingRestoreModal;
+            window._pendingRestoreModal = null;
+            restoreModal.style.display = "flex";
+            document.body.classList.add("modal-open");
+            if (!restoreModal._clickHandler) {
+                restoreModal._clickHandler = (e) => { if (e.target === restoreModal) closeModal(restoreModal); };
+                restoreModal.addEventListener("click", restoreModal._clickHandler);
+            }
+            if (restoreModal.refreshFunc) restoreModal.refreshFunc();
+        }
     }
     
     function showDetailModal(cafe){
-        let detail = document.getElementById("detailModal");
+        let otherModals = Array.from(document.querySelectorAll(".modal")).filter(m => m.style.display === "flex" && m.id !== "detailModal");
+        if (otherModals.length) {
+            window._pendingRestoreModal = otherModals[0];
+            otherModals.forEach(m => m.style.display = "none");
+        }
         let detailContent = document.getElementById("detailContent");
-        detailContent.innerHTML = `<div class="detail-field"><strong>名称</strong><br>${escapeHtml(cafe.name)}</div><div class="detail-field"><strong>地区</strong><br>${escapeHtml(cafe.region||'未填写')}</div><div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div><div class="detail-field"><strong>简介</strong><br>${escapeHtml(cafe.description||'暂无')}</div><div class="detail-field"><strong>链接</strong><br>${cafe.url?`<a href="${cafe.url}" target="_blank">${cafe.url}</a>`:'无'}</div>`;
-        if(detail.style.display !== "flex") openModal(detail);
+        detailContent.innerHTML = `<div class="detail-field"><strong>名称</strong><br>${escapeHtml(cafe.name)}</div>
+                                   <div class="detail-field"><strong>地区</strong><br>${escapeHtml(cafe.region||'未填写')}</div>
+                                   <div class="detail-field"><strong>分类</strong><br>${escapeHtml(cafe.category)}</div>
+                                   <div class="detail-field"><strong>简介</strong><br>${escapeHtml(cafe.description||'暂无')}</div>
+                                   <div class="detail-field"><strong>链接</strong><br>${cafe.url?`<a href="${cafe.url}" target="_blank">${cafe.url}</a>`:'无'}</div>`;
+        let detail = document.getElementById("detailModal");
+        if (detail.style.display !== "flex") {
+            detail.style.display = "flex";
+            document.body.classList.add("modal-open");
+            if (!detail._clickHandler) {
+                detail._clickHandler = (e) => { if (e.target === detail) closeModal(detail); };
+                detail.addEventListener("click", detail._clickHandler);
+            }
+        }
     }
     
     function renderTrashModal(){ 
@@ -524,17 +602,23 @@
     function importData(file){ 
         let reader=new FileReader(); 
         reader.onload=async e=>{ 
-            let items=JSON.parse(e.target.result); 
-            for(let item of items){ 
-                if(!item.name) continue; 
-                if(getActiveCafes().some(c=>c.name===item.name)){ showToast(`跳过重复: ${item.name}`); continue; } 
-                delete item.id; delete item.deleted; delete item.deletedAt; delete item.createdAt;
-                const favorited = item.favorited === true || item.favorited === "true";
-                const wishlisted = item.wishlisted === true || item.wishlisted === "true";
-                delete item.favorited; delete item.wishlisted;
-                await cafesRef.push({ ...item, favorited, wishlisted, createdAt: Date.now(), deleted: false }); 
-            } 
-            showToast("导入完成"); 
+            try {
+                let items=JSON.parse(e.target.result); 
+                for(let item of items){ 
+                    if(!item.name) continue; 
+                    const exists = getAllCafesIncludeDeleted().some(c => c.name.toLowerCase() === item.name.toLowerCase());
+                    if(exists){ showToast(`跳过重复: ${item.name}`); continue; } 
+                    delete item.id; delete item.deleted; delete item.deletedAt; delete item.createdAt;
+                    const favorited = item.favorited === true || item.favorited === "true";
+                    const wishlisted = item.wishlisted === true || item.wishlisted === "true";
+                    delete item.favorited; delete item.wishlisted;
+                    await cafesRef.push({ ...item, favorited, wishlisted, createdAt: Date.now(), deleted: false }); 
+                } 
+                showToast("导入完成"); 
+            } catch(err) {
+                showToast("文件解析失败，请提供有效的 JSON 文件");
+                console.error(err);
+            }
         }; 
         reader.readAsText(file); 
     }
@@ -567,6 +651,7 @@
         let container = document.getElementById("allModalList");
         let sortSelect = document.getElementById("allModalSortSelect");
         let searchInput = document.getElementById("allModalSearchInput");
+        const modal = document.getElementById("allCafesModal");
         function refresh(){
             let search = searchInput.value.toLowerCase();
             let sort = sortSelect.value;
@@ -574,26 +659,29 @@
             fillModalList(container, filtered, sort);
             document.getElementById("allCafesCount").innerText = `(${filtered.length})`;
         }
+        modal.refreshFunc = refresh;
         refresh();
         searchInput.oninput = refresh;
         sortSelect.onchange = refresh;
-        openModal(document.getElementById("allCafesModal"));
+        openModal(modal);
     }
     function openCategoryModal(cat){
         let container = document.getElementById("modalList");
         let searchInput = document.getElementById("modalSearchInput");
         let sortSelect = document.getElementById("modalSortSelect");
+        const modal = document.getElementById("categoryModal");
         function refresh(){
             let search = searchInput.value.toLowerCase();
             let sort = sortSelect.value;
             let filtered = getActiveCafes().filter(c=>c.category===cat && (c.name.toLowerCase().includes(search) || (c.region&&c.region.toLowerCase().includes(search))));
             fillModalList(container, filtered, sort);
         }
+        modal.refreshFunc = refresh;
         refresh();
         searchInput.oninput = refresh;
         sortSelect.onchange = refresh;
         document.getElementById("modalCategoryTitle").innerText = `📌 ${cat}`;
-        openModal(document.getElementById("categoryModal"));
+        openModal(modal);
     }
     
     function subscribeCafes(){
@@ -603,20 +691,10 @@
             allCafes = arr;
             computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView();
             if(document.getElementById("trashModal").style.display === "flex") renderTrashModal();
-            if(document.getElementById("allCafesModal").style.display === "flex"){
-                let search = document.getElementById("allModalSearchInput").value;
-                let sort = document.getElementById("allModalSortSelect").value;
-                let filtered = getActiveCafes().filter(c=>c.name.toLowerCase().includes(search) || (c.region&&c.region.toLowerCase().includes(search)));
-                fillModalList(document.getElementById("allModalList"), filtered, sort);
-                document.getElementById("allCafesCount").innerText = `(${filtered.length})`;
-            }
-            if(document.getElementById("categoryModal").style.display === "flex"){
-                let cat = document.getElementById("modalCategoryTitle").innerText.replace(/^📌 /,"");
-                let search = document.getElementById("modalSearchInput").value;
-                let sort = document.getElementById("modalSortSelect").value;
-                let filtered = getActiveCafes().filter(c=>c.category===cat && (c.name.toLowerCase().includes(search) || (c.region&&c.region.toLowerCase().includes(search))));
-                fillModalList(document.getElementById("modalList"), filtered, sort);
-            }
+            const allModal = document.getElementById("allCafesModal");
+            if (allModal.style.display === "flex" && allModal.refreshFunc) allModal.refreshFunc();
+            const catModal = document.getElementById("categoryModal");
+            if (catModal.style.display === "flex" && catModal.refreshFunc) catModal.refreshFunc();
             if(document.getElementById("wishlistModal").style.display === "flex") renderWishlistModal();
             if(document.getElementById("favoritesModal").style.display === "flex") renderFavoritesModal();
         });
@@ -678,6 +756,7 @@
                 let trash = allCafes.filter(c=>c.deleted); 
                 await Promise.all(trash.map(c => permanentDelete(c.id, true)));
                 showToast("已清空回收站"); 
+                if(document.getElementById("trashModal").style.display === "flex") renderTrashModal();
             } 
         });
     }
