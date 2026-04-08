@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>FEONG的咖啡馆收藏集 · 优化版</title>
+    <title>FEONG的咖啡馆收藏集</title>
     <link rel="manifest" href="data:application/manifest+json,{ \"name\":\"FEONG咖啡馆\", \"short_name\":\"咖啡馆集\", \"start_url\":\".\", \"display\":\"standalone\", \"theme_color\":\"#c7a16b\", \"background_color\":\"#f2efe7\" }">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
@@ -200,14 +200,14 @@
     let allCafes = [];
     let globalCategories = [];
     let searchKeyword = "", selectedRegion = "";
-    let categoryCollapsedState = JSON.parse(localStorage.getItem("categoryCollapsedState") || "{}");
+    // 强制所有分类默认为展开状态，不记忆任何折叠状态
+    let categoryCollapsedState = {};   // 永远为空对象，即所有分类展开
     let currentEditId = null;
     let currentDetailCafeId = null;
     let isLoadingAction = false;
     
-    // 模态框堆栈管理 (用于恢复)
-    let modalHistoryStack = [];      // 存储依次打开的模态框id
-    let suppressedModal = null;      // 当打开详情时，被临时隐藏的上一个模态框
+    // 模态框堆栈管理
+    let suppressedModal = null;
 
     // DOM 元素
     const toastMsg = document.getElementById("toastMsg");
@@ -232,8 +232,11 @@
         return filtered;
     }
     
-    // 折叠状态持久化
-    function persistCollapsedState() { localStorage.setItem("categoryCollapsedState", JSON.stringify(categoryCollapsedState)); }
+    // 折叠状态持久化：由于不再记忆，此函数空置或仅清除存储
+    function persistCollapsedState() {
+        // 不再保存折叠状态，确保每次刷新都是全展开
+        localStorage.removeItem("categoryCollapsedState");
+    }
     
     // 渲染主界面
     function renderMainView() {
@@ -249,9 +252,9 @@
             cafes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
             let sec = document.createElement("div"); sec.className="category-section";
             sec.dataset.category = cat;
-            const isCollapsed = categoryCollapsedState[cat] === true;
-            const collapsedClass = isCollapsed ? "collapsed" : "";
-            sec.innerHTML = `<div class="category-header"><div class="category-title-wrapper" tabindex="0" role="button" aria-label="折叠/展开 ${cat} 分类"><i class="fas fa-chevron-down category-toggle-icon ${collapsedClass}"></i><span class="category-title">${escapeHtml(cat)}</span></div><button class="view-all-btn" data-cat="${cat}" aria-label="查看全部 ${cat} 咖啡馆">📋 全部 (${cafes.length})</button></div><div class="scroll-container ${collapsedClass}"></div>`;
+            // 强制展开：collapsedClass 永远为空字符串
+            const collapsedClass = "";
+            sec.innerHTML = `<div class="category-header"><div class="category-title-wrapper" tabindex="0" role="button" aria-label="折叠/展开 ${cat} 分类"><i class="fas fa-chevron-down category-toggle-icon"></i><span class="category-title">${escapeHtml(cat)}</span></div><button class="view-all-btn" data-cat="${cat}" aria-label="查看全部 ${cat} 咖啡馆">📋 全部 (${cafes.length})</button></div><div class="scroll-container"></div>`;
             categoriesContainer.appendChild(sec);
             let scroll = sec.querySelector(".scroll-container");
             cafes.forEach(c=> scroll.appendChild(createCardElement(c)));
@@ -290,25 +293,43 @@
         const container = section.querySelector(".scroll-container");
         const icon = section.querySelector(".category-toggle-icon");
         if(container) {
+            // 手动切换折叠类，但不会保存到 localStorage
             container.classList.toggle("collapsed");
             icon.classList.toggle("collapsed");
-            categoryCollapsedState[cat] = container.classList.contains("collapsed");
-            persistCollapsedState();
+            // 注意：不再将状态存储到 categoryCollapsedState，因为用户手动折叠只是临时行为，刷新后恢复展开
         }
     }
     
     function expandAllCategories(){ 
-        document.querySelectorAll(".category-section").forEach(s=>{ let c=s.querySelector(".scroll-container"),i=s.querySelector(".category-toggle-icon"); if(c&&c.classList.contains("collapsed")){ c.classList.remove("collapsed"); i.classList.remove("collapsed"); categoryCollapsedState[s.dataset.category]=false; } }); persistCollapsedState(); 
+        document.querySelectorAll(".category-section").forEach(s=>{ 
+            let c=s.querySelector(".scroll-container"), i=s.querySelector(".category-toggle-icon"); 
+            if(c && c.classList.contains("collapsed")){ 
+                c.classList.remove("collapsed"); 
+                i.classList.remove("collapsed"); 
+            } 
+        }); 
     }
     function collapseAllCategories(){ 
-        document.querySelectorAll(".category-section").forEach(s=>{ let c=s.querySelector(".scroll-container"),i=s.querySelector(".category-toggle-icon"); if(c&&!c.classList.contains("collapsed")){ c.classList.add("collapsed"); i.classList.add("collapsed"); categoryCollapsedState[s.dataset.category]=true; } }); persistCollapsedState(); 
+        document.querySelectorAll(".category-section").forEach(s=>{ 
+            let c=s.querySelector(".scroll-container"), i=s.querySelector(".category-toggle-icon"); 
+            if(c && !c.classList.contains("collapsed")){ 
+                c.classList.add("collapsed"); 
+                i.classList.add("collapsed"); 
+            } 
+        }); 
     }
-    function toggleAllCategories(){ let anyExpanded = Array.from(document.querySelectorAll(".category-section")).some(s=>{ let c=s.querySelector(".scroll-container"); return c&&!c.classList.contains("collapsed"); }); anyExpanded?collapseAllCategories():expandAllCategories(); showToast(anyExpanded?"已折叠所有分类":"已展开所有分类"); }
+    function toggleAllCategories(){ 
+        let anyExpanded = Array.from(document.querySelectorAll(".category-section")).some(s=>{ 
+            let c=s.querySelector(".scroll-container"); 
+            return c && !c.classList.contains("collapsed"); 
+        }); 
+        anyExpanded?collapseAllCategories():expandAllCategories(); 
+        showToast(anyExpanded?"已折叠所有分类":"已展开所有分类"); 
+    }
     
-    // 增强模态框管理：支持堆栈恢复
+    // 增强模态框管理：支持恢复，并且禁止自动聚焦
     function openModal(modal) {
         if(modal.style.display === "flex") return;
-        // 如果当前有显示的其他模态框，暂时隐藏它 (但不从历史栈移除)
         let currentlyOpen = document.querySelectorAll(".modal");
         let visibleModal = null;
         for(let m of currentlyOpen) {
@@ -325,42 +346,32 @@
         }
         modal.style.display = "flex";
         document.body.classList.add("modal-open");
-        modalHistoryStack.push(modal.id);
         if(modal._clickHandler) modal.removeEventListener("click", modal._clickHandler);
         modal._clickHandler = (e)=>{ if(e.target===modal) closeModal(modal); };
         modal.addEventListener("click", modal._clickHandler);
-        let focusable = modal.querySelector('button, input, select, textarea, [tabindex="0"]');
-        if(focusable) focusable.focus();
+        // 不自动聚焦，避免键盘弹出
     }
     
     function closeModal(modal) {
-        let wasDetail = (modal.id === "detailModal");
         modal.style.display = "none";
-        modalHistoryStack = modalHistoryStack.filter(id => id !== modal.id);
-        // 恢复之前被隐藏的模态框（如果有）
         if(suppressedModal && suppressedModal !== modal) {
             suppressedModal.style.display = "flex";
-            // 如果被恢复的模态框有刷新函数，调用它以保证数据最新
             if(suppressedModal.refreshFn && typeof suppressedModal.refreshFn === "function") {
                 suppressedModal.refreshFn();
             }
             suppressedModal = null;
         } else {
-            // 没有待恢复的模态框，检查是否还有其他打开的模态框（可能由于嵌套打开详情导致堆栈复杂）
             let anyOpen = Array.from(document.querySelectorAll(".modal")).some(m => m.style.display === "flex");
             if(!anyOpen) {
                 document.body.classList.remove("modal-open");
             }
         }
         if(modal._clickHandler) { modal.removeEventListener("click", modal._clickHandler); delete modal._clickHandler; }
-        if(wasDetail) currentDetailCafeId = null;
+        if(modal.id === "detailModal") currentDetailCafeId = null;
     }
     
-    // 详情模态框特殊处理：保存当前打开的模态框（如果有）然后打开详情
     function showDetailModal(cafe){
         const detailModal = document.getElementById("detailModal");
-        // 如果已经有其他模态框打开，保存到 suppressedModal (openModal 会自动处理隐藏)
-        // 但为了明确，手动查找当前可见的非详情模态框
         let currentlyVisible = null;
         for(let m of document.querySelectorAll(".modal")) {
             if(m.style.display === "flex" && m.id !== "detailModal") {
@@ -378,7 +389,6 @@
         currentDetailCafeId = cafe.id;
         detailModal.style.display = "flex";
         document.body.classList.add("modal-open");
-        modalHistoryStack.push(detailModal.id);
         if(detailModal._clickHandler) detailModal.removeEventListener("click", detailModal._clickHandler);
         detailModal._clickHandler = (e)=>{ if(e.target===detailModal) closeModal(detailModal); };
         detailModal.addEventListener("click", detailModal._clickHandler);
@@ -396,7 +406,6 @@
         container.querySelector(".delete-detail").addEventListener("click", () => { closeModal(document.getElementById("detailModal")); deleteToTrash(cafe.id); });
     }
     
-    // 异步操作包装
     async function withLoading(btnId, promiseFn) {
         if(isLoadingAction) return;
         let btn = btnId ? document.getElementById(btnId) : null;
@@ -434,7 +443,6 @@
     async function updateCafe(id, data){ await cafesRef.child(id).update(data); showToast("已更新"); }
     function shareCafe(cafe){ let text = `☕ ${cafe.name}\n📍 ${cafe.region||'未知地区'}\n📝 ${cafe.description||'暂无简介'}\n🔗 ${cafe.url||'无链接'}`; if(navigator.share) navigator.share({title:cafe.name, text:text}).catch(()=>{}); else { navigator.clipboard.writeText(text); showToast("已复制咖啡馆信息"); } }
     
-    // 模态框通用列表填充
     function fillModalList(container, cafes, sortType="date"){
         let items=[...cafes];
         if(sortType==="name") items.sort((a,b)=>a.name.localeCompare(b.name));
@@ -447,7 +455,6 @@
         container.querySelectorAll(".small-wish").forEach(btn=>{ btn.addEventListener("click",(e)=>{ e.stopPropagation(); toggleWishlist(btn.dataset.id, !btn.classList.contains("active")); }); });
     }
     
-    // 各个模态框的打开函数，并为模态框绑定 refresh 方法以便恢复时刷新
     function openAllCafesModal(){ 
         let modal=document.getElementById("allCafesModal"); 
         let container=document.getElementById("allModalList"); 
@@ -552,14 +559,11 @@
         openModal(document.getElementById("editModal")); 
     }
     
-    // 数据相关函数
     function computeGlobalCategories(){ let set=new Set(["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"]); getActiveCafes().forEach(c=>{ if(c.category) set.add(c.category); }); globalCategories=[...set].sort((a,b)=>a.localeCompare(b)); }
     function updateRegionFilter(){ let regionSet=new Set(); getActiveCafes().forEach(c=>{ if(c.region) regionSet.add(c.region.trim()); }); let sel=document.getElementById("regionFilter"), cur=sel.value; sel.innerHTML='<option value="">🌍 所有地区</option>'; [...regionSet].sort().forEach(r=>{ let opt=document.createElement("option"); opt.value=r; opt.textContent=r; sel.appendChild(opt); }); if(cur&&regionSet.has(cur)) sel.value=cur; else sel.value=""; selectedRegion=sel.value; }
     function renderCategorySelect(selectEl=null){ let sel=selectEl||document.getElementById("cafeCategory"); if(!sel) return; sel.innerHTML=""; globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); }); }
     
-    function subscribeCafes(){ cafesRef.on("value",snap=>{ let data=snap.val(); let arr=[]; if(data) Object.keys(data).forEach(k=>{ let it=data[k]; arr.push({ id:k, name:it.name||"未命名", url:it.url||"", category:it.category||"Others", favorited:it.favorited===true, wishlisted:it.wishlisted===true, region:it.region||"", description:it.description||"", createdAt:it.createdAt||0, deleted:it.deleted===true, deletedAt:it.deletedAt||0 }); }); allCafes=arr; computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView(); if(document.getElementById("detailModal").style.display==="flex" && currentDetailCafeId){ let updated=allCafes.find(c=>c.id===currentDetailCafeId); if(updated) renderDetailContent(updated); } // 同时刷新所有可能被恢复的模态框
-        for(let m of document.querySelectorAll(".modal")) { if(m.style.display==="flex" && m.refreshFn) m.refreshFn(); }
-    }); }
+    function subscribeCafes(){ cafesRef.on("value",snap=>{ let data=snap.val(); let arr=[]; if(data) Object.keys(data).forEach(k=>{ let it=data[k]; arr.push({ id:k, name:it.name||"未命名", url:it.url||"", category:it.category||"Others", favorited:it.favorited===true, wishlisted:it.wishlisted===true, region:it.region||"", description:it.description||"", createdAt:it.createdAt||0, deleted:it.deleted===true, deletedAt:it.deletedAt||0 }); }); allCafes=arr; computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView(); if(document.getElementById("detailModal").style.display==="flex" && currentDetailCafeId){ let updated=allCafes.find(c=>c.id===currentDetailCafeId); if(updated) renderDetailContent(updated); } for(let m of document.querySelectorAll(".modal")) { if(m.style.display==="flex" && m.refreshFn) m.refreshFn(); } }); }
     async function seedData(){ let snap=await cafesRef.once("value"); if(snap.exists()) return; let ex=[{name:"蓝瓶咖啡",url:"https://bluebottlecoffee.com",category:"Cafe",favorited:true,wishlisted:false,region:"东京·涩谷",description:"精品咖啡领航者，手冲与冷萃闻名。"},{name:"福来甜品屋",category:"Dessert",region:"槟城",description:"传统马来甜点+创意西式蛋糕。"},{name:"槟城娘惹餐厅",url:"https://example.com/nyonya",category:"Nyonya",favorited:true,wishlisted:true,region:"槟城乔治市",description:"正宗娘惹菜，叻沙与小金杯。"},{name:"合艾泰式咖啡",category:"Hatyai",region:"合艾",description:"泰南风味咖啡，搭配斑斓甜品。"},{name:"喫茶 夜雾",category:"Japanese",favorited:true,wishlisted:false,region:"京都",description:"日式深烘，昭和复古喫茶店。"}]; for(let e of ex) await cafesRef.push({ ...e, createdAt:Date.now(), deleted:false }); }
     function initCollapsible(){ let searchCard=document.getElementById("searchCollapsible"); let addCard=document.getElementById("addCollapsible"); searchCard.classList.add("collapsed"); addCard.classList.add("collapsed"); document.getElementById("searchHeader").addEventListener("click",()=>{ searchCard.classList.toggle("collapsed"); let expanded=!searchCard.classList.contains("collapsed"); document.getElementById("searchHeader").setAttribute("aria-expanded",expanded); }); document.getElementById("addHeader").addEventListener("click",()=>{ addCard.classList.toggle("collapsed"); let expanded=!addCard.classList.contains("collapsed"); document.getElementById("addHeader").setAttribute("aria-expanded",expanded); }); }
     function bindEvents(){
@@ -581,7 +585,16 @@
         document.getElementById("saveEditBtn").addEventListener("click",async()=>{ let newName=document.getElementById("editName").value.trim(); if(!newName){ alert("名称不能为空"); return; } if(allCafes.some(c=>c.id!==currentEditId && c.name.toLowerCase()===newName.toLowerCase())){ alert("名称已存在"); return; } await updateCafe(currentEditId,{ name:newName, region:document.getElementById("editRegion").value, url:safeUrl(document.getElementById("editUrl").value), category:document.getElementById("editCategory").value, description:document.getElementById("editDesc").value }); closeModal(document.getElementById("editModal")); });
         document.getElementById("emptyTrashBtn")?.addEventListener("click",async()=>{ if(confirm("永久清空回收站？")){ let trash=allCafes.filter(c=>c.deleted); await Promise.all(trash.map(c=>permanentDelete(c.id,true))); showToast("已清空回收站"); closeModal(document.getElementById("trashModal")); } });
     }
-    async function init(){ await seedData(); subscribeCafes(); bindEvents(); renderCategorySelect(); initCollapsible(); }
+    async function init(){ 
+        // 清除任何可能残留的折叠状态存储，确保所有分类默认展开
+        localStorage.removeItem("categoryCollapsedState");
+        categoryCollapsedState = {};
+        await seedData(); 
+        subscribeCafes(); 
+        bindEvents(); 
+        renderCategorySelect(); 
+        initCollapsible(); 
+    }
     init();
 })();
 </script>
