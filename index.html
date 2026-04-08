@@ -100,11 +100,6 @@
         .toast-msg { position: fixed; bottom: 30%; left: 50%; transform: translateX(-50%); background: #1f1c18e6; color: white; padding: 8px 20px; border-radius: 40px; font-size: 0.8rem; z-index: 1100; pointer-events: none; transition: opacity 0.2s; opacity: 0; }
         .detail-field { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0e6da; }
         .detail-field strong { color: #b88d54; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; }
-        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 20; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e2d8ca; }
-        .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0e6da; }
-        .suggestion-item:hover { background: #fef5e8; }
-        .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.6s linear infinite; margin-right: 6px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
         [aria-label]:focus-visible { outline: 2px solid #c7a16b; outline-offset: 2px; }
         @media (max-width: 640px) { body { padding: 1rem; } .card { width: 260px; } .category-title { font-size: 1.2rem; } .card-actions button { padding: 6px; min-width: 44px; min-height: 44px; } }
     </style>
@@ -132,7 +127,6 @@
                 <div class="search-input-group" style="position:relative;">
                     <i class="fas fa-search"></i>
                     <input type="text" id="searchKeyword" placeholder="搜索名称、地区或简介..." autocomplete="off" aria-label="搜索关键词">
-                    <div id="suggestionsBox" class="suggestions-box"></div>
                 </div>
                 <div class="filter-group"><select id="regionFilter" aria-label="地区筛选"><option value="">🌍 所有地区</option></select></div>
                 <button class="clear-filter" id="clearFiltersBtn" aria-label="清除筛选"><i class="fas fa-eraser"></i> 清除</button>
@@ -200,14 +194,10 @@
     let allCafes = [];
     let globalCategories = [];
     let searchKeyword = "", selectedRegion = "";
-    // 强制所有分类默认为展开状态，不记忆任何折叠状态
-    let categoryCollapsedState = {};   // 永远为空对象，即所有分类展开
     let currentEditId = null;
     let currentDetailCafeId = null;
     let isLoadingAction = false;
-    
-    // 模态框堆栈管理
-    let suppressedModal = null;
+    let suppressedModal = null;      // 用于模态框嵌套恢复
 
     // DOM 元素
     const toastMsg = document.getElementById("toastMsg");
@@ -215,11 +205,10 @@
     const categoriesContainer = document.getElementById("categoriesContainer");
     
     // 工具函数
-    function showToast(msg, duration=2000, isError=false) { 
+    function showToast(msg, duration=2000) { 
         toastMsg.innerText = msg; 
         toastMsg.style.opacity = "1"; 
         setTimeout(()=> toastMsg.style.opacity = "0", duration); 
-        if(isError) console.error(msg);
     }
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     function safeUrl(url) { if(!url) return ""; if(url.startsWith("http://") || url.startsWith("https://")) return url; return ""; }
@@ -232,13 +221,7 @@
         return filtered;
     }
     
-    // 折叠状态持久化：由于不再记忆，此函数空置或仅清除存储
-    function persistCollapsedState() {
-        // 不再保存折叠状态，确保每次刷新都是全展开
-        localStorage.removeItem("categoryCollapsedState");
-    }
-    
-    // 渲染主界面
+    // 渲染主界面 (所有分类默认展开)
     function renderMainView() {
         if(!categoriesContainer) return;
         let filtered = getFilteredCafes();
@@ -252,14 +235,12 @@
             cafes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
             let sec = document.createElement("div"); sec.className="category-section";
             sec.dataset.category = cat;
-            // 强制展开：collapsedClass 永远为空字符串
-            const collapsedClass = "";
             sec.innerHTML = `<div class="category-header"><div class="category-title-wrapper" tabindex="0" role="button" aria-label="折叠/展开 ${cat} 分类"><i class="fas fa-chevron-down category-toggle-icon"></i><span class="category-title">${escapeHtml(cat)}</span></div><button class="view-all-btn" data-cat="${cat}" aria-label="查看全部 ${cat} 咖啡馆">📋 全部 (${cafes.length})</button></div><div class="scroll-container"></div>`;
             categoriesContainer.appendChild(sec);
             let scroll = sec.querySelector(".scroll-container");
             cafes.forEach(c=> scroll.appendChild(createCardElement(c)));
             const titleWrapper = sec.querySelector(".category-title-wrapper");
-            titleWrapper.addEventListener("click", () => { toggleCategory(cat); });
+            titleWrapper.addEventListener("click", () => toggleCategory(cat));
             sec.querySelector(".view-all-btn").addEventListener("click", (e) => { e.stopPropagation(); openCategoryModal(cat); });
         }
         if(categoriesContainer.children.length===0) categoriesContainer.innerHTML = `<div style="padding:2rem;text-align:center;">🔍 没有找到咖啡厅</div>`;
@@ -293,10 +274,8 @@
         const container = section.querySelector(".scroll-container");
         const icon = section.querySelector(".category-toggle-icon");
         if(container) {
-            // 手动切换折叠类，但不会保存到 localStorage
             container.classList.toggle("collapsed");
             icon.classList.toggle("collapsed");
-            // 注意：不再将状态存储到 categoryCollapsedState，因为用户手动折叠只是临时行为，刷新后恢复展开
         }
     }
     
@@ -327,7 +306,7 @@
         showToast(anyExpanded?"已折叠所有分类":"已展开所有分类"); 
     }
     
-    // 增强模态框管理：支持恢复，并且禁止自动聚焦
+    // 模态框管理 (支持恢复，不自动聚焦)
     function openModal(modal) {
         if(modal.style.display === "flex") return;
         let currentlyOpen = document.querySelectorAll(".modal");
@@ -349,7 +328,6 @@
         if(modal._clickHandler) modal.removeEventListener("click", modal._clickHandler);
         modal._clickHandler = (e)=>{ if(e.target===modal) closeModal(modal); };
         modal.addEventListener("click", modal._clickHandler);
-        // 不自动聚焦，避免键盘弹出
     }
     
     function closeModal(modal) {
@@ -362,9 +340,7 @@
             suppressedModal = null;
         } else {
             let anyOpen = Array.from(document.querySelectorAll(".modal")).some(m => m.style.display === "flex");
-            if(!anyOpen) {
-                document.body.classList.remove("modal-open");
-            }
+            if(!anyOpen) document.body.classList.remove("modal-open");
         }
         if(modal._clickHandler) { modal.removeEventListener("click", modal._clickHandler); delete modal._clickHandler; }
         if(modal.id === "detailModal") currentDetailCafeId = null;
@@ -409,9 +385,9 @@
     async function withLoading(btnId, promiseFn) {
         if(isLoadingAction) return;
         let btn = btnId ? document.getElementById(btnId) : null;
-        if(btn) { btn.disabled = true; }
+        if(btn) btn.disabled = true;
         isLoadingAction = true;
-        try { await promiseFn(); } catch(e) { showToast("操作失败: "+e.message, 3000, true); } finally { 
+        try { await promiseFn(); } catch(e) { showToast("操作失败: "+e.message); } finally { 
             if(btn) btn.disabled = false;
             isLoadingAction = false;
         }
@@ -443,6 +419,7 @@
     async function updateCafe(id, data){ await cafesRef.child(id).update(data); showToast("已更新"); }
     function shareCafe(cafe){ let text = `☕ ${cafe.name}\n📍 ${cafe.region||'未知地区'}\n📝 ${cafe.description||'暂无简介'}\n🔗 ${cafe.url||'无链接'}`; if(navigator.share) navigator.share({title:cafe.name, text:text}).catch(()=>{}); else { navigator.clipboard.writeText(text); showToast("已复制咖啡馆信息"); } }
     
+    // 模态框列表填充
     function fillModalList(container, cafes, sortType="date"){
         let items=[...cafes];
         if(sortType==="name") items.sort((a,b)=>a.name.localeCompare(b.name));
@@ -455,6 +432,7 @@
         container.querySelectorAll(".small-wish").forEach(btn=>{ btn.addEventListener("click",(e)=>{ e.stopPropagation(); toggleWishlist(btn.dataset.id, !btn.classList.contains("active")); }); });
     }
     
+    // 各模态框打开函数
     function openAllCafesModal(){ 
         let modal=document.getElementById("allCafesModal"); 
         let container=document.getElementById("allModalList"); 
@@ -559,6 +537,7 @@
         openModal(document.getElementById("editModal")); 
     }
     
+    // 数据相关
     function computeGlobalCategories(){ let set=new Set(["Bar","Cafe","Chinese","Dessert","Fine Dine","Hatyai","Japanese","Kopitiam","Korean","Nyonya","Thai","Western","Others"]); getActiveCafes().forEach(c=>{ if(c.category) set.add(c.category); }); globalCategories=[...set].sort((a,b)=>a.localeCompare(b)); }
     function updateRegionFilter(){ let regionSet=new Set(); getActiveCafes().forEach(c=>{ if(c.region) regionSet.add(c.region.trim()); }); let sel=document.getElementById("regionFilter"), cur=sel.value; sel.innerHTML='<option value="">🌍 所有地区</option>'; [...regionSet].sort().forEach(r=>{ let opt=document.createElement("option"); opt.value=r; opt.textContent=r; sel.appendChild(opt); }); if(cur&&regionSet.has(cur)) sel.value=cur; else sel.value=""; selectedRegion=sel.value; }
     function renderCategorySelect(selectEl=null){ let sel=selectEl||document.getElementById("cafeCategory"); if(!sel) return; sel.innerHTML=""; globalCategories.forEach(c=>{ let opt=document.createElement("option"); opt.value=c; opt.textContent=c; sel.appendChild(opt); }); }
@@ -566,6 +545,7 @@
     function subscribeCafes(){ cafesRef.on("value",snap=>{ let data=snap.val(); let arr=[]; if(data) Object.keys(data).forEach(k=>{ let it=data[k]; arr.push({ id:k, name:it.name||"未命名", url:it.url||"", category:it.category||"Others", favorited:it.favorited===true, wishlisted:it.wishlisted===true, region:it.region||"", description:it.description||"", createdAt:it.createdAt||0, deleted:it.deleted===true, deletedAt:it.deletedAt||0 }); }); allCafes=arr; computeGlobalCategories(); updateRegionFilter(); renderCategorySelect(); renderMainView(); if(document.getElementById("detailModal").style.display==="flex" && currentDetailCafeId){ let updated=allCafes.find(c=>c.id===currentDetailCafeId); if(updated) renderDetailContent(updated); } for(let m of document.querySelectorAll(".modal")) { if(m.style.display==="flex" && m.refreshFn) m.refreshFn(); } }); }
     async function seedData(){ let snap=await cafesRef.once("value"); if(snap.exists()) return; let ex=[{name:"蓝瓶咖啡",url:"https://bluebottlecoffee.com",category:"Cafe",favorited:true,wishlisted:false,region:"东京·涩谷",description:"精品咖啡领航者，手冲与冷萃闻名。"},{name:"福来甜品屋",category:"Dessert",region:"槟城",description:"传统马来甜点+创意西式蛋糕。"},{name:"槟城娘惹餐厅",url:"https://example.com/nyonya",category:"Nyonya",favorited:true,wishlisted:true,region:"槟城乔治市",description:"正宗娘惹菜，叻沙与小金杯。"},{name:"合艾泰式咖啡",category:"Hatyai",region:"合艾",description:"泰南风味咖啡，搭配斑斓甜品。"},{name:"喫茶 夜雾",category:"Japanese",favorited:true,wishlisted:false,region:"京都",description:"日式深烘，昭和复古喫茶店。"}]; for(let e of ex) await cafesRef.push({ ...e, createdAt:Date.now(), deleted:false }); }
     function initCollapsible(){ let searchCard=document.getElementById("searchCollapsible"); let addCard=document.getElementById("addCollapsible"); searchCard.classList.add("collapsed"); addCard.classList.add("collapsed"); document.getElementById("searchHeader").addEventListener("click",()=>{ searchCard.classList.toggle("collapsed"); let expanded=!searchCard.classList.contains("collapsed"); document.getElementById("searchHeader").setAttribute("aria-expanded",expanded); }); document.getElementById("addHeader").addEventListener("click",()=>{ addCard.classList.toggle("collapsed"); let expanded=!addCard.classList.contains("collapsed"); document.getElementById("addHeader").setAttribute("aria-expanded",expanded); }); }
+    
     function bindEvents(){
         document.getElementById("addCafeBtn").addEventListener("click",async()=>{ let name=document.getElementById("cafeName").value, url=document.getElementById("cafeUrl").value, cat=document.getElementById("cafeCategory").value, reg=document.getElementById("cafeRegion").value, desc=document.getElementById("cafeDesc").value; await addCafe(name,url,cat,reg,desc); document.getElementById("cafeName").value=""; document.getElementById("cafeRegion").value=""; document.getElementById("cafeUrl").value=""; document.getElementById("cafeDesc").value=""; });
         document.getElementById("favoritesBtn").addEventListener("click",renderFavoritesModal);
@@ -585,10 +565,8 @@
         document.getElementById("saveEditBtn").addEventListener("click",async()=>{ let newName=document.getElementById("editName").value.trim(); if(!newName){ alert("名称不能为空"); return; } if(allCafes.some(c=>c.id!==currentEditId && c.name.toLowerCase()===newName.toLowerCase())){ alert("名称已存在"); return; } await updateCafe(currentEditId,{ name:newName, region:document.getElementById("editRegion").value, url:safeUrl(document.getElementById("editUrl").value), category:document.getElementById("editCategory").value, description:document.getElementById("editDesc").value }); closeModal(document.getElementById("editModal")); });
         document.getElementById("emptyTrashBtn")?.addEventListener("click",async()=>{ if(confirm("永久清空回收站？")){ let trash=allCafes.filter(c=>c.deleted); await Promise.all(trash.map(c=>permanentDelete(c.id,true))); showToast("已清空回收站"); closeModal(document.getElementById("trashModal")); } });
     }
+    
     async function init(){ 
-        // 清除任何可能残留的折叠状态存储，确保所有分类默认展开
-        localStorage.removeItem("categoryCollapsedState");
-        categoryCollapsedState = {};
         await seedData(); 
         subscribeCafes(); 
         bindEvents(); 
