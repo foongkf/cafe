@@ -13,15 +13,33 @@
     --bg:#faf7f2; --card:#ffffff; --text:#2c2320; --muted:#8a7a6d;
     --accent:#a8683c; --accent-soft:#f7ede4; --border:#ece1d6; --radius:16px;
     --card-w-mobile:82%; --card-w-tablet:38%; --card-w-desktop:23%; --fade-w:48px;
+
+    /* ---------- 统一卡片 token（所有卡片共用同一套数值） ---------- */
+    --card-pad-x:16px;        /* 卡片左右内边距 */
+    --card-pad-y:15px;        /* 卡片上下内边距 */
+    --card-radius:var(--radius);
+    --card-border:1px solid var(--border);
+    --card-shadow:0 1px 2px rgba(90,60,35,.04);
+    --card-shadow-hover:0 10px 24px rgba(120,80,50,.11);
+    --card-gap:9px;           /* 区块之间的统一间距 */
+    --card-title-size:16px;   /* 标题字号 */
+    --card-title-line:1.35;   /* 标题行高 */
+    --card-desc-size:13.5px;  /* 描述字号 */
+    --card-desc-line:1.6;     /* 描述行高 */
+    --tag-height:22px;        /* 标签区固定高度 */
+    --foot-height:30px;       /* 底部链接区固定高度 */
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
+  /* 全站禁止出现 overscroll-behavior:none / touch-action:none / overflow:hidden，
+     以保证纵向手势能冒泡给页面、原生下拉刷新可用。 */
   body{
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     background:var(--bg); color:var(--text);
     -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     line-height:1.5; min-height:100vh;
   }
+  /* 唯一的滚动锁定类，只由 syncBodyScroll() 增删 */
   body.no-scroll{overflow:hidden;}
 
   /* ---------- 顶部 ---------- */
@@ -73,12 +91,25 @@
     box-shadow:0 2px 8px rgba(168,104,60,.22);
   }
   .btn-random:active{opacity:.86;transform:scale(.98);}
+  /* 排序切换按钮 */
+  .btn-sort{
+    flex:0 0 auto;padding:11px 15px;border-radius:12px;
+    border:1px solid var(--border);background:#fff;color:var(--text);
+    font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;
+    white-space:nowrap;line-height:1;transition:background .15s, border-color .15s, color .15s;
+  }
+  .btn-sort:active{background:#f3ece5;}
+  .btn-sort[aria-pressed="true"]{background:var(--accent-soft);border-color:#e2cdb8;color:var(--accent);}
 
   /* ---------- 顶部 chips ---------- */
+  /* 横向滚动容器：只保留横向 overscroll 隔离，纵向手势必须能冒泡给页面 */
   .chips{
     display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+    overscroll-behavior-x:contain;   /* 横向滚动不外溢 */
+    overscroll-behavior-y:auto;      /* 纵向手势交还给页面（原生下拉刷新） */
     padding:12px 16px 14px;max-width:1200px;margin:0 auto;
-    scrollbar-width:none;-webkit-overflow-scrolling:touch;position:relative;
+    scrollbar-width:none;position:relative;
+    /* 注意：已移除 -webkit-overflow-scrolling:touch，避免生成独立滚动层吞掉纵向手势 */
   }
   .chips::-webkit-scrollbar{display:none;}
   .chip{
@@ -131,9 +162,12 @@
 
   .cat-scroller{
     display:flex;gap:14px;align-items:stretch;overflow-x:auto;
-    overscroll-behavior-x:contain;scroll-snap-type:x proximity;
-    -webkit-overflow-scrolling:touch;padding:2px 2px 14px;
+    overscroll-behavior-x:contain;   /* 横向滚动不外溢 */
+    overscroll-behavior-y:auto;      /* 纵向手势交还给页面（原生下拉刷新） */
+    scroll-snap-type:x proximity;
+    padding:2px 2px 14px;
     scrollbar-width:thin;scrollbar-color:#ddd0c2 transparent;
+    /* 注意：已移除 -webkit-overflow-scrolling:touch */
   }
   .cat-scroller::-webkit-scrollbar{height:6px;}
   .cat-scroller::-webkit-scrollbar-thumb{background:#ddd0c2;border-radius:3px;}
@@ -152,40 +186,103 @@
     width:100%;min-width:0;max-width:100%;flex:initial;scroll-snap-align:none;
   }
 
-  /* ---------- 卡片 ---------- */
+  /* ---------- 卡片（折叠 / 展开完全一致，只改变宽度） ---------- */
   .card{
-    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-    padding:15px 16px 14px;display:flex;flex-direction:column;gap:9px;
-    cursor:pointer;box-shadow:0 1px 2px rgba(90,60,35,.04);
+    position:relative;
+    background:var(--card);
+    border:var(--card-border);
+    border-radius:var(--card-radius);
+    padding:var(--card-pad-y) var(--card-pad-x);
+    display:flex;flex-direction:column;gap:var(--card-gap);
+    cursor:pointer;
+    box-shadow:var(--card-shadow);
     transition:transform .16s ease, box-shadow .16s ease, border-color .16s;
-    -webkit-user-select:none;user-select:none;height:100%;
+    -webkit-user-select:none;user-select:none;
+    height:100%;
   }
-  @media (hover:hover){ .card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(120,80,50,.11);border-color:#e3d5c6;} }
+  @media (hover:hover){ .card:hover{transform:translateY(-3px);box-shadow:var(--card-shadow-hover);border-color:#e3d5c6;} }
   .card:active{transform:scale(.988);}
-  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-  .card-title{font-size:16px;font-weight:650;margin:0;line-height:1.35;letter-spacing:.1px;word-break:break-word;}
-  .fav-btn{
-    flex:0 0 auto;background:none;border:none;padding:1px 3px;
-    font-size:19px;line-height:1;cursor:pointer;color:#d9c9bb;font-family:inherit;
-    transition:transform .14s, color .14s;
+
+  /* 区块 1：标题（最多 2 行） */
+  .card-title{
+    margin:0;
+    padding-right:30px;                 /* 给右上角收藏按钮留位，按钮位置不受标题行数影响 */
+    font-size:var(--card-title-size);
+    font-weight:650;
+    line-height:var(--card-title-line);
+    letter-spacing:.1px;
+    color:var(--text);
+    word-break:break-word;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    min-height:calc(var(--card-title-size) * var(--card-title-line));
   }
-  .fav-btn.on{color:#e0574a;}
-  .fav-btn:active{transform:scale(1.22);}
-  .tags{display:flex;flex-wrap:wrap;gap:6px;}
-  .tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:1;padding:5px 9px;border-radius:999px;white-space:nowrap;}
+
+  /* 区块 2：标签（固定高度，无数据也占位） */
+  .tags{
+    display:flex;flex-wrap:nowrap;gap:6px;align-items:center;
+    min-height:var(--tag-height);
+    overflow:hidden;
+  }
+  .tag{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:12px;line-height:1;padding:5px 9px;border-radius:999px;
+    white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;
+  }
   .tag-area{background:#eef3ee;color:#4f6b4f;}
   .tag-cat{background:var(--accent-soft);color:#8a5a34;}
+  /* 无地区 / 无分类时的浅色占位 */
+  .tag.is-empty{background:#f5f1ec;color:#b6a698;}
+
+  /* 区块 3：描述（最多 3 行，无描述也占位，高度一致） */
   .card-desc{
-    margin:0;font-size:13.5px;line-height:1.6;color:var(--muted);
-    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+    margin:0;
+    font-size:var(--card-desc-size);
+    line-height:var(--card-desc-line);
+    color:var(--muted);
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
     word-break:break-word;
+    min-height:calc(var(--card-desc-size) * var(--card-desc-line) * 3);
+  }
+  .card-desc.is-empty{color:#c3b5a8;}
+
+  /* 区块 4：底部链接（margin-top:auto 顶到卡片底部，无链接用同尺寸禁用占位） */
+  .card-foot{
+    margin-top:auto;
+    display:flex;align-items:center;
+    min-height:var(--foot-height);
   }
   .pill-xhs{
-    margin-top:auto;align-self:flex-start;font-size:12.5px;font-weight:600;
-    color:var(--accent);background:var(--accent-soft);padding:6px 11px;border-radius:9px;
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:12.5px;font-weight:600;line-height:1;
+    color:var(--accent);background:var(--accent-soft);
+    padding:9px 12px;border-radius:9px;
     text-decoration:none;transition:background .15s;
+    white-space:nowrap;
   }
   .pill-xhs:hover{background:#f0e0d2;}
+  .pill-xhs.is-disabled{
+    color:#b6a698;background:#f5f1ec;cursor:default;pointer-events:none;
+  }
+
+  /* 收藏按钮：所有卡片固定在右上角同一位置，不随标题行数变化 */
+  .fav-btn{
+    position:absolute;top:10px;right:10px;z-index:1;
+    width:32px;height:32px;padding:0;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;border:none;border-radius:50%;
+    font-size:19px;line-height:1;font-family:inherit;
+    cursor:pointer;color:#d9c9bb;
+    transition:transform .14s, color .14s, background .14s;
+  }
+  .fav-btn:hover{background:#faf3ec;}
+  .fav-btn.on{color:#e0574a;}
+  .fav-btn:active{transform:scale(1.18);}
 
   /* ---------- 状态 ---------- */
   .state{text-align:center;padding:64px 20px;color:var(--muted);font-size:15px;line-height:1.9;}
@@ -223,9 +320,10 @@
   @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
   .modal-panel,.drawer-panel{
     position:relative;width:100%;background:#fffdfa;
-    border-radius:22px 22px 0 0;-webkit-overflow-scrolling:touch;
+    border-radius:22px 22px 0 0;
     animation:slideUp .26s cubic-bezier(.2,.85,.3,1);
     box-shadow:0 -8px 40px rgba(60,35,15,.18);overflow-y:auto;
+    /* 已移除 -webkit-overflow-scrolling:touch */
   }
   .modal-panel{max-width:600px;padding:20px 20px calc(24px + env(safe-area-inset-bottom));max-height:88vh;}
   .drawer-panel{max-width:560px;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:80vh;}
@@ -246,7 +344,11 @@
     display:flex;align-items:center;justify-content:center;
   }
   .icon-btn:active{background:#f3ece5;}
-  .m-desc{font-size:15px;line-height:1.8;color:#4e4239;margin:16px 0 0;white-space:pre-wrap;word-break:break-word;}
+  /* 弹窗描述与卡片描述同一套字体层级 */
+  .m-desc{
+    font-size:15px;line-height:1.75;color:#4e4239;margin:16px 0 0;
+    white-space:pre-wrap;word-break:break-word;
+  }
   .m-desc.muted{color:var(--muted);font-style:italic;}
   .m-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
   .btn{
@@ -265,6 +367,15 @@
   .drawer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
   .drawer-head h2{font-size:17px;font-weight:700;margin:0;letter-spacing:.2px;}
   .drawer-hint{font-size:12.5px;color:var(--muted);margin:0 0 14px;}
+  /* 抽屉内的排序选项 */
+  .drawer-sort{display:flex;gap:8px;margin:0 0 16px;}
+  .drawer-sort-item{
+    flex:1 1 0;padding:10px 8px;border-radius:11px;border:1px solid var(--border);
+    background:#fff;color:#6b5b4e;font-size:13.5px;font-weight:600;font-family:inherit;
+    cursor:pointer;line-height:1;white-space:nowrap;transition:all .15s;
+  }
+  .drawer-sort-item:hover{border-color:#dccbb9;}
+  .drawer-sort-item.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   .drawer-list{display:flex;flex-wrap:wrap;gap:8px;}
   .drawer-item{
     display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border-radius:11px;
@@ -315,7 +426,10 @@
     .toolbar{padding:12px 12px 2px;}
     .chips{padding:10px 12px 12px;}
     .app-header{padding-left:12px;padding-right:12px;}
-    .btn-random{flex:1 1 100%;}
+    /* 移动端工具栏：搜索独占一行，随机 + 排序各占一半，不破坏布局 */
+    .search{flex:1 1 100%;}
+    .btn-random{flex:1 1 0;min-width:0;padding:11px 12px;font-size:13.5px;}
+    .btn-sort{flex:1 1 0;min-width:0;padding:11px 12px;font-size:13.5px;}
     .cat-scroller,.cat-section[data-expanded="true"] .cat-scroller{gap:12px;}
     .cat-more{padding:6px 11px;font-size:12px;}
     .drawer-panel{padding-left:16px;padding-right:16px;}
@@ -343,6 +457,7 @@
     <input id="searchInput" type="search" placeholder="搜索名字、地区、分类或描述…" autocomplete="off" enterkeyhint="search">
   </div>
   <button class="btn-random" id="randomBtn" type="button">🎲 随机挑一间</button>
+  <button class="btn-sort" id="sortBtn" type="button" aria-pressed="false" aria-label="切换分类排序方式">排序：默认 ▾</button>
 </div>
 
 <div class="chips" id="chips"></div>
@@ -369,6 +484,7 @@
       <button type="button" class="icon-btn" data-drawer-close="1" aria-label="关闭">✕</button>
     </div>
     <p class="drawer-hint">选择一个分类，页面会只显示该类别的咖啡馆。</p>
+    <div class="drawer-sort" id="drawerSort" role="group" aria-label="排序方式"></div>
     <div class="drawer-list" id="drawerBody"></div>
   </div>
 </div>
@@ -450,9 +566,14 @@
   var SUPABASE_URL = '';
   var SUPABASE_ANON_KEY = '';
   var FAV_KEY = 'feong_cafe_favs_v1';
+  var SORT_KEY = 'feong_cafe_sort_v1';   /* 排序模式持久化 key */
 
   /* ==================== 状态 ==================== */
-  var state = { all:[], view:[], cat:'全部', onlyFav:false, q:'', loading:true, error:'' };
+  var state = {
+    all:[], view:[], cat:'全部', onlyFav:false, q:'',
+    loading:true, error:'',
+    sortMode:'default'   /* 'default' | 'alpha' */
+  };
   var favs = loadFavs();
   var currentId = null;
   var expandedCats = {};
@@ -468,10 +589,12 @@
   var randomBtn   = document.getElementById('randomBtn');
   var refreshBtn  = document.getElementById('refreshBtn');
   var userBtn     = document.getElementById('userBtn');
+  var sortBtn     = document.getElementById('sortBtn');
   var modalEl     = document.getElementById('modal');
   var modalPanel  = document.getElementById('modalPanel');
   var drawerEl    = document.getElementById('catDrawer');
   var drawerBody  = document.getElementById('drawerBody');
+  var drawerSort  = document.getElementById('drawerSort');
   var fabAdd      = document.getElementById('fabAdd');
   var addModal    = document.getElementById('addModal');
   var addForm     = document.getElementById('addForm');
@@ -502,6 +625,11 @@
     if (w < 1024) return 2;
     return 4;
   }
+  /* 统一的字母比较器：中英文混排结果稳定可复现 */
+  function alphaCompare(a, b) {
+    return String(a == null ? '' : a).localeCompare(String(b == null ? '' : b), 'en',
+      { sensitivity:'base', numeric:true });
+  }
 
   /* ==================== 本地收藏 ==================== */
   function loadFavs() {
@@ -513,6 +641,17 @@
   }
   function saveFavs() {
     try { localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favs))); } catch (e) {}
+  }
+
+  /* ==================== 排序模式持久化 ==================== */
+  function loadSortMode() {
+    try {
+      var v = localStorage.getItem(SORT_KEY);
+      return (v === 'alpha') ? 'alpha' : 'default';
+    } catch (e) { return 'default'; }
+  }
+  function saveSortMode() {
+    try { localStorage.setItem(SORT_KEY, state.sortMode); } catch (e) {}
   }
 
   /* ==================== CSV 解析 ==================== */
@@ -617,11 +756,20 @@
     });
   }
 
-  /* ==================== 分类排序（公共比较器） ==================== */
+  /* ==================== 分类排序（公共比较器，受 sortMode 控制） ==================== */
   function compareCat(aKey, aCount, bKey, bCount) {
-    var aO = (aKey === '其它'), bO = (bKey === '其它');
-    if (aO && !bO) return 1;
-    if (!aO && bO) return -1;
+    // 「其它 / 未分类」永远排最后（两种模式都适用）
+    var aOther = (aKey === '其它' || aKey === '未分类');
+    var bOther = (bKey === '其它' || bKey === '未分类');
+    if (aOther && !bOther) return 1;
+    if (!aOther && bOther) return -1;
+
+    if (state.sortMode === 'alpha') {
+      // 字母 A-Z 模式：分类名升序（localeCompare）
+      return alphaCompare(aKey, bKey);
+    }
+
+    // 默认模式：CAT_ORDER 优先，其余按数量倒序，再按 key 兜底
     var ia = CAT_ORDER.indexOf(aKey), ib = CAT_ORDER.indexOf(bKey);
     var aK = ia >= 0, bK = ib >= 0;
     if (aK && bK) return ia - ib;
@@ -643,10 +791,15 @@
     return arr;
   }
   function getTopCategories(n) {
-    return getCategoryStats()
-      .filter(function (c) { return c.key !== '其它'; })
+    var list = getCategoryStats().filter(function (c) { return c.key !== '其它'; });
+    // 先按数量挑出「热门」，再按当前排序模式决定展示顺序
+    var picked = list.slice()
       .sort(function (a, b) { return b.count - a.count; })
       .slice(0, n);
+    if (state.sortMode === 'alpha') {
+      picked.sort(function (a, b) { return alphaCompare(a.name, b.name); });
+    }
+    return picked;
   }
 
   /* ==================== 顶部 chips ==================== */
@@ -688,6 +841,15 @@
 
   /* ==================== 分类抽屉 ==================== */
   function buildDrawer() {
+    // 排序选项（与工具栏按钮同步）
+    var isAlpha = state.sortMode === 'alpha';
+    drawerSort.innerHTML =
+      '<button type="button" class="drawer-sort-item' + (!isAlpha ? ' active' : '') +
+        '" data-sort="default" aria-pressed="' + (!isAlpha ? 'true' : 'false') + '">默认排序</button>' +
+      '<button type="button" class="drawer-sort-item' + (isAlpha ? ' active' : '') +
+        '" data-sort="alpha" aria-pressed="' + (isAlpha ? 'true' : 'false') + '">字母 A-Z</button>';
+
+    // 分类列表顺序同样跟随 sortMode
     var stats = getCategoryStats();
     var html = '<button type="button" class="drawer-item' +
       (state.cat === '全部' && !state.onlyFav ? ' active' : '') +
@@ -704,47 +866,63 @@
   }
 
   /* ==================== overlay 公共逻辑 ==================== */
+  /* 唯一的 body 滚动锁定入口：任何 overlay 开关都只通过它增删 body.no-scroll */
   function syncBodyScroll() {
     var open = drawerEl.classList.contains('open') || modalEl.classList.contains('open')
             || addModal.classList.contains('open') || authModal.classList.contains('open');
     document.body.classList[open ? 'add' : 'remove']('no-scroll');
   }
+
   function openDrawer() {
     buildDrawer();
     drawerEl.classList.add('open');
     drawerEl.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('no-scroll');
+    syncBodyScroll();                       // 统一锁定
     var m = document.getElementById('moreChip');
     if (m) m.setAttribute('aria-expanded', 'true');
   }
   function closeDrawer() {
     drawerEl.classList.remove('open');
-    drawerEl.setAttribute('aria-hidden', 'false'); // 原逻辑: aria-hidden="false"? 保留一致
-    syncBodyScroll();
+    drawerEl.setAttribute('aria-hidden', 'true');  // 修复：关闭时应为 'true'
+    syncBodyScroll();                       // 统一解锁，确保 overflow:hidden 一定被移除
     var m = document.getElementById('moreChip');
     if (m) m.setAttribute('aria-expanded', 'false');
   }
-  // 修正: 原 closeDrawer 设置的是 'false'? 让我保留严格等价。
 
-  /* ==================== 卡片 ==================== */
+  /* ==================== 卡片（结构固定为 4 个区块） ==================== */
   function cardHTML(it) {
     var isFav = favs.has(it.id);
-    var html = '<article class="card" data-id="' + esc(it.id) + '">'
-      + '<div class="card-head">'
+
+    // 区块 1：右上角收藏按钮（绝对定位，不随标题行数位移）+ 标题（最多 2 行）
+    var favBtn = '<button type="button" class="fav-btn' + (isFav ? ' on' : '') +
+      '" data-fav="' + esc(it.id) + '" aria-label="' + (isFav ? '取消收藏' : '收藏') +
+      '" aria-pressed="' + (isFav ? 'true' : 'false') + '">' + (isFav ? '♥' : '♡') + '</button>';
+
+    // 区块 2：标签区（固定高度，无数据也渲染浅色占位）
+    var areaTag = it.area
+      ? '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>'
+      : '<span class="tag tag-area is-empty">📍 未标注</span>';
+    var catTag = it.category
+      ? '<span class="tag tag-cat">' + esc(it.category) + '</span>'
+      : '<span class="tag tag-cat is-empty">未分类</span>';
+
+    // 区块 3：描述区（最多 3 行，无描述渲染浅色占位，占位高度一致）
+    var desc = it.desc
+      ? '<p class="card-desc">' + esc(it.desc) + '</p>'
+      : '<p class="card-desc is-empty">暂无描述</p>';
+
+    // 区块 4：底部链接区（margin-top:auto，无链接用同尺寸禁用占位）
+    var foot = it.url
+      ? '<a class="pill-xhs" href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">小红书 ↗</a>'
+      : '<span class="pill-xhs is-disabled" aria-disabled="true">暂无链接</span>';
+
+    return '<article class="card" data-id="' + esc(it.id) + '">'
+      + favBtn
       + '<h3 class="card-title">' + esc(it.name) + '</h3>'
-      + '<button type="button" class="fav-btn' + (isFav ? ' on' : '') +
-        '" data-fav="' + esc(it.id) + '" aria-label="收藏">' + (isFav ? '♥' : '♡') + '</button>'
-      + '</div>';
-    if (it.area || it.category) {
-      html += '<div class="tags">';
-      if (it.area) html += '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>';
-      if (it.category) html += '<span class="tag tag-cat">' + esc(it.category) + '</span>';
-      html += '</div>';
-    }
-    if (it.desc) html += '<p class="card-desc">' + esc(it.desc) + '</p>';
-    if (it.url) html += '<a class="pill-xhs" href="' + esc(it.url) +
-      '" target="_blank" rel="noopener noreferrer">小红书 ↗</a>';
-    return html + '</article>';
+      + '<div class="tags">' + areaTag + catTag + '</div>'
+      + desc
+      + '<div class="card-foot">' + foot + '</div>'
+      + '</article>';
   }
 
   /* ==================== 主渲染 ==================== */
@@ -777,12 +955,22 @@
       return;
     }
 
+    // ---- 分组 ----
     var groupMap = {}, groupOrder = [];
     state.view.forEach(function (it) {
       var k = it.categoryKey || '其它';
       if (!groupMap[k]) { groupMap[k] = { name: it.category || '其它', items: [] }; groupOrder.push(k); }
       groupMap[k].items.push(it);
     });
+
+    // 组内卡片顺序：字母模式按名称升序，默认保持原顺序
+    if (state.sortMode === 'alpha') {
+      groupOrder.forEach(function (k) {
+        groupMap[k].items.sort(function (a, b) { return alphaCompare(a.name, b.name); });
+      });
+    }
+
+    // 分类顺序：由 compareCat 根据 sortMode 决定
     groupOrder.sort(function (a, b) {
       return compareCat(a, groupMap[a].items.length, b, groupMap[b].items.length);
     });
@@ -884,16 +1072,38 @@
     applyFilter();
   }
 
+  /* ==================== 排序切换 ==================== */
+  function updateSortUI() {
+    if (!sortBtn) return;
+    var isAlpha = state.sortMode === 'alpha';
+    sortBtn.textContent = isAlpha ? '排序：字母 A-Z ▾' : '排序：默认 ▾';
+    sortBtn.setAttribute('aria-pressed', isAlpha ? 'true' : 'false');
+  }
+  /* 切换排序模式：立即重渲染，不重新请求网络；展开状态因筛选特征未变而保留 */
+  function setSortMode(mode) {
+    if (mode !== 'alpha' && mode !== 'default') mode = 'default';
+    if (state.sortMode === mode) return;
+    state.sortMode = mode;
+    saveSortMode();
+    updateSortUI();
+    buildChips();                 // chips 顺序同步跟随
+    buildDrawer();                // 抽屉里分类顺序 + 排序选中态同步
+    applyFilter();                // 重新渲染（筛选特征未变 → expandedCats 保留）
+  }
+
   /* ==================== 详情弹窗 ==================== */
   function modalHTML(it) {
     var isFav = favs.has(it.id);
     var html = '<div class="m-head"><div style="min-width:0"><h2>' + esc(it.name) + '</h2>';
-    if (it.area || it.category) {
-      html += '<div class="tags">';
-      if (it.area) html += '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>';
-      if (it.category) html += '<span class="tag tag-cat">' + esc(it.category) + '</span>';
-      html += '</div>';
-    }
+    // 弹窗标签与卡片同一套样式
+    html += '<div class="tags">';
+    html += it.area
+      ? '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>'
+      : '<span class="tag tag-area is-empty">📍 未标注</span>';
+    html += it.category
+      ? '<span class="tag tag-cat">' + esc(it.category) + '</span>'
+      : '<span class="tag tag-cat is-empty">未分类</span>';
+    html += '</div>';
     html += '</div><button type="button" class="icon-btn" data-close="1" aria-label="关闭">✕</button></div>';
     html += it.desc ? '<p class="m-desc">' + esc(it.desc) + '</p>'
                     : '<p class="m-desc muted">暂无描述</p>';
@@ -912,13 +1122,13 @@
     modalPanel.innerHTML = modalHTML(it);
     modalEl.classList.add('open');
     modalEl.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('no-scroll');
+    syncBodyScroll();                 // 统一锁定
     modalPanel.scrollTop = 0;
   }
   function closeModal() {
     modalEl.classList.remove('open');
     modalEl.setAttribute('aria-hidden', 'true');
-    syncBodyScroll();
+    syncBodyScroll();                 // 统一解锁
     currentId = null;
   }
   function syncModalFav(id) {
@@ -959,13 +1169,13 @@
     addForm.reset();
     addModal.classList.add('open');
     addModal.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('no-scroll');
+    syncBodyScroll();                 // 统一锁定
     setTimeout(function () { document.getElementById('f-name').focus(); }, 180);
   }
   function closeAddModal() {
     addModal.classList.remove('open');
     addModal.setAttribute('aria-hidden', 'true');
-    syncBodyScroll();
+    syncBodyScroll();                 // 统一解锁
   }
   function insertLocalCafe(data) {
     var rawCat = String(data.category || '其它').trim() || '其它';
@@ -1081,12 +1291,12 @@
     renderAuthUI();
     authModal.classList.add('open');
     authModal.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('no-scroll');
+    syncBodyScroll();                 // 统一锁定
   }
   function closeAuthModal() {
     authModal.classList.remove('open');
     authModal.setAttribute('aria-hidden', 'true');
-    syncBodyScroll();
+    syncBodyScroll();                 // 统一解锁
   }
 
   /* ==================== 事件绑定 ==================== */
@@ -1099,6 +1309,11 @@
 
   drawerEl.addEventListener('click', function (e) {
     if (e.target.closest && e.target.closest('[data-drawer-close]')) { closeDrawer(); return; }
+
+    // 抽屉内排序切换（不关闭抽屉）
+    var sortItem = e.target.closest ? e.target.closest('.drawer-sort-item') : null;
+    if (sortItem) { setSortMode(sortItem.getAttribute('data-sort')); return; }
+
     var item = e.target.closest ? e.target.closest('.drawer-item') : null;
     if (item) { selectCategory(item.getAttribute('data-value')); closeDrawer(); }
   });
@@ -1158,6 +1373,11 @@
   userBtn.addEventListener('click', openAuthModal);
   authModal.addEventListener('click', function (e) {
     if (e.target.closest && e.target.closest('[data-auth-close]')) closeAuthModal();
+  });
+
+  // 工具栏排序按钮：两模式间切换
+  sortBtn.addEventListener('click', function () {
+    setSortMode(state.sortMode === 'alpha' ? 'default' : 'alpha');
   });
 
   document.addEventListener('keydown', function (e) {
@@ -1228,6 +1448,9 @@
   });
 
   /* ==================== 启动 ==================== */
+  state.sortMode = loadSortMode();   // 恢复用户上次选择的排序模式
+  updateSortUI();
+
   load();
   if (document.readyState === 'complete') initSupabase();
   else window.addEventListener('load', initSupabase);
