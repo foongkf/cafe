@@ -10,44 +10,29 @@
 <title>FEONG的咖啡馆收藏集</title>
 <style>
   :root{
-    --bg:#faf7f2; --card:#ffffff; --text:#2c2320; --muted:#8a7a6d;
-    --accent:#a8683c; --accent-soft:#f7ede4; --border:#ece1d6; --radius:16px;
-    --card-w-mobile:82%; --card-w-tablet:38%; --card-w-desktop:23%; --fade-w:48px;
-
-    /* ---------- 统一卡片 token（所有卡片共用同一套数值） ---------- */
-    --card-pad-x:16px;        /* 卡片左右内边距 */
-    --card-pad-y:15px;        /* 卡片上下内边距 */
-    --card-radius:var(--radius);
-    --card-border:1px solid var(--border);
-    --card-shadow:0 1px 2px rgba(90,60,35,.04);
-    --card-shadow-hover:0 10px 24px rgba(120,80,50,.11);
-    --card-gap:9px;           /* 区块之间的统一间距 */
-    --card-title-size:16px;   /* 标题字号 */
-    --card-title-line:1.35;   /* 标题行高 */
-    --card-desc-size:13.5px;  /* 描述字号 */
-    --card-desc-line:1.6;     /* 描述行高 */
-    --tag-height:22px;        /* 标签区固定高度 */
-    --foot-height:30px;       /* 底部链接区固定高度 */
+    --bg:#faf7f2;
+    --card:#ffffff;
+    --text:#2c2320;
+    --muted:#8a7a6d;
+    --accent:#a8683c;
+    --accent-soft:#f7ede4;
+    --border:#ece1d6;
+    --radius:16px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
-  /* 全站禁止出现 overscroll-behavior:none / touch-action:none / overflow:hidden，
-     以保证纵向手势能冒泡给页面、原生下拉刷新可用。 */
   body{
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-    background:var(--bg); color:var(--text);
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    line-height:1.5; min-height:100vh;
+    background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   }
-  /* 唯一的滚动锁定类，只由 syncBodyScroll() 增删 */
   body.no-scroll{overflow:hidden;}
 
   /* ---------- 顶部 ---------- */
   .app-header{
     position:sticky;top:0;z-index:30;
-    display:flex;align-items:center;gap:10px;
-    padding:14px 16px;
-    padding-top:calc(14px + env(safe-area-inset-top));
+    display:flex;align-items:center;gap:12px;
+    padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top));
     background:rgba(250,247,242,.88);
     -webkit-backdrop-filter:saturate(180%) blur(14px);
     backdrop-filter:saturate(180%) blur(14px);
@@ -56,299 +41,172 @@
   .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
   .logo{font-size:24px;line-height:1;flex:0 0 auto;}
   .brand-text{min-width:0;}
-  .brand-text h1{font-size:17px;font-weight:700;margin:0;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .brand-text h1{
+    font-size:17px;font-weight:700;margin:0;letter-spacing:.2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
   .sub{font-size:12px;color:var(--muted);margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .hdr-btn{
-    flex:0 0 auto;
-    border:1px solid var(--border);background:#fff;color:var(--text);
-    border-radius:11px;padding:9px 12px;font-size:13.5px;font-weight:500;
-    font-family:inherit;cursor:pointer;transition:background .15s;line-height:1;
+    flex:0 0 auto;border:1px solid var(--border);background:#fff;color:var(--text);
+    border-radius:11px;padding:9px 13px;font-size:13.5px;font-weight:500;
+    font-family:inherit;cursor:pointer;transition:background .15s;
   }
   .hdr-btn:active{background:#f3ece5;}
   .hdr-btn.spin{opacity:.55;pointer-events:none;}
-  .hdr-icon{width:36px;height:36px;padding:0;display:none;align-items:center;justify-content:center;font-size:15px;}
-  .hdr-icon.on{display:flex;}
 
   /* ---------- 工具栏 ---------- */
   .toolbar{
     max-width:1200px;margin:0 auto;padding:14px 16px 4px;
     display:flex;gap:10px;align-items:center;flex-wrap:wrap;
   }
-  .search{flex:1 1 240px;position:relative;display:flex;align-items:center;}
+  .search{flex:1 1 220px;min-width:0;position:relative;display:flex;align-items:center;}
   .search .ico{position:absolute;left:13px;font-size:14px;opacity:.45;pointer-events:none;line-height:1;}
   .search input{
     width:100%;padding:11px 14px 11px 38px;border-radius:12px;
-    border:1px solid var(--border);background:#fff;
-    font-size:15px;font-family:inherit;color:var(--text);outline:none;
+    border:1px solid var(--border);background:#fff;font-size:15px;
+    font-family:inherit;color:var(--text);outline:none;
     transition:border-color .15s, box-shadow .15s;-webkit-appearance:none;
   }
   .search input::placeholder{color:#b6a698;}
   .search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  .cat-select{
+    flex:0 0 auto;min-height:42px;padding:8px 10px;border-radius:12px;
+    border:1px solid var(--border);background:#fff;color:var(--text);
+    font-size:14.5px;font-family:inherit;cursor:pointer;outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .cat-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
   .btn-random{
     flex:0 0 auto;padding:11px 17px;border-radius:12px;border:none;
-    background:var(--accent);color:#fff;font-size:14.5px;font-weight:600;font-family:inherit;
-    cursor:pointer;white-space:nowrap;transition:opacity .15s, transform .1s;
-    box-shadow:0 2px 8px rgba(168,104,60,.22);
+    background:var(--accent);color:#fff;font-size:14.5px;font-weight:600;
+    font-family:inherit;cursor:pointer;white-space:nowrap;
+    transition:opacity .15s, transform .1s;box-shadow:0 2px 8px rgba(168,104,60,.22);
   }
   .btn-random:active{opacity:.86;transform:scale(.98);}
-  /* 排序切换按钮 */
-  .btn-sort{
-    flex:0 0 auto;padding:11px 15px;border-radius:12px;
-    border:1px solid var(--border);background:#fff;color:var(--text);
-    font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;
-    white-space:nowrap;line-height:1;transition:background .15s, border-color .15s, color .15s;
-  }
-  .btn-sort:active{background:#f3ece5;}
-  .btn-sort[aria-pressed="true"]{background:var(--accent-soft);border-color:#e2cdb8;color:var(--accent);}
-
-  /* ---------- 顶部 chips ---------- */
-  /* 横向滚动容器：只保留横向 overscroll 隔离，纵向手势必须能冒泡给页面 */
-  .chips{
-    display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
-    overscroll-behavior-x:contain;   /* 横向滚动不外溢 */
-    overscroll-behavior-y:auto;      /* 纵向手势交还给页面（原生下拉刷新） */
-    padding:12px 16px 14px;max-width:1200px;margin:0 auto;
-    scrollbar-width:none;position:relative;
-    /* 注意：已移除 -webkit-overflow-scrolling:touch，避免生成独立滚动层吞掉纵向手势 */
-  }
-  .chips::-webkit-scrollbar{display:none;}
-  .chip{
-    flex:0 0 auto;padding:8px 14px;border-radius:999px;
-    border:1px solid var(--border);background:#fff;color:#6b5b4e;
-    font-size:13.5px;font-family:inherit;font-weight:500;cursor:pointer;
-    white-space:nowrap;transition:all .15s;line-height:1;
-  }
-  .chip:hover{border-color:#dccbb9;}
-  .chip.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(168,104,60,.22);}
-  .chip.fav.active{background:#e0574a;border-color:#e0574a;box-shadow:0 2px 8px rgba(224,87,74,.25);}
-  .chip-more{
-    border-style:dashed;color:var(--accent);border-color:#e2cdb8;background:#fffdfa;
-    position:sticky;right:0;z-index:2;
-    box-shadow:-10px 0 12px -6px rgba(250,247,242,0.9);
-  }
-  .chip-more:hover{background:var(--accent-soft);border-color:#dcc3a6;}
 
   /* ---------- 分类区块 ---------- */
-  .cat-wrap{max-width:1200px;margin:0 auto;padding:0 16px 32px;}
-  .cat-section{margin-bottom:30px;}
-  .cat-section:last-child{margin-bottom:8px;}
-  .cat-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:0 2px 11px;}
-  .cat-title{font-size:17px;font-weight:700;margin:0;letter-spacing:.2px;color:var(--text);line-height:1.3;}
+  .cat-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    max-width:1200px;margin:0 auto;padding:16px 16px 8px;
+  }
+  .cat-name{font-size:15.5px;font-weight:700;margin:0;letter-spacing:.2px;word-break:break-word;}
   .cat-count{
-    font-size:12.5px;color:var(--muted);font-weight:600;
-    background:#f2ece5;padding:3px 10px;border-radius:999px;
-    line-height:1.35;white-space:nowrap;
+    font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);
+    border-radius:999px;padding:2px 8px;margin-left:4px;
   }
-  .cat-more{
-    margin-left:auto;display:inline-flex;align-items:center;gap:6px;
-    padding:7px 13px;border-radius:10px;border:1px solid var(--border);
-    background:#fff;color:var(--accent);font-size:12.5px;font-weight:600;
-    font-family:inherit;cursor:pointer;transition:background .15s, border-color .15s;
-    line-height:1;white-space:nowrap;
+  .cat-toggle{
+    flex:0 0 auto;min-height:40px;padding:0 14px;border-radius:10px;
+    border:1px solid var(--border);background:#fff;color:var(--accent);
+    font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer;
+    transition:background .15s, border-color .15s;
   }
-  .cat-more:hover{background:var(--accent-soft);border-color:#e8d3c0;}
-  .cat-more:active{background:#f0e2d6;}
-  .cat-more .arrow{font-size:10px;transition:transform .2s;display:inline-block;line-height:1;}
-  .cat-more[aria-expanded="true"] .arrow{transform:rotate(180deg);}
+  .cat-toggle:active{background:#f3ece5;border-color:#dccbb9;}
 
-  /* ---------- 横向滚动 + 右侧渐隐 ---------- */
-  .cat-scroller-wrap{position:relative;}
-  .cat-scroller-wrap::after{
-    content:'';position:absolute;top:0;right:0;bottom:14px;width:var(--fade-w);
-    background:linear-gradient(to left, var(--bg) 15%, rgba(250,247,242,0));
-    pointer-events:none;z-index:2;opacity:1;transition:opacity .22s;
+  /* 横向滑动（默认） / 网格平铺（展开） */
+  .cat-row{
+    display:grid;grid-auto-flow:column;grid-auto-columns:min(78vw,300px);
+    gap:12px;padding:6px 16px 18px;max-width:1200px;margin:0 auto;
+    overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:16px;
+    -webkit-overflow-scrolling:touch;touch-action:pan-x;
+    scrollbar-width:none;
   }
-  .cat-section[data-expanded="true"] .cat-scroller-wrap::after{opacity:0;}
-
-  .cat-scroller{
-    display:flex;gap:14px;align-items:stretch;overflow-x:auto;
-    overscroll-behavior-x:contain;   /* 横向滚动不外溢 */
-    overscroll-behavior-y:auto;      /* 纵向手势交还给页面（原生下拉刷新） */
-    scroll-snap-type:x proximity;
-    padding:2px 2px 14px;
-    scrollbar-width:thin;scrollbar-color:#ddd0c2 transparent;
-    /* 注意：已移除 -webkit-overflow-scrolling:touch */
-  }
-  .cat-scroller::-webkit-scrollbar{height:6px;}
-  .cat-scroller::-webkit-scrollbar-thumb{background:#ddd0c2;border-radius:3px;}
-  .cat-scroller::-webkit-scrollbar-track{background:transparent;}
-
-  .cat-scroller > .card{flex:0 0 auto;width:var(--card-w-mobile);scroll-snap-align:start;}
-  @media (min-width:600px){ .cat-scroller > .card{width:var(--card-w-tablet);} }
-  @media (min-width:1024px){ .cat-scroller > .card{width:var(--card-w-desktop);} }
-
-  /* ---------- 展开态 grid ---------- */
-  .cat-section[data-expanded="true"] .cat-scroller{
-    display:grid;grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
-    gap:14px;overflow:visible;padding-bottom:2px;
-  }
-  .cat-section[data-expanded="true"] .cat-scroller > .card{
-    width:100%;min-width:0;max-width:100%;flex:initial;scroll-snap-align:none;
+  .cat-row::-webkit-scrollbar{display:none;}
+  .cat-row > *{scroll-snap-align:start;}
+  .cat-row.open{
+    grid-auto-flow:row;
+    grid-template-columns:repeat(auto-fill, minmax(258px, 1fr));
+    overflow:visible;touch-action:auto;
   }
 
-  /* ---------- 卡片（折叠 / 展开完全一致，只改变宽度） ---------- */
+  /* ---------- 卡片 ---------- */
   .card{
-    position:relative;
-    background:var(--card);
-    border:var(--card-border);
-    border-radius:var(--card-radius);
-    padding:var(--card-pad-y) var(--card-pad-x);
-    display:flex;flex-direction:column;gap:var(--card-gap);
-    cursor:pointer;
-    box-shadow:var(--card-shadow);
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:15px 16px 14px;display:flex;flex-direction:column;gap:9px;
+    cursor:pointer;box-shadow:0 1px 2px rgba(90,60,35,.04);
     transition:transform .16s ease, box-shadow .16s ease, border-color .16s;
     -webkit-user-select:none;user-select:none;
-    height:100%;
   }
-  @media (hover:hover){ .card:hover{transform:translateY(-3px);box-shadow:var(--card-shadow-hover);border-color:#e3d5c6;} }
+  @media (hover:hover){
+    .card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(120,80,50,.11);border-color:#e3d5c6;}
+  }
   .card:active{transform:scale(.988);}
-
-  /* 区块 1：标题（最多 2 行） */
-  .card-title{
-    margin:0;
-    padding-right:30px;                 /* 给右上角收藏按钮留位，按钮位置不受标题行数影响 */
-    font-size:var(--card-title-size);
-    font-weight:650;
-    line-height:var(--card-title-line);
-    letter-spacing:.1px;
-    color:var(--text);
-    word-break:break-word;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
-    min-height:calc(var(--card-title-size) * var(--card-title-line));
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .card-title{font-size:16px;font-weight:650;margin:0;line-height:1.35;letter-spacing:.1px;word-break:break-word;}
+  .fav-btn{
+    flex:0 0 auto;background:none;border:none;padding:1px 3px;
+    font-size:19px;line-height:1;cursor:pointer;color:#d9c9bb;font-family:inherit;
+    transition:transform .14s, color .14s;
   }
-
-  /* 区块 2：标签（固定高度，无数据也占位） */
-  .tags{
-    display:flex;flex-wrap:nowrap;gap:6px;align-items:center;
-    min-height:var(--tag-height);
-    overflow:hidden;
-  }
-  .tag{
-    display:inline-flex;align-items:center;gap:4px;
-    font-size:12px;line-height:1;padding:5px 9px;border-radius:999px;
-    white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;
-  }
+  .fav-btn.on{color:#e0574a;}
+  .fav-btn:active{transform:scale(1.22);}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:1;padding:5px 9px;border-radius:999px;white-space:nowrap;}
   .tag-area{background:#eef3ee;color:#4f6b4f;}
   .tag-cat{background:var(--accent-soft);color:#8a5a34;}
-  /* 无地区 / 无分类时的浅色占位 */
-  .tag.is-empty{background:#f5f1ec;color:#b6a698;}
-
-  /* 区块 3：描述（最多 3 行，无描述也占位，高度一致） */
   .card-desc{
-    margin:0;
-    font-size:var(--card-desc-size);
-    line-height:var(--card-desc-line);
-    color:var(--muted);
-    display:-webkit-box;
-    -webkit-line-clamp:3;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
-    word-break:break-word;
-    min-height:calc(var(--card-desc-size) * var(--card-desc-line) * 3);
-  }
-  .card-desc.is-empty{color:#c3b5a8;}
-
-  /* 区块 4：底部链接（margin-top:auto 顶到卡片底部，无链接用同尺寸禁用占位） */
-  .card-foot{
-    margin-top:auto;
-    display:flex;align-items:center;
-    min-height:var(--foot-height);
+    margin:0;font-size:13.5px;line-height:1.6;color:var(--muted);
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;
   }
   .pill-xhs{
-    display:inline-flex;align-items:center;gap:4px;
-    font-size:12.5px;font-weight:600;line-height:1;
-    color:var(--accent);background:var(--accent-soft);
-    padding:9px 12px;border-radius:9px;
+    align-self:flex-start;font-size:12.5px;font-weight:600;color:var(--accent);
+    background:var(--accent-soft);padding:6px 11px;border-radius:9px;
     text-decoration:none;transition:background .15s;
-    white-space:nowrap;
   }
   .pill-xhs:hover{background:#f0e0d2;}
-  .pill-xhs.is-disabled{
-    color:#b6a698;background:#f5f1ec;cursor:default;pointer-events:none;
-  }
-
-  /* 收藏按钮：所有卡片固定在右上角同一位置，不随标题行数变化 */
-  .fav-btn{
-    position:absolute;top:10px;right:10px;z-index:1;
-    width:32px;height:32px;padding:0;
-    display:flex;align-items:center;justify-content:center;
-    background:transparent;border:none;border-radius:50%;
-    font-size:19px;line-height:1;font-family:inherit;
-    cursor:pointer;color:#d9c9bb;
-    transition:transform .14s, color .14s, background .14s;
-  }
-  .fav-btn:hover{background:#faf3ec;}
-  .fav-btn.on{color:#e0574a;}
-  .fav-btn:active{transform:scale(1.18);}
 
   /* ---------- 状态 ---------- */
   .state{text-align:center;padding:64px 20px;color:var(--muted);font-size:15px;line-height:1.9;}
   .state .big{font-size:34px;display:block;margin-bottom:10px;}
-  .state button{margin-top:14px;padding:10px 22px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer;}
-  .empty-actions{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-  .empty-btn{
-    padding:10px 18px;border-radius:11px;border:1px solid var(--border);
-    background:#fff;color:var(--text);font-size:14px;font-weight:600;font-family:inherit;
-    cursor:pointer;transition:background .15s, border-color .15s;margin-top:0 !important;
+  .state button{
+    margin-top:14px;padding:10px 22px;border-radius:11px;border:none;
+    background:var(--accent);color:#fff;font-size:14.5px;font-weight:600;
+    font-family:inherit;cursor:pointer;
   }
-  .empty-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .empty-btn:hover{background:#f5efe8;}
-  .empty-btn.primary:hover{background:#b8763f;}
   .loading-dot{
-    display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);
-    margin-right:8px;animation:pulse 1s infinite ease-in-out;
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--accent);margin-right:8px;animation:pulse 1s infinite ease-in-out;
   }
   @keyframes pulse{0%,100%{opacity:.25;transform:scale(.8);}50%{opacity:1;transform:scale(1.15);}}
 
   /* ---------- 底部 ---------- */
-  .footer{text-align:center;padding:0 16px calc(90px + env(safe-area-inset-bottom));color:#b9aa9c;font-size:12.5px;line-height:1.7;}
+  .footer{
+    text-align:center;padding:0 16px calc(34px + env(safe-area-inset-bottom));
+    color:#b9aa9c;font-size:12.5px;line-height:1.7;
+  }
   .footer a{color:#b9aa9c;}
 
-  /* ---------- 通用 overlay（modal + drawer） ---------- */
-  .modal,.drawer{position:fixed;inset:0;display:none;}
-  .modal{z-index:100;}
-  .drawer{z-index:95;}
-  .modal.open,.drawer.open{display:flex;align-items:flex-end;justify-content:center;}
-  .modal-backdrop,.drawer-backdrop{
+  /* ---------- 弹窗 ---------- */
+  .modal{position:fixed;inset:0;z-index:100;display:none;}
+  .modal.open{display:flex;align-items:flex-end;justify-content:center;}
+  .modal-backdrop{
     position:absolute;inset:0;background:rgba(45,28,16,.48);
     -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
     animation:fadeIn .2s ease;
   }
   @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-  .modal-panel,.drawer-panel{
-    position:relative;width:100%;background:#fffdfa;
-    border-radius:22px 22px 0 0;
+  .modal-panel{
+    position:relative;width:100%;max-width:600px;background:#fffdfa;
+    border-radius:22px 22px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom));
+    max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
     animation:slideUp .26s cubic-bezier(.2,.85,.3,1);
-    box-shadow:0 -8px 40px rgba(60,35,15,.18);overflow-y:auto;
-    /* 已移除 -webkit-overflow-scrolling:touch */
+    box-shadow:0 -8px 40px rgba(60,35,15,.18);
   }
-  .modal-panel{max-width:600px;padding:20px 20px calc(24px + env(safe-area-inset-bottom));max-height:88vh;}
-  .drawer-panel{max-width:560px;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:80vh;}
   @keyframes slideUp{from{transform:translateY(28px);opacity:.6;}to{transform:translateY(0);opacity:1;}}
   @media (min-width:700px){
-    .modal.open,.drawer.open{align-items:center;}
-    .modal-panel,.drawer-panel{border-radius:20px;animation:popIn .22s ease;}
-    .modal-panel{max-height:82vh;}
-    .drawer-panel{max-height:76vh;}
+    .modal.open{align-items:center;}
+    .modal-panel{border-radius:20px;max-height:82vh;animation:popIn .22s ease;}
     @keyframes popIn{from{transform:scale(.96);opacity:.5;}to{transform:scale(1);opacity:1;}}
   }
   .m-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
-  .m-head h2{font-size:20px;font-weight:700;margin:0 0 9px;line-height:1.35;word-break:break-word;}
+  .m-head h2{font-size:21px;font-weight:700;margin:0 0 9px;line-height:1.35;word-break:break-word;}
   .icon-btn{
-    flex:0 0 auto;width:34px;height:34px;border-radius:50%;
+    flex:0 0 auto;width:36px;height:36px;border-radius:50%;
     border:1px solid var(--border);background:#fff;color:#8a7a6d;
     font-size:15px;line-height:1;cursor:pointer;font-family:inherit;
     display:flex;align-items:center;justify-content:center;
   }
   .icon-btn:active{background:#f3ece5;}
-  /* 弹窗描述与卡片描述同一套字体层级 */
-  .m-desc{
-    font-size:15px;line-height:1.75;color:#4e4239;margin:16px 0 0;
-    white-space:pre-wrap;word-break:break-word;
-  }
+  .m-desc{font-size:15px;line-height:1.8;color:#4e4239;margin:16px 0 0;white-space:pre-wrap;word-break:break-word;}
   .m-desc.muted{color:var(--muted);font-style:italic;}
   .m-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
   .btn{
@@ -363,77 +221,18 @@
   .btn-ghost.on{color:#e0574a;border-color:#f3cfca;background:#fdf3f2;}
   .btn-ghost:active{background:#f7f1ea;}
 
-  /* ---------- 抽屉专属 ---------- */
-  .drawer-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
-  .drawer-head h2{font-size:17px;font-weight:700;margin:0;letter-spacing:.2px;}
-  .drawer-hint{font-size:12.5px;color:var(--muted);margin:0 0 14px;}
-  /* 抽屉内的排序选项 */
-  .drawer-sort{display:flex;gap:8px;margin:0 0 16px;}
-  .drawer-sort-item{
-    flex:1 1 0;padding:10px 8px;border-radius:11px;border:1px solid var(--border);
-    background:#fff;color:#6b5b4e;font-size:13.5px;font-weight:600;font-family:inherit;
-    cursor:pointer;line-height:1;white-space:nowrap;transition:all .15s;
-  }
-  .drawer-sort-item:hover{border-color:#dccbb9;}
-  .drawer-sort-item.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .drawer-list{display:flex;flex-wrap:wrap;gap:8px;}
-  .drawer-item{
-    display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border-radius:11px;
-    border:1px solid var(--border);background:#fff;font-size:14px;font-weight:500;
-    font-family:inherit;cursor:pointer;color:#6b5b4e;transition:all .15s;
-    white-space:nowrap;line-height:1;
-  }
-  .drawer-item:hover{border-color:#dccbb9;}
-  .drawer-item:active{background:#f8f2eb;}
-  .drawer-item.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .drawer-item.fav.active{background:#e0574a;border-color:#e0574a;}
-  .di-count{font-size:11.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:#f2ece5;color:#8a7a6d;line-height:1.3;}
-  .drawer-item.active .di-count{background:rgba(255,255,255,.24);color:#fff;}
-
-  /* ---------- FAB ---------- */
-  .fab{
-    position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));
-    width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;
-    border:none;font-size:28px;font-weight:300;line-height:1;cursor:pointer;
-    box-shadow:0 6px 20px rgba(168,104,60,.35);z-index:40;
-    display:flex;align-items:center;justify-content:center;padding:0;
-    transition:transform .15s, box-shadow .15s;
-  }
-  .fab:active{transform:scale(.94);box-shadow:0 4px 12px rgba(168,104,60,.3);}
-
-  /* ---------- 表单 ---------- */
-  .form-row{margin-bottom:14px;}
-  .form-row label{display:block;font-size:13px;font-weight:600;color:#6b5b4e;margin-bottom:6px;}
-  .form-row input,.form-row select,.form-row textarea{
-    width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:11px;
-    font-size:15px;font-family:inherit;color:var(--text);outline:none;background:#fff;
-    -webkit-appearance:none;transition:border-color .15s, box-shadow .15s;
-  }
-  .form-row textarea{resize:vertical;min-height:80px;line-height:1.5;}
-  .form-row input:focus,.form-row select:focus,.form-row textarea:focus{
-    border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);
-  }
-
   /* ---------- 移动端微调 ---------- */
   @media (max-width:520px){
     .brand-text h1{font-size:15.5px;}
     .logo{font-size:21px;}
     .hdr-btn{padding:8px 11px;font-size:13px;}
-    .hdr-icon{width:32px;height:32px;font-size:14px;}
-    .cat-wrap{padding:0 12px 28px;}
-    .cat-section{margin-bottom:26px;}
-    .cat-title{font-size:16px;}
-    .toolbar{padding:12px 12px 2px;}
-    .chips{padding:10px 12px 12px;}
     .app-header{padding-left:12px;padding-right:12px;}
-    /* 移动端工具栏：搜索独占一行，随机 + 排序各占一半，不破坏布局 */
+    .toolbar{padding:12px 12px 2px;}
     .search{flex:1 1 100%;}
-    .btn-random{flex:1 1 0;min-width:0;padding:11px 12px;font-size:13.5px;}
-    .btn-sort{flex:1 1 0;min-width:0;padding:11px 12px;font-size:13.5px;}
-    .cat-scroller,.cat-section[data-expanded="true"] .cat-scroller{gap:12px;}
-    .cat-more{padding:6px 11px;font-size:12px;}
-    .drawer-panel{padding-left:16px;padding-right:16px;}
-    .fab{width:50px;height:50px;font-size:26px;right:14px;}
+    .cat-select{flex:1 1 auto;max-width:52vw;}
+    .btn-random{flex:1 1 auto;}
+    .cat-head{padding:14px 12px 8px;}
+    .cat-row{padding:6px 12px 16px;scroll-padding-left:12px;}
   }
 </style>
 </head>
@@ -447,7 +246,6 @@
       <p class="sub" id="countText">正在载入…</p>
     </div>
   </div>
-  <button class="hdr-btn hdr-icon" id="userBtn" type="button" aria-label="账号">👤</button>
   <button class="hdr-btn" id="refreshBtn" type="button">↻ 刷新</button>
 </header>
 
@@ -456,161 +254,83 @@
     <span class="ico">🔍</span>
     <input id="searchInput" type="search" placeholder="搜索名字、地区、分类或描述…" autocomplete="off" enterkeyhint="search">
   </div>
+  <select class="cat-select" id="catSelect" aria-label="选择分类"></select>
   <button class="btn-random" id="randomBtn" type="button">🎲 随机挑一间</button>
-  <button class="btn-sort" id="sortBtn" type="button" aria-pressed="false" aria-label="切换分类排序方式">排序：默认 ▾</button>
 </div>
 
-<div class="chips" id="chips"></div>
-
-<main class="cat-wrap" id="grid"></main>
+<main class="list" id="list"></main>
 
 <footer class="footer">
   数据来自 Google Sheet，打开页面即自动同步最新内容<br>
   © FEONG 的私人咖啡馆清单
 </footer>
 
-<button class="fab" id="fabAdd" type="button" aria-label="添加咖啡厅">＋</button>
-
 <div class="modal" id="modal" aria-hidden="true">
   <div class="modal-backdrop" data-close="1"></div>
   <div class="modal-panel" id="modalPanel" role="dialog" aria-modal="true"></div>
 </div>
 
-<div class="drawer" id="catDrawer" aria-hidden="true">
-  <div class="drawer-backdrop" data-drawer-close="1"></div>
-  <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
-    <div class="drawer-head">
-      <h2 id="drawerTitle">分类筛选</h2>
-      <button type="button" class="icon-btn" data-drawer-close="1" aria-label="关闭">✕</button>
-    </div>
-    <p class="drawer-hint">选择一个分类，页面会只显示该类别的咖啡馆。</p>
-    <div class="drawer-sort" id="drawerSort" role="group" aria-label="排序方式"></div>
-    <div class="drawer-list" id="drawerBody"></div>
-  </div>
-</div>
-
-<div class="modal" id="addModal" aria-hidden="true">
-  <div class="modal-backdrop" data-add-close="1"></div>
-  <div class="modal-panel" role="dialog" aria-modal="true">
-    <div class="m-head">
-      <h2>添加咖啡厅</h2>
-      <button type="button" class="icon-btn" data-add-close="1" aria-label="关闭">✕</button>
-    </div>
-    <form id="addForm" autocomplete="off">
-      <div class="form-row">
-        <label for="f-name">名字 *</label>
-        <input id="f-name" name="name" type="text" required maxlength="100" placeholder="例如：Kafe ABC">
-      </div>
-      <div class="form-row">
-        <label for="f-area">地区</label>
-        <input id="f-area" name="area" type="text" maxlength="60" placeholder="例如：PJ / Hatyai">
-      </div>
-      <div class="form-row">
-        <label for="f-url">小红书链接</label>
-        <input id="f-url" name="url" type="text" maxlength="300" placeholder="xhslink.com/… 或完整链接">
-      </div>
-      <div class="form-row">
-        <label for="f-cat">分类</label>
-        <select id="f-cat" name="category"></select>
-      </div>
-      <div class="form-row">
-        <label for="f-desc">描述</label>
-        <textarea id="f-desc" name="desc" maxlength="500" placeholder="一句话记下推荐理由…"></textarea>
-      </div>
-      <div class="m-actions">
-        <button type="submit" class="btn btn-primary" id="addSubmit">提交</button>
-        <button type="button" class="btn btn-ghost" data-add-close="1">取消</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div class="modal" id="authModal" aria-hidden="true">
-  <div class="modal-backdrop" data-auth-close="1"></div>
-  <div class="modal-panel" role="dialog" aria-modal="true">
-    <div class="m-head">
-      <h2 id="authTitle">账号</h2>
-      <button type="button" class="icon-btn" data-auth-close="1" aria-label="关闭">✕</button>
-    </div>
-    <div id="authBody"></div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-
 <script>
 (function () {
   'use strict';
 
-  /* ==================== 配置 ==================== */
+  /* ================= 配置 ================= */
+  // Google Sheet 发布为 CSV 的链接（自动由 pubhtml 转换而来）
   var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMGavuFvvhx3l5G3oN_X_8QZsdfs6wg69dWw0WnkOIF6a6fJCXqgmgSYCLAkh94jI5sPQF-IZ5g_r6/pub?output=csv';
 
+  // 直接读取失败时的备用代理（跨域兜底）
   var PROXIES = [
     function (u) { return u; },
     function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
     function (u) { return 'https://corsproxy.io/?url=' + encodeURIComponent(u); }
   ];
 
-  var CAT_ORDER = ['cafe','dessert','bar','western','thai','korean','japanese',
-                   'kopitiam','nyonya','chinese','asian','fine dine','hatyai'];
-  var TOP_CAT_N = 6;
-  var RECENT_CAT_N = 2;
-
-  var CAT_DISPLAY = {
-    'cafe':'Cafe','dessert':'Dessert','bar':'Bar','western':'Western','thai':'Thai',
-    'korean':'Korean','japanese':'Japanese','kopitiam':'Kopitiam','nyonya':'Nyonya',
-    'chinese':'Chinese','asian':'Asian','fine dine':'Fine Dine','hatyai':'Hatyai','其它':'其它'
-  };
-
-  var APPS_SCRIPT_URL = '';
-  var SUPABASE_URL = '';
-  var SUPABASE_ANON_KEY = '';
   var FAV_KEY = 'feong_cafe_favs_v1';
-  var SORT_KEY = 'feong_cafe_sort_v1';   /* 排序模式持久化 key */
 
-  /* ==================== 状态 ==================== */
+  // 分类排序：中英文混排稳定、不区分大小写
+  var collator = new Intl.Collator(['en', 'zh-Hans-CN'], { numeric: true, sensitivity: 'base' });
+
+  /* ================= 状态 ================= */
   var state = {
-    all:[], view:[], cat:'全部', onlyFav:false, q:'',
-    loading:true, error:'',
-    sortMode:'default'   /* 'default' | 'alpha' */
+    all: [],
+    view: [],
+    cat: '全部',
+    onlyFav: false,
+    q: '',
+    loading: true,
+    error: '',
+    expanded: {}          // categoryKey -> true（该分类是否已展开全部）
   };
   var favs = loadFavs();
   var currentId = null;
-  var expandedCats = {};
-  var lastFilterSig = '';
-  var sb = null;
-  var currentUser = null;
 
-  /* ==================== DOM ==================== */
-  var gridEl      = document.getElementById('grid');
-  var chipsEl     = document.getElementById('chips');
-  var countEl     = document.getElementById('countText');
-  var searchEl    = document.getElementById('searchInput');
-  var randomBtn   = document.getElementById('randomBtn');
-  var refreshBtn  = document.getElementById('refreshBtn');
-  var userBtn     = document.getElementById('userBtn');
-  var sortBtn     = document.getElementById('sortBtn');
-  var modalEl     = document.getElementById('modal');
-  var modalPanel  = document.getElementById('modalPanel');
-  var drawerEl    = document.getElementById('catDrawer');
-  var drawerBody  = document.getElementById('drawerBody');
-  var drawerSort  = document.getElementById('drawerSort');
-  var fabAdd      = document.getElementById('fabAdd');
-  var addModal    = document.getElementById('addModal');
-  var addForm     = document.getElementById('addForm');
-  var authModal   = document.getElementById('authModal');
-  var authBody    = document.getElementById('authBody');
+  /* ================= DOM ================= */
+  var listEl     = document.getElementById('list');
+  var selectEl   = document.getElementById('catSelect');
+  var countEl    = document.getElementById('countText');
+  var searchEl   = document.getElementById('searchInput');
+  var randomBtn  = document.getElementById('randomBtn');
+  var refreshBtn = document.getElementById('refreshBtn');
+  var modalEl    = document.getElementById('modal');
+  var modalPanel = document.getElementById('modalPanel');
 
-  /* ==================== 工具函数 ==================== */
+  /* ================= 工具函数 ================= */
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
+
   function normalizeKey(s) {
-    return String(s == null ? '' : s).toLowerCase()
-      .replace(/[\s\u3000_\-—–:：·.。/\\()（）\[\]]/g,'');
+    return String(s == null ? '' : s)
+      .toLowerCase()
+      .replace(/[\s\u3000_\-—–:：·.。/\\()（）\[\]]/g, '');
   }
+
+  // 处理小红书链接（允许只填 www.xxx 或 xhslink.com/xxx）
   function normalizeUrl(u) {
     u = String(u == null ? '' : u).trim();
     if (!u) return '';
@@ -619,55 +339,40 @@
     if (/\.(com|cn|net|org|me|cc|link)\b/i.test(u)) return 'https://' + u;
     return '';
   }
-  function visibleCount() {
-    var w = window.innerWidth;
-    if (w < 600) return 1;
-    if (w < 1024) return 2;
-    return 4;
-  }
-  /* 统一的字母比较器：中英文混排结果稳定可复现 */
-  function alphaCompare(a, b) {
-    return String(a == null ? '' : a).localeCompare(String(b == null ? '' : b), 'en',
-      { sensitivity:'base', numeric:true });
-  }
 
-  /* ==================== 本地收藏 ==================== */
+  /* ================= 本地收藏 ================= */
   function loadFavs() {
     try {
       var raw = localStorage.getItem(FAV_KEY);
       var arr = raw ? JSON.parse(raw) : [];
       return new Set(Array.isArray(arr) ? arr : []);
-    } catch (e) { return new Set(); }
+    } catch (e) {
+      return new Set();
+    }
   }
   function saveFavs() {
-    try { localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favs))); } catch (e) {}
-  }
-
-  /* ==================== 排序模式持久化 ==================== */
-  function loadSortMode() {
     try {
-      var v = localStorage.getItem(SORT_KEY);
-      return (v === 'alpha') ? 'alpha' : 'default';
-    } catch (e) { return 'default'; }
-  }
-  function saveSortMode() {
-    try { localStorage.setItem(SORT_KEY, state.sortMode); } catch (e) {}
+      localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favs)));
+    } catch (e) { /* 忽略隐私模式下的写入失败 */ }
   }
 
-  /* ==================== CSV 解析 ==================== */
+  /* ================= CSV 解析 ================= */
   function parseCSV(text) {
-    text = String(text || '').replace(/^\uFEFF/,'');
+    text = String(text || '').replace(/^\uFEFF/, '');
     var rows = [], row = [], field = '', inQ = false;
     for (var i = 0; i < text.length; i++) {
       var c = text[i];
       if (inQ) {
-        if (c === '"') { if (text[i+1] === '"') { field += '"'; i++; } else inQ = false; }
-        else field += c;
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else { inQ = false; }
+        } else { field += c; }
       } else {
-        if (c === '"') inQ = true;
+        if (c === '"') { inQ = true; }
         else if (c === ',') { row.push(field); field = ''; }
         else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
-        else if (c !== '\r') field += c;
+        else if (c === '\r') { /* 跳过 */ }
+        else { field += c; }
       }
     }
     row.push(field);
@@ -675,25 +380,30 @@
     return rows;
   }
 
-  /* ==================== 数据组装 ==================== */
+  /* ================= 数据组装 ================= */
   function findCol(headers, keys) {
-    for (var i = 0; i < headers.length; i++)
-      for (var j = 0; j < keys.length; j++)
+    for (var i = 0; i < headers.length; i++) {
+      for (var j = 0; j < keys.length; j++) {
         if (headers[i] === keys[j] || headers[i].indexOf(keys[j]) !== -1) return i;
+      }
+    }
     return -1;
   }
+
   function buildItems(rows) {
     if (!rows || !rows.length) return [];
-    var catMap = {};
+
     var firstRowText = rows[0].join('|').toLowerCase();
     var headerWords = ['名字','名称','店名','地区','区域','分类','类别','描述','简介','小红书','链接',
                        'name','area','location','category','description','desc','url','link','note','remark'];
     var hasHeader = false;
-    for (var w = 0; w < headerWords.length; w++)
+    for (var w = 0; w < headerWords.length; w++) {
       if (firstRowText.indexOf(headerWords[w]) !== -1) { hasHeader = true; break; }
+    }
 
-    var DEF = { name:0, area:1, url:2, cat:3, desc:4 };
+    var DEF = { name: 0, area: 1, url: 2, cat: 3, desc: 4 };
     var col, dataRows;
+
     if (hasHeader) {
       var h = rows[0].map(normalizeKey);
       col = {
@@ -703,356 +413,201 @@
         cat:  findCol(h, ['分类','类别','类型','category','type','tag']),
         desc: findCol(h, ['描述','简介','介绍','备注','说明','description','desc','note','remark'])
       };
-      for (var k in DEF) if (col[k] < 0) col[k] = DEF[k];
+      for (var k in DEF) { if (col[k] < 0) col[k] = DEF[k]; }
       dataRows = rows.slice(1);
-    } else { col = DEF; dataRows = rows; }
+    } else {
+      col = DEF;
+      dataRows = rows;
+    }
 
     var items = [];
     dataRows.forEach(function (r) {
-      var get = function (idx) { return (idx >= 0 && idx < r.length) ? String(r[idx] == null ? '' : r[idx]).trim() : ''; };
+      var get = function (idx) {
+        return (idx >= 0 && idx < r.length) ? String(r[idx] == null ? '' : r[idx]).trim() : '';
+      };
       var name = get(col.name);
       if (!name) return;
+
       var area = get(col.area);
-      var rawCat = get(col.cat) || '其它';
-      var catKey = rawCat.toLowerCase();
-      if (!catMap[catKey]) catMap[catKey] = (CAT_DISPLAY && CAT_DISPLAY[catKey]) ? CAT_DISPLAY[catKey] : rawCat;
+      var category = get(col.cat) || '其它';
+
       items.push({
         id: (name + '|' + area).toLowerCase(),
-        name: name, area: area,
-        category: catMap[catKey], categoryKey: catKey,
-        desc: get(col.desc), url: normalizeUrl(get(col.url))
+        name: name,
+        area: area,
+        category: category,
+        categoryKey: category.toLowerCase(),
+        desc: get(col.desc),
+        url: normalizeUrl(get(col.url))
       });
     });
+
     return items;
   }
 
-  /* ==================== 网络请求 ==================== */
+  /* ================= 网络请求 ================= */
   function fetchWithTimeout(url, ms) {
     return new Promise(function (resolve, reject) {
       var timer = setTimeout(function () { reject(new Error('请求超时')); }, ms);
-      fetch(url, { cache:'no-store', redirect:'follow' })
+      fetch(url, { cache: 'no-store', redirect: 'follow' })
         .then(function (res) { clearTimeout(timer); resolve(res); })
         .catch(function (err) { clearTimeout(timer); reject(err); });
     });
   }
+
   function fetchCSVText() {
     var lastErr = null;
     var chain = Promise.reject();
-    var baseUrl = CSV_URL + (CSV_URL.indexOf('?') === -1 ? '?' : '&') + '_t=' + Date.now();
+
     PROXIES.forEach(function (make) {
       chain = chain.catch(function () {
-        return fetchWithTimeout(make(baseUrl), 15000).then(function (res) {
+        return fetchWithTimeout(make(CSV_URL), 15000).then(function (res) {
           if (!res.ok) throw new Error('HTTP ' + res.status);
           return res.text();
         }).then(function (text) {
           if (!text || text.trim().length < 5) throw new Error('返回内容为空');
           if (text.trim().charAt(0) === '<') throw new Error('返回的不是 CSV 数据');
           return text;
-        }).catch(function (err) { lastErr = err; throw err; });
+        }).catch(function (err) {
+          lastErr = err;
+          throw err;
+        });
       });
     });
+
     return chain.catch(function () {
       throw new Error((lastErr && lastErr.message) ? lastErr.message : '网络请求失败');
     });
   }
 
-  /* ==================== 分类排序（公共比较器，受 sortMode 控制） ==================== */
-  function compareCat(aKey, aCount, bKey, bCount) {
-    // 「其它 / 未分类」永远排最后（两种模式都适用）
-    var aOther = (aKey === '其它' || aKey === '未分类');
-    var bOther = (bKey === '其它' || bKey === '未分类');
-    if (aOther && !bOther) return 1;
-    if (!aOther && bOther) return -1;
-
-    if (state.sortMode === 'alpha') {
-      // 字母 A-Z 模式：分类名升序（localeCompare）
-      return alphaCompare(aKey, bKey);
-    }
-
-    // 默认模式：CAT_ORDER 优先，其余按数量倒序，再按 key 兜底
-    var ia = CAT_ORDER.indexOf(aKey), ib = CAT_ORDER.indexOf(bKey);
-    var aK = ia >= 0, bK = ib >= 0;
-    if (aK && bK) return ia - ib;
-    if (aK) return -1;
-    if (bK) return 1;
-    if (bCount !== aCount) return bCount - aCount;
-    return aKey < bKey ? -1 : (aKey > bKey ? 1 : 0);
-  }
-  function getCategoryStats() {
-    var map = {};
+  /* ================= 分类推导（全部来自数据） ================= */
+  function getCats() {
+    var seen = {}, cats = [];
     state.all.forEach(function (it) {
-      var k = it.categoryKey;
-      if (!k) return;
-      if (!map[k]) map[k] = { key:k, name:it.category, count:0 };
-      map[k].count++;
-    });
-    var arr = Object.keys(map).map(function (k) { return map[k]; });
-    arr.sort(function (a, b) { return compareCat(a.key, a.count, b.key, b.count); });
-    return arr;
-  }
-  function getTopCategories(n) {
-    var list = getCategoryStats().filter(function (c) { return c.key !== '其它'; });
-    // 先按数量挑出「热门」，再按当前排序模式决定展示顺序
-    var picked = list.slice()
-      .sort(function (a, b) { return b.count - a.count; })
-      .slice(0, n);
-    if (state.sortMode === 'alpha') {
-      picked.sort(function (a, b) { return alphaCompare(a.name, b.name); });
-    }
-    return picked;
-  }
-
-  /* ==================== 顶部 chips ==================== */
-  function chipHTML(label, active, isFav) {
-    var value = isFav ? '__fav__' : label;
-    return '<button type="button" class="chip' + (isFav ? ' fav' : '') + (active ? ' active' : '') +
-           '" data-value="' + esc(value) + '">' + esc(label) + '</button>';
-  }
-  function buildChips() {
-    var tops = getTopCategories(TOP_CAT_N);
-    var topNames = tops.map(function (t) { return t.name; });
-
-    if (RECENT_CAT_N > 0) {
-      var seen = {}, recent = [];
-      for (var i = state.all.length - 1; i >= 0 && recent.length < RECENT_CAT_N; i--) {
-        var ck = state.all[i].categoryKey;
-        if (!ck || seen[ck]) continue;
-        seen[ck] = true;
-        recent.unshift(state.all[i].category);
+      if (!seen[it.categoryKey]) {
+        seen[it.categoryKey] = true;
+        cats.push(it.category);
       }
-      recent.forEach(function (name) {
-        if (topNames.indexOf(name) === -1) { tops.push({name:name,count:0}); topNames.push(name); }
-      });
+    });
+    cats.sort(function (a, b) { return collator.compare(a, b); });
+    return cats;
+  }
+
+  function buildSelect() {
+    var cats = getCats();
+    var h = '<option value="全部">全部分类</option>';
+    cats.forEach(function (c) {
+      h += '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+    });
+    h += '<option value="__fav__">❤ 我的收藏</option>';
+    selectEl.innerHTML = h;
+
+    var want = state.onlyFav ? '__fav__' : state.cat;
+    selectEl.value = want;
+    if (selectEl.value !== want) {
+      state.cat = '全部';
+      state.onlyFav = false;
+      selectEl.value = '全部';
     }
-
-    var extra = null;
-    if (state.cat !== '全部' && topNames.indexOf(state.cat) === -1) extra = state.cat;
-
-    var html = chipHTML('全部', state.cat === '全部' && !state.onlyFav, false)
-             + chipHTML('❤ 收藏', state.onlyFav, true);
-    if (extra) html += chipHTML(extra, !state.onlyFav, false);
-    tops.forEach(function (t) {
-      html += chipHTML(t.name, !state.onlyFav && state.cat === t.name, false);
-    });
-    html += '<button type="button" class="chip chip-more" id="moreChip" ' +
-            'aria-haspopup="dialog" aria-expanded="false">分类筛选 ▾</button>';
-    chipsEl.innerHTML = html;
   }
 
-  /* ==================== 分类抽屉 ==================== */
-  function buildDrawer() {
-    // 排序选项（与工具栏按钮同步）
-    var isAlpha = state.sortMode === 'alpha';
-    drawerSort.innerHTML =
-      '<button type="button" class="drawer-sort-item' + (!isAlpha ? ' active' : '') +
-        '" data-sort="default" aria-pressed="' + (!isAlpha ? 'true' : 'false') + '">默认排序</button>' +
-      '<button type="button" class="drawer-sort-item' + (isAlpha ? ' active' : '') +
-        '" data-sort="alpha" aria-pressed="' + (isAlpha ? 'true' : 'false') + '">字母 A-Z</button>';
-
-    // 分类列表顺序同样跟随 sortMode
-    var stats = getCategoryStats();
-    var html = '<button type="button" class="drawer-item' +
-      (state.cat === '全部' && !state.onlyFav ? ' active' : '') +
-      '" data-value="全部"><span>全部</span><span class="di-count">' + state.all.length + '</span></button>';
-    html += '<button type="button" class="drawer-item fav' + (state.onlyFav ? ' active' : '') +
-      '" data-value="__fav__"><span>❤ 收藏</span><span class="di-count">' + favs.size + '</span></button>';
-    stats.forEach(function (c) {
-      html += '<button type="button" class="drawer-item' +
-        (!state.onlyFav && state.cat === c.name ? ' active' : '') +
-        '" data-value="' + esc(c.name) + '"><span>' + esc(c.name) + '</span>' +
-        '<span class="di-count">' + c.count + '</span></button>';
-    });
-    drawerBody.innerHTML = html;
-  }
-
-  /* ==================== overlay 公共逻辑 ==================== */
-  /* 唯一的 body 滚动锁定入口：任何 overlay 开关都只通过它增删 body.no-scroll */
-  function syncBodyScroll() {
-    var open = drawerEl.classList.contains('open') || modalEl.classList.contains('open')
-            || addModal.classList.contains('open') || authModal.classList.contains('open');
-    document.body.classList[open ? 'add' : 'remove']('no-scroll');
-  }
-
-  function openDrawer() {
-    buildDrawer();
-    drawerEl.classList.add('open');
-    drawerEl.setAttribute('aria-hidden', 'false');
-    syncBodyScroll();                       // 统一锁定
-    var m = document.getElementById('moreChip');
-    if (m) m.setAttribute('aria-expanded', 'true');
-  }
-  function closeDrawer() {
-    drawerEl.classList.remove('open');
-    drawerEl.setAttribute('aria-hidden', 'true');  // 修复：关闭时应为 'true'
-    syncBodyScroll();                       // 统一解锁，确保 overflow:hidden 一定被移除
-    var m = document.getElementById('moreChip');
-    if (m) m.setAttribute('aria-expanded', 'false');
-  }
-
-  /* ==================== 卡片（结构固定为 4 个区块） ==================== */
+  /* ================= 渲染：卡片 ================= */
   function cardHTML(it) {
     var isFav = favs.has(it.id);
+    var html = '<article class="card" data-id="' + esc(it.id) + '">';
 
-    // 区块 1：右上角收藏按钮（绝对定位，不随标题行数位移）+ 标题（最多 2 行）
-    var favBtn = '<button type="button" class="fav-btn' + (isFav ? ' on' : '') +
-      '" data-fav="' + esc(it.id) + '" aria-label="' + (isFav ? '取消收藏' : '收藏') +
-      '" aria-pressed="' + (isFav ? 'true' : 'false') + '">' + (isFav ? '♥' : '♡') + '</button>';
+    html += '<div class="card-head">';
+    html += '<h3 class="card-title">' + esc(it.name) + '</h3>';
+    html += '<button type="button" class="fav-btn' + (isFav ? ' on' : '') +
+            '" data-fav="' + esc(it.id) + '" aria-label="收藏">' + (isFav ? '♥' : '♡') + '</button>';
+    html += '</div>';
 
-    // 区块 2：标签区（固定高度，无数据也渲染浅色占位）
-    var areaTag = it.area
-      ? '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>'
-      : '<span class="tag tag-area is-empty">📍 未标注</span>';
-    var catTag = it.category
-      ? '<span class="tag tag-cat">' + esc(it.category) + '</span>'
-      : '<span class="tag tag-cat is-empty">未分类</span>';
+    if (it.area || it.category) {
+      html += '<div class="tags">';
+      if (it.area) html += '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>';
+      if (it.category) html += '<span class="tag tag-cat">' + esc(it.category) + '</span>';
+      html += '</div>';
+    }
 
-    // 区块 3：描述区（最多 3 行，无描述渲染浅色占位，占位高度一致）
-    var desc = it.desc
-      ? '<p class="card-desc">' + esc(it.desc) + '</p>'
-      : '<p class="card-desc is-empty">暂无描述</p>';
+    if (it.desc) html += '<p class="card-desc">' + esc(it.desc) + '</p>';
+    if (it.url) {
+      html += '<a class="pill-xhs" href="' + esc(it.url) +
+              '" target="_blank" rel="noopener noreferrer">小红书 ↗</a>';
+    }
 
-    // 区块 4：底部链接区（margin-top:auto，无链接用同尺寸禁用占位）
-    var foot = it.url
-      ? '<a class="pill-xhs" href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">小红书 ↗</a>'
-      : '<span class="pill-xhs is-disabled" aria-disabled="true">暂无链接</span>';
-
-    return '<article class="card" data-id="' + esc(it.id) + '">'
-      + favBtn
-      + '<h3 class="card-title">' + esc(it.name) + '</h3>'
-      + '<div class="tags">' + areaTag + catTag + '</div>'
-      + desc
-      + '<div class="card-foot">' + foot + '</div>'
-      + '</article>';
+    return html + '</article>';
   }
 
-  /* ==================== 主渲染 ==================== */
+  /* ================= 渲染：分组区块 ================= */
   function render() {
     if (state.loading) {
-      gridEl.innerHTML = '<div class="state"><span class="loading-dot"></span>正在读取咖啡馆收藏…</div>';
+      listEl.innerHTML = '<div class="state"><span class="loading-dot"></span>正在读取咖啡馆收藏…</div>';
       updateCount();
       return;
     }
+
     if (state.error) {
-      gridEl.innerHTML = '<div class="state"><span class="big">😵</span>读取失败：' + esc(state.error) +
+      listEl.innerHTML =
+        '<div class="state"><span class="big">😵</span>读取失败：' + esc(state.error) +
         '<br><span style="font-size:13px">请检查网络，或确认 Google Sheet 已发布为 CSV</span>' +
         '<br><button type="button" id="retryBtn">重新加载</button></div>';
       updateCount();
       return;
     }
+
     if (!state.view.length) {
-      var hasFilter = !!state.q || state.cat !== '全部' || state.onlyFav;
-      var msg = !state.all.length ? '表格里还没有数据'
+      var msg = state.onlyFav && !state.all.length ? '还没有任何记录'
               : state.onlyFav ? '你还没有收藏任何咖啡馆'
-              : '没有找到符合条件的咖啡馆 🥲';
-      var actions = hasFilter
-        ? '<div class="empty-actions">'
-          + '<button type="button" class="empty-btn" id="clearSearchBtn">清空搜索</button>'
-          + '<button type="button" class="empty-btn primary" id="viewAllBtn">查看全部</button>'
-          + '</div>'
-        : '';
-      gridEl.innerHTML = '<div class="state"><span class="big">☕</span>' + esc(msg) + actions + '</div>';
+              : (state.all.length ? '没有找到符合条件的咖啡馆 🥲' : '表格里还没有数据');
+      listEl.innerHTML = '<div class="state"><span class="big">☕</span>' + esc(msg) + '</div>';
       updateCount();
       return;
     }
 
-    // ---- 分组 ----
-    var groupMap = {}, groupOrder = [];
+    // 按分类分组
+    var groups = {}, order = [];
     state.view.forEach(function (it) {
-      var k = it.categoryKey || '其它';
-      if (!groupMap[k]) { groupMap[k] = { name: it.category || '其它', items: [] }; groupOrder.push(k); }
-      groupMap[k].items.push(it);
+      var k = it.categoryKey;
+      if (!groups[k]) { groups[k] = { name: it.category, items: [] }; order.push(k); }
+      groups[k].items.push(it);
     });
+    order.sort(function (a, b) { return collator.compare(groups[a].name, groups[b].name); });
 
-    // 组内卡片顺序：字母模式按名称升序，默认保持原顺序
-    if (state.sortMode === 'alpha') {
-      groupOrder.forEach(function (k) {
-        groupMap[k].items.sort(function (a, b) { return alphaCompare(a.name, b.name); });
-      });
-    }
-
-    // 分类顺序：由 compareCat 根据 sortMode 决定
-    groupOrder.sort(function (a, b) {
-      return compareCat(a, groupMap[a].items.length, b, groupMap[b].items.length);
-    });
-
-    var visN = visibleCount();
     var html = '';
-    groupOrder.forEach(function (k) {
-      var g = groupMap[k];
-      var count = g.items.length;
-      var expanded = !!expandedCats[k];
-      var showMore = count > visN;
-
-      html += '<section class="cat-section" data-cat="' + esc(k) + '" data-expanded="' + (expanded ? 'true' : 'false') + '">';
-      html += '<div class="cat-head">'
-            + '<h2 class="cat-title">' + esc(g.name) + '</h2>'
-            + '<span class="cat-count">' + count + ' 家</span>';
-      if (showMore) {
-        html += '<button type="button" class="cat-more" data-cat="' + esc(k) +
-          '" aria-expanded="' + (expanded ? 'true' : 'false') + '">'
-          + '<span class="txt">' + (expanded ? '收起' : '查看更多（共 ' + count + ' 家）') + '</span>'
-          + '<span class="arrow" aria-hidden="true">▾</span></button>';
-      }
-      html += '</div>';
-      html += '<div class="cat-scroller-wrap"><div class="cat-scroller">';
+    order.forEach(function (k) {
+      var g = groups[k];
+      var open = !!state.expanded[k];
+      html += '<section class="cat-block" data-cat="' + esc(k) + '">' +
+                '<div class="cat-head">' +
+                  '<h2 class="cat-name">' + esc(g.name) +
+                    ' <span class="cat-count">' + g.items.length + '</span></h2>' +
+                  '<button class="cat-toggle" type="button">' + (open ? '收起' : '展开全部') + '</button>' +
+                '</div>' +
+                '<div class="cat-row' + (open ? ' open' : '') + '">';
       g.items.forEach(function (it) { html += cardHTML(it); });
-      html += '</div></div></section>';
+      html += '</div></section>';
     });
-    gridEl.innerHTML = html;
+
+    listEl.innerHTML = html;
     updateCount();
   }
 
   function updateCount() {
-    if (state.loading) countEl.textContent = '正在载入…';
-    else if (state.error) countEl.textContent = '载入失败';
-    else if (state.view.length === state.all.length) countEl.textContent = '共收藏 ' + state.all.length + ' 间咖啡馆';
-    else countEl.textContent = '显示 ' + state.view.length + ' / ' + state.all.length + ' 间';
-  }
-
-  /* ==================== 展开/收起动画 ==================== */
-  function toggleSection(section, btn, key, expand) {
-    var scroller = section.querySelector('.cat-scroller');
-    if (!scroller) return;
-    scroller.style.height = '';
-    scroller.style.overflow = '';
-    scroller.style.transition = '';
-    var fromH = scroller.getBoundingClientRect().height;
-
-    section.setAttribute('data-expanded', expand ? 'true' : 'false');
-    expandedCats[key] = expand;
-
-    scroller.style.transition = 'none';
-    var toH = scroller.getBoundingClientRect().height;
-    scroller.style.transition = '';
-
-    if (btn) {
-      btn.setAttribute('aria-expanded', expand ? 'true' : 'false');
-      var txt = btn.querySelector('.txt');
-      if (txt) txt.textContent = expand ? '收起'
-        : ('查看更多（共 ' + section.querySelectorAll('.card').length + ' 家）');
+    if (state.loading) {
+      countEl.textContent = '正在载入…';
+    } else if (state.error) {
+      countEl.textContent = '载入失败';
+    } else if (state.view.length === state.all.length) {
+      countEl.textContent = '共收藏 ' + state.all.length + ' 间咖啡馆';
+    } else {
+      countEl.textContent = '显示 ' + state.view.length + ' / ' + state.all.length + ' 间';
     }
-    if (Math.abs(toH - fromH) < 1) return;
-
-    scroller.style.height = fromH + 'px';
-    scroller.style.overflow = 'hidden';
-    void scroller.offsetHeight;
-    requestAnimationFrame(function () {
-      scroller.style.transition = 'height .32s cubic-bezier(.2,.85,.3,1)';
-      scroller.style.height = toH + 'px';
-      setTimeout(function () {
-        scroller.style.height = '';
-        scroller.style.overflow = '';
-        scroller.style.transition = '';
-      }, 340);
-    });
   }
 
-  /* ==================== 筛选 ==================== */
+  /* ================= 筛选 ================= */
   function applyFilter() {
     var q = state.q.trim().toLowerCase();
     var cat = state.cat.toLowerCase();
-    var sig = q + '|' + cat + '|' + (state.onlyFav ? '1' : '0');
-    if (sig !== lastFilterSig) { expandedCats = {}; lastFilterSig = sig; }
 
     state.view = state.all.filter(function (it) {
       if (state.cat !== '全部' && it.categoryKey !== cat) return false;
@@ -1063,74 +618,63 @@
       }
       return true;
     });
+
     render();
   }
-  function selectCategory(value) {
-    if (value === '__fav__') { state.onlyFav = !state.onlyFav; state.cat = '全部'; }
-    else { state.cat = value; state.onlyFav = false; }
-    buildChips();
-    applyFilter();
-  }
 
-  /* ==================== 排序切换 ==================== */
-  function updateSortUI() {
-    if (!sortBtn) return;
-    var isAlpha = state.sortMode === 'alpha';
-    sortBtn.textContent = isAlpha ? '排序：字母 A-Z ▾' : '排序：默认 ▾';
-    sortBtn.setAttribute('aria-pressed', isAlpha ? 'true' : 'false');
-  }
-  /* 切换排序模式：立即重渲染，不重新请求网络；展开状态因筛选特征未变而保留 */
-  function setSortMode(mode) {
-    if (mode !== 'alpha' && mode !== 'default') mode = 'default';
-    if (state.sortMode === mode) return;
-    state.sortMode = mode;
-    saveSortMode();
-    updateSortUI();
-    buildChips();                 // chips 顺序同步跟随
-    buildDrawer();                // 抽屉里分类顺序 + 排序选中态同步
-    applyFilter();                // 重新渲染（筛选特征未变 → expandedCats 保留）
-  }
-
-  /* ==================== 详情弹窗 ==================== */
+  /* ================= 弹窗 ================= */
   function modalHTML(it) {
     var isFav = favs.has(it.id);
-    var html = '<div class="m-head"><div style="min-width:0"><h2>' + esc(it.name) + '</h2>';
-    // 弹窗标签与卡片同一套样式
-    html += '<div class="tags">';
-    html += it.area
-      ? '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>'
-      : '<span class="tag tag-area is-empty">📍 未标注</span>';
-    html += it.category
-      ? '<span class="tag tag-cat">' + esc(it.category) + '</span>'
-      : '<span class="tag tag-cat is-empty">未分类</span>';
+
+    var html = '<div class="m-head"><div style="min-width:0">';
+    html += '<h2>' + esc(it.name) + '</h2>';
+    if (it.area || it.category) {
+      html += '<div class="tags">';
+      if (it.area) html += '<span class="tag tag-area">📍 ' + esc(it.area) + '</span>';
+      if (it.category) html += '<span class="tag tag-cat">' + esc(it.category) + '</span>';
+      html += '</div>';
+    }
     html += '</div>';
-    html += '</div><button type="button" class="icon-btn" data-close="1" aria-label="关闭">✕</button></div>';
-    html += it.desc ? '<p class="m-desc">' + esc(it.desc) + '</p>'
-                    : '<p class="m-desc muted">暂无描述</p>';
+    html += '<button type="button" class="icon-btn" data-close="1" aria-label="关闭">✕</button></div>';
+
+    html += it.desc
+      ? '<p class="m-desc">' + esc(it.desc) + '</p>'
+      : '<p class="m-desc muted">暂无描述</p>';
+
     html += '<div class="m-actions">';
-    if (it.url) html += '<a class="btn btn-primary" href="' + esc(it.url) +
-      '" target="_blank" rel="noopener noreferrer">在小红书查看 ↗</a>';
+    if (it.url) {
+      html += '<a class="btn btn-primary" href="' + esc(it.url) +
+              '" target="_blank" rel="noopener noreferrer">在小红书查看 ↗</a>';
+    }
     html += '<button type="button" class="btn btn-ghost' + (isFav ? ' on' : '') +
-      '" data-fav="' + esc(it.id) + '">' + (isFav ? '♥ 已收藏' : '♡ 加入收藏') + '</button></div>';
+            '" data-fav="' + esc(it.id) + '">' + (isFav ? '♥ 已收藏' : '♡ 加入收藏') + '</button>';
+    html += '</div>';
+
     return html;
   }
+
   function openModal(id) {
     var it = null;
-    for (var i = 0; i < state.all.length; i++) if (state.all[i].id === id) { it = state.all[i]; break; }
+    for (var i = 0; i < state.all.length; i++) {
+      if (state.all[i].id === id) { it = state.all[i]; break; }
+    }
     if (!it) return;
+
     currentId = id;
     modalPanel.innerHTML = modalHTML(it);
     modalEl.classList.add('open');
     modalEl.setAttribute('aria-hidden', 'false');
-    syncBodyScroll();                 // 统一锁定
+    document.body.classList.add('no-scroll');
     modalPanel.scrollTop = 0;
   }
+
   function closeModal() {
     modalEl.classList.remove('open');
     modalEl.setAttribute('aria-hidden', 'true');
-    syncBodyScroll();                 // 统一解锁
+    document.body.classList.remove('no-scroll');
     currentId = null;
   }
+
   function syncModalFav(id) {
     if (!currentId || currentId !== id) return;
     var btn = modalPanel.querySelector('[data-fav]');
@@ -1140,294 +684,125 @@
     btn.textContent = isFav ? '♥ 已收藏' : '♡ 加入收藏';
   }
 
-  /* ==================== 收藏切换 ==================== */
+  /* ================= 收藏切换（局部更新） ================= */
+  function refreshFavBtns(id) {
+    var on = favs.has(id);
+    var btns = listEl.querySelectorAll('[data-fav]');
+    for (var i = 0; i < btns.length; i++) {
+      if (btns[i].getAttribute('data-fav') !== id) continue;
+      btns[i].classList.toggle('on', on);
+      btns[i].textContent = on ? '♥' : '♡';
+    }
+  }
+
   function toggleFav(id) {
-    var isNowFav;
-    if (favs.has(id)) { favs.delete(id); isNowFav = false; }
-    else { favs.add(id); isNowFav = true; }
+    if (favs.has(id)) favs.delete(id);
+    else favs.add(id);
     saveFavs();
-    applyFilter();
+
+    if (state.onlyFav) { applyFilter(); syncModalFav(id); return; }  // 收藏视图需增删卡片
+    refreshFavBtns(id);
     syncModalFav(id);
-    if (drawerEl.classList.contains('open')) buildDrawer();
-    pushFavToRemote(id, isNowFav);
   }
 
-  /* ==================== 添加咖啡厅 ==================== */
-  function populateCategorySelect() {
-    var sel = document.getElementById('f-cat');
-    var base = ['cafe','dessert','bar','western','thai','korean','japanese',
-                'kopitiam','nyonya','chinese','asian','fine dine','hatyai','其它'];
-    getCategoryStats().forEach(function (c) {
-      if (c.name && base.indexOf(c.name) === -1) base.push(c.name);
-    });
-    var html = '';
-    base.forEach(function (c) { html += '<option value="' + esc(c) + '">' + esc(c) + '</option>'; });
-    sel.innerHTML = html;
-  }
-  function openAddModal() {
-    populateCategorySelect();
-    addForm.reset();
-    addModal.classList.add('open');
-    addModal.setAttribute('aria-hidden', 'false');
-    syncBodyScroll();                 // 统一锁定
-    setTimeout(function () { document.getElementById('f-name').focus(); }, 180);
-  }
-  function closeAddModal() {
-    addModal.classList.remove('open');
-    addModal.setAttribute('aria-hidden', 'true');
-    syncBodyScroll();                 // 统一解锁
-  }
-  function insertLocalCafe(data) {
-    var rawCat = String(data.category || '其它').trim() || '其它';
-    var catKey = rawCat.toLowerCase();
-    var display = (CAT_DISPLAY && CAT_DISPLAY[catKey]) ? CAT_DISPLAY[catKey] : rawCat;
-    var item = {
-      id: (data.name + '|' + (data.area || '')).toLowerCase(),
-      name: data.name, area: data.area || '',
-      category: display, categoryKey: catKey,
-      desc: data.desc || '', url: normalizeUrl(data.url || '')
-    };
-    if (!state.all.some(function (x) { return x.id === item.id; })) state.all.push(item);
-    buildChips();
-    applyFilter();
-  }
-  function submitNewCafe(data) {
-    if (!APPS_SCRIPT_URL) {
-      insertLocalCafe(data);
-      closeAddModal();
-      alert('已本地添加（未配置 Apps Script，刷新后会丢失）\n\n请在代码顶部填写 APPS_SCRIPT_URL。');
-      return Promise.resolve();
-    }
-    return fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      redirect: 'follow'
-    }).then(function () {
-      insertLocalCafe(data);
-      closeAddModal();
-      alert('添加成功！');
-    }).catch(function (err) {
-      alert('提交失败：' + (err && err.message ? err.message : '未知错误'));
-    });
-  }
-
-  /* ==================== Supabase ==================== */
-  function initSupabase() {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !window.supabase) return;
-    try {
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      userBtn.classList.add('on');
-      sb.auth.getUser().then(function (r) {
-        if (r && r.data && r.data.user) { currentUser = r.data.user; onLoginSync(); }
-        renderAuthUI();
-      });
-      sb.auth.onAuthStateChange(function (event, session) {
-        if (session && session.user) {
-          var was = !!currentUser;
-          currentUser = session.user;
-          if (!was) onLoginSync(); else renderAuthUI();
-        } else { currentUser = null; renderAuthUI(); }
-      });
-    } catch (e) {}
-  }
-  function onLoginSync() {
-    if (!sb || !currentUser) return;
-    sb.from('favorites').select('cafe_id').then(function (r) {
-      if (r.error) { renderAuthUI(); return; }
-      var remote = new Set((r.data || []).map(function (x) { return x.cafe_id; }));
-      var localArr = Array.from(favs);
-      var toPush = localArr.filter(function (id) { return !remote.has(id); });
-      var done = function () {
-        favs = new Set(Array.from(remote).concat(localArr));
-        saveFavs(); applyFilter();
-        if (drawerEl.classList.contains('open')) buildDrawer();
-        renderAuthUI();
-      };
-      if (toPush.length) {
-        sb.from('favorites').insert(toPush.map(function (id) {
-          return { user_id: currentUser.id, cafe_id: id };
-        })).then(done).catch(done);
-      } else done();
-    });
-  }
-  function pushFavToRemote(id, add) {
-    if (!sb || !currentUser) return;
-    if (add) sb.from('favorites').insert({ user_id: currentUser.id, cafe_id: id }).then(function(){});
-    else sb.from('favorites').delete().eq('user_id', currentUser.id).eq('cafe_id', id).then(function(){});
-  }
-  function renderAuthUI() {
-    if (!sb) return;
-    if (currentUser) {
-      authBody.innerHTML = '<p style="margin:0 0 14px;font-size:14px;color:#6b5b4e;">已登录：<b>' +
-        esc(currentUser.email || '用户') + '</b></p>' +
-        '<p style="margin:0 0 16px;font-size:13px;color:#8a7a6d;">你的收藏正在跨设备同步。</p>' +
-        '<button type="button" class="btn btn-ghost" id="signOutBtn" style="width:100%;">退出登录</button>';
-      var so = document.getElementById('signOutBtn');
-      if (so) so.addEventListener('click', function () { sb.auth.signOut().then(closeAuthModal); });
-    } else {
-      authBody.innerHTML = '<p style="margin:0 0 14px;font-size:14px;color:#6b5b4e;">' +
-        '输入邮箱，收到魔法链接后即可登录并跨设备同步收藏。</p>' +
-        '<form id="magicForm"><div class="form-row"><label for="authEmail">邮箱</label>' +
-        '<input id="authEmail" type="email" required placeholder="you@example.com"></div>' +
-        '<button type="submit" class="btn btn-primary" style="width:100%;">发送登录链接</button></form>';
-      var mf = document.getElementById('magicForm');
-      if (mf) mf.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var email = document.getElementById('authEmail').value.trim();
-        if (!email) return;
-        sb.auth.signInWithOtp({
-          email: email,
-          options: { emailRedirectTo: window.location.href.split('#')[0] }
-        }).then(function (r) {
-          if (r.error) alert('发送失败：' + r.error.message);
-          else alert('登录链接已发送到 ' + email + '，请查收邮箱。');
-        });
-      });
-    }
-  }
-  function openAuthModal() {
-    if (!sb) return;
-    renderAuthUI();
-    authModal.classList.add('open');
-    authModal.setAttribute('aria-hidden', 'false');
-    syncBodyScroll();                 // 统一锁定
-  }
-  function closeAuthModal() {
-    authModal.classList.remove('open');
-    authModal.setAttribute('aria-hidden', 'true');
-    syncBodyScroll();                 // 统一解锁
-  }
-
-  /* ==================== 事件绑定 ==================== */
-  chipsEl.addEventListener('click', function (e) {
-    var moreBtn = e.target.closest ? e.target.closest('#moreChip') : null;
-    if (moreBtn) { e.preventDefault(); openDrawer(); return; }
-    var chip = e.target.closest ? e.target.closest('.chip[data-value]') : null;
-    if (chip) selectCategory(chip.getAttribute('data-value'));
-  });
-
-  drawerEl.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('[data-drawer-close]')) { closeDrawer(); return; }
-
-    // 抽屉内排序切换（不关闭抽屉）
-    var sortItem = e.target.closest ? e.target.closest('.drawer-sort-item') : null;
-    if (sortItem) { setSortMode(sortItem.getAttribute('data-sort')); return; }
-
-    var item = e.target.closest ? e.target.closest('.drawer-item') : null;
-    if (item) { selectCategory(item.getAttribute('data-value')); closeDrawer(); }
-  });
-
-  gridEl.addEventListener('click', function (e) {
+  /* ================= 事件绑定 ================= */
+  listEl.addEventListener('click', function (e) {
     var t = e.target;
-    var favBtn = t.closest ? t.closest('[data-fav]') : null;
-    if (favBtn) { e.preventDefault(); e.stopPropagation(); toggleFav(favBtn.getAttribute('data-fav')); return; }
 
-    var moreBtn = t.closest ? t.closest('.cat-more') : null;
-    if (moreBtn) {
-      e.preventDefault(); e.stopPropagation();
-      var key = moreBtn.getAttribute('data-cat');
-      var sec = moreBtn.closest('.cat-section');
-      if (sec) toggleSection(sec, moreBtn, key, !expandedCats[key]);
+    // 展开 / 收起
+    var tgl = t.closest ? t.closest('.cat-toggle') : null;
+    if (tgl) {
+      var block = tgl.closest('.cat-block');
+      var row = block.querySelector('.cat-row');
+      var open = row.classList.toggle('open');
+      state.expanded[block.getAttribute('data-cat')] = open;
+      tgl.textContent = open ? '收起' : '展开全部';
       return;
     }
-    if (t.closest && t.closest('a')) return;
+
+    // 收藏
+    var favBtn = t.closest ? t.closest('[data-fav]') : null;
+    if (favBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFav(favBtn.getAttribute('data-fav'));
+      return;
+    }
+
+    if (t.closest && t.closest('a')) return;   // 让链接正常跳转
 
     if (t.closest && t.closest('#retryBtn')) { load(); return; }
-    if (t.closest && t.closest('#clearSearchBtn')) { searchEl.value = ''; state.q = ''; applyFilter(); return; }
-    if (t.closest && t.closest('#viewAllBtn')) {
-      searchEl.value = '';
-      state.q = ''; state.cat = '全部'; state.onlyFav = false;
-      buildChips(); applyFilter(); return;
-    }
+
     var card = t.closest ? t.closest('.card') : null;
     if (card) openModal(card.getAttribute('data-id'));
   });
 
   modalEl.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('[data-close]')) { closeModal(); return; }
-    var favBtn = e.target.closest ? e.target.closest('[data-fav]') : null;
-    if (favBtn) { e.preventDefault(); toggleFav(favBtn.getAttribute('data-fav')); }
-  });
+    var t = e.target;
+    if (t.closest && t.closest('[data-close]')) { closeModal(); return; }
 
-  fabAdd.addEventListener('click', openAddModal);
-  addModal.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('[data-add-close]')) closeAddModal();
-  });
-  addForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var fd = new FormData(addForm);
-    var data = {
-      name: String(fd.get('name') || '').trim(),
-      area: String(fd.get('area') || '').trim(),
-      url: String(fd.get('url') || '').trim(),
-      category: String(fd.get('category') || '其它'),
-      desc: String(fd.get('desc') || '').trim()
-    };
-    if (!data.name) return;
-    var btn = document.getElementById('addSubmit');
-    btn.disabled = true; btn.textContent = '提交中…';
-    submitNewCafe(data).then(function () { btn.disabled = false; btn.textContent = '提交'; });
-  });
-
-  userBtn.addEventListener('click', openAuthModal);
-  authModal.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('[data-auth-close]')) closeAuthModal();
-  });
-
-  // 工具栏排序按钮：两模式间切换
-  sortBtn.addEventListener('click', function () {
-    setSortMode(state.sortMode === 'alpha' ? 'default' : 'alpha');
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' || e.key === 'Esc') {
-      if (addModal.classList.contains('open')) closeAddModal();
-      else if (authModal.classList.contains('open')) closeAuthModal();
-      else if (modalEl.classList.contains('open')) closeModal();
-      else if (drawerEl.classList.contains('open')) closeDrawer();
+    var favBtn = t.closest ? t.closest('[data-fav]') : null;
+    if (favBtn) {
+      e.preventDefault();
+      toggleFav(favBtn.getAttribute('data-fav'));
     }
   });
 
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' || e.key === 'Esc') closeModal();
+  });
+
+  // 分类下拉
+  selectEl.addEventListener('change', function () {
+    var v = selectEl.value;
+    if (v === '__fav__') {
+      state.onlyFav = true;
+      state.cat = '全部';
+    } else {
+      state.onlyFav = false;
+      state.cat = v;
+      if (v !== '全部') state.expanded[v.toLowerCase()] = true;   // 选中具体分类时默认展开
+    }
+    applyFilter();
+  });
+
+  // 搜索
   var searchTimer = null;
   searchEl.addEventListener('input', function () {
     var val = searchEl.value;
     if (searchTimer) clearTimeout(searchTimer);
-    searchTimer = setTimeout(function () { state.q = val; applyFilter(); }, 180);
+    searchTimer = setTimeout(function () {
+      state.q = val;
+      applyFilter();
+    }, 180);
   });
 
+  // 随机
   randomBtn.addEventListener('click', function () {
     if (!state.view.length) {
       if (state.loading) return;
       alert('目前没有可挑选的咖啡馆～');
       return;
     }
-    openModal(state.view[Math.floor(Math.random() * state.view.length)].id);
+    var pick = state.view[Math.floor(Math.random() * state.view.length)];
+    openModal(pick.id);
   });
 
-  refreshBtn.addEventListener('click', load);
+  // 刷新
+  refreshBtn.addEventListener('click', function () { load(); });
 
-  var resizeTimer = null;
-  var lastVisN = visibleCount();
-  window.addEventListener('resize', function () {
-    if (resizeTimer) clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      var n = visibleCount();
-      if (n !== lastVisN) { lastVisN = n; render(); }
-    }, 250);
-  });
-
-  /* ==================== 加载流程 ==================== */
+  /* ================= 加载流程 ================= */
   function load() {
-    state.loading = true; state.error = '';
+    state.loading = true;
+    state.error = '';
     render();
     refreshBtn.classList.add('spin');
     refreshBtn.textContent = '↻ 同步中';
+
     fetchCSVText().then(function (text) {
-      var rows = parseCSV(text);
-      state.all = buildItems(rows);
+      state.all = buildItems(parseCSV(text));
       state.loading = false;
-      buildChips();
+      buildSelect();
       applyFilter();
     }).catch(function (err) {
       state.loading = false;
@@ -1439,6 +814,7 @@
     });
   }
 
+  // 页面重新可见时自动同步（超过 5 分钟）
   var lastLoad = Date.now();
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden && Date.now() - lastLoad > 5 * 60 * 1000 && !state.loading) {
@@ -1447,13 +823,7 @@
     }
   });
 
-  /* ==================== 启动 ==================== */
-  state.sortMode = loadSortMode();   // 恢复用户上次选择的排序模式
-  updateSortUI();
-
   load();
-  if (document.readyState === 'complete') initSupabase();
-  else window.addEventListener('load', initSupabase);
 })();
 </script>
 </body>
