@@ -115,7 +115,6 @@ main{padding:16px 0 70px;}
   border-radius:999px;padding:2px 9px;line-height:1.6;
 }
 
-/* 子类别 */
 .subcat{margin-bottom:14px;}
 .subcat-head{
   display:flex;align-items:baseline;gap:7px;
@@ -128,7 +127,6 @@ main{padding:16px 0 70px;}
   font-size:11.5px;color:var(--ink-3);
 }
 
-/* 横向滚动卡片区 */
 .cards-row{
   display:flex;gap:10px;
   overflow-x:auto;overflow-y:hidden;
@@ -199,7 +197,6 @@ main{padding:16px 0 70px;}
   overflow:hidden;word-break:break-word;
 }
 
-/* 展开按钮 */
 .expand-btn{
   display:flex;align-items:center;justify-content:center;gap:4px;
   margin:0 16px;width:calc(100% - 32px);min-height:44px;
@@ -217,7 +214,6 @@ main{padding:16px 0 70px;}
 }
 .more-btn:active{background:#eae0d4;}
 
-/* 空状态 / 提示 */
 .empty{
   padding:16px;margin:0 16px;
   font-size:13px;color:var(--ink-3);text-align:center;
@@ -249,7 +245,7 @@ main{padding:16px 0 70px;}
 }
 .error-box .emoji{font-size:32px;margin-bottom:10px;}
 .error-box h3{margin:0 0 8px;font-size:16px;color:var(--brown);}
-.error-box p{margin:0 0 18px;font-size:13px;color:var(--ink-2);word-break:break-all;}
+.error-box p{margin:0 0 18px;font-size:13px;color:var(--ink-2);word-break:break-word;}
 .retry-btn{
   min-height:44px;padding:0 26px;border:none;border-radius:22px;
   background:var(--brown);color:#fff;font-size:14px;font-weight:600;
@@ -341,10 +337,8 @@ main{padding:16px 0 70px;}
 </head>
 <body>
 
-<!-- 下拉刷新指示器 -->
 <div class="pull-indicator" id="pullIndicator"><div class="spinner"></div></div>
 
-<!-- 顶部搜索栏 -->
 <header class="topbar">
   <h1><span class="dot"></span>FEONG的咖啡馆收藏集</h1>
   <div class="search-wrap">
@@ -353,10 +347,8 @@ main{padding:16px 0 70px;}
   </div>
 </header>
 
-<!-- 内容区 -->
 <main id="content"></main>
 
-<!-- 弹窗 -->
 <div class="modal-backdrop" id="modal" hidden>
   <div class="modal" role="dialog" aria-modal="true">
     <button class="modal-close" id="modalClose" aria-label="关闭">×</button>
@@ -366,16 +358,14 @@ main{padding:16px 0 70px;}
     <div class="modal-actions">
       <a class="btn primary" id="modalLink" href="#" target="_blank" rel="noopener noreferrer">打开小红书</a>
       <button class="btn" id="modalFav" data-act="fav">♡ 收藏</button>
-      <button class="btn" id="modalVisited" data-act="visited">✓ 已去过</button>
+      <button class="btn" id="modalVisited" data-act="visited">✓ 标记去过</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- PapaParse -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
 <script>
 (function () {
   'use strict';
@@ -384,23 +374,32 @@ main{padding:16px 0 70px;}
      常量
   ========================================================= */
   var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMGavuFvvhx3l5G3oN_X_8QZsdfs6wg69dWw0WnkOIF6a6fJCXqgmgSYCLAkh94jI5sPQF-IZ5g_r6/pub?output=csv';
-  var PROXY_PREFIX = 'https://api.allorigins.win/raw?url=';
-  var FETCH_URL = PROXY_PREFIX + encodeURIComponent(CSV_URL);
 
-  var LS_DATA = 'feong_cafes_cache_v2';
-  var LS_STATE = 'feong_cafe_marks_v2';
+  /* 多个公共 CORS 代理，依次尝试，任一成功即用 */
+  var PROXIES = [
+    function (u) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+    function (u) { return 'https://corsproxy.io/?url=' + encodeURIComponent(u); },
+    function (u) { return 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u); },
+    function (u) { return 'https://cors.eu.org/' + u; },
+    function (u) { return 'https://thingproxy.freeboard.io/fetch/' + u; },
+    function (u) { return u; }   // 最后直连试试
+  ];
+  var FETCH_TIMEOUT = 12000;   // 每个代理的超时
 
-  var MAX_PREVIEW_CARDS = 5;   // 每个子类别默认横向展示的卡片数
-  var MAX_DEFAULT_SUBCATS = 2; // 每个分组默认展示的子类别数
-  var PULL_THRESHOLD = 80;     // 下拉刷新触发距离(px)
+  var LS_DATA = 'feong_cafes_cache_v3';
+  var LS_STATE = 'feong_cafe_marks_v3';
+
+  var MAX_PREVIEW_CARDS = 5;
+  var MAX_DEFAULT_SUBCATS = 2;
+  var PULL_THRESHOLD = 80;
 
   /* =========================================================
      状态
   ========================================================= */
-  var cafes = [];                 // 全部咖啡馆
-  var marks = {};                 // { id: {fav:Boolean, visited:Boolean} }
-  var expandedSubcats = {};       // { 'group::subcat': true }
-  var expandedGroups = {};        // { groupId: true }
+  var cafes = [];
+  var marks = {};
+  var expandedSubcats = {};
+  var expandedGroups = {};
   var searchQuery = '';
   var loading = false;
   var currentModalId = null;
@@ -415,7 +414,7 @@ main{padding:16px 0 70px;}
   var pullIndicator = document.getElementById('pullIndicator');
 
   /* =========================================================
-     工具函数
+     工具
   ========================================================= */
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) {
@@ -447,7 +446,7 @@ main{padding:16px 0 70px;}
   }
 
   /* =========================================================
-     本地存储：标记状态
+     本地存储
   ========================================================= */
   function loadMarks() {
     try {
@@ -456,19 +455,14 @@ main{padding:16px 0 70px;}
       if (!marks || typeof marks !== 'object') marks = {};
     } catch (e) { marks = {}; }
   }
-
   function saveMarks() {
     try { localStorage.setItem(LS_STATE, JSON.stringify(marks)); } catch (e) {}
   }
-
   function markOf(id) {
     if (!marks[id]) marks[id] = { fav: false, visited: false };
     return marks[id];
   }
 
-  /* =========================================================
-     本地存储：数据缓存
-  ========================================================= */
   function saveCache(list) {
     try {
       var slim = list.map(function (c) {
@@ -480,7 +474,6 @@ main{padding:16px 0 70px;}
       localStorage.setItem(LS_DATA, JSON.stringify({ t: Date.now(), list: slim }));
     } catch (e) {}
   }
-
   function loadCache() {
     try {
       var raw = localStorage.getItem(LS_DATA);
@@ -489,6 +482,51 @@ main{padding:16px 0 70px;}
       if (!obj || !obj.list || !obj.list.length) return null;
       return obj.list;
     } catch (e) { return null; }
+  }
+
+  /* =========================================================
+     网络：多代理回退 + 超时
+  ========================================================= */
+  function fetchWithTimeout(url, ms) {
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { reject(new Error('请求超时')); }, ms);
+      fetch(url, { cache: 'no-store', redirect: 'follow' })
+        .then(function (r) { clearTimeout(timer); resolve(r); },
+              function (e) { clearTimeout(timer); reject(e); });
+    });
+  }
+
+  function looksLikeOurCSV(text) {
+    if (!text || text.length < 10) return false;
+    if (/^\s*</.test(text)) return false;
+    var head = text.slice(0, 1500).toLowerCase();
+    return head.indexOf('名字') !== -1 || head.indexOf('name') !== -1 ||
+           head.indexOf('分类') !== -1 || head.indexOf('category') !== -1 ||
+           head.indexOf('地区') !== -1 || head.indexOf('region') !== -1;
+  }
+
+  function fetchCSVText() {
+    var i = 0;
+    function next() {
+      if (i >= PROXIES.length) {
+        return Promise.reject(new Error('所有数据源均不可用，请检查网络后重试'));
+      }
+      var url = PROXIES[i++](CSV_URL);
+      return fetchWithTimeout(url, FETCH_TIMEOUT)
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.text();
+        })
+        .then(function (text) {
+          if (!looksLikeOurCSV(text)) throw new Error('返回内容不是有效 CSV');
+          return text;
+        })
+        .catch(function (err) {
+          console.warn('[FEONG] 数据源失败：', url, '→', err && err.message);
+          return next();
+        });
+    }
+    return next();
   }
 
   /* =========================================================
@@ -508,7 +546,7 @@ main{padding:16px 0 70px;}
     return '';
   }
 
-  function mapRow(row, index, idCounter) {
+  function mapRow(row, idCounter) {
     var name = pickField(row, [/^名字$/, /^名称$/, /^店名$/, /^name$/, /店名/]);
     var region = pickField(row, [/^地区$/, /^区域$/, /^城市$/, /地区/, /区域/, /城市/, /region/, /area/]);
     var link = pickField(row, [/小红书链接/, /^链接$/, /小红书/, /^link$/, /^url$/, /网址/]);
@@ -556,14 +594,13 @@ main{padding:16px 0 70px;}
 
     var counter = {};
     var list = [];
-    result.data.forEach(function (row, i) {
-      var c = mapRow(row, i, counter);
+    result.data.forEach(function (row) {
+      var c = mapRow(row, counter);
       if (c) list.push(c);
     });
     return list;
   }
 
-  /* 把 CSV 中的「收藏 / 已去过」列同步成本地默认值（仅当本地还没有记录时） */
   function syncCsvMarks(list) {
     var changed = false;
     list.forEach(function (c) {
@@ -586,7 +623,7 @@ main{padding:16px 0 70px;}
   }
 
   /* =========================================================
-     数据加载
+     加载
   ========================================================= */
   function showSkeleton() {
     var rowCards = '';
@@ -624,13 +661,8 @@ main{padding:16px 0 70px;}
       return Promise.resolve();
     }
 
-    return fetch(FETCH_URL, { cache: 'no-store' })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.text();
-      })
+    return fetchCSVText()
       .then(function (text) {
-        if (!text || /^\s*</.test(text)) throw new Error('返回内容不是有效的 CSV');
         var list = parseCSV(text);
         if (!list.length) throw new Error('没有解析到有效数据');
         cafes = list;
@@ -741,7 +773,6 @@ main{padding:16px 0 70px;}
         '<div class="empty">暂无内容</div></section>';
     }
 
-    // 归入子类别
     var map = {};
     var order = [];
     items.forEach(function (c) {
@@ -752,10 +783,10 @@ main{padding:16px 0 70px;}
 
     var subs = order.map(function (k) { return { name: k, items: map[k] }; });
 
-    // 默认展示「数量最少」的子类别（升序），最多 MAX_DEFAULT_SUBCATS 个
+    // 默认展示数量最少的子类别（升序），最多 MAX_DEFAULT_SUBCATS 个
     subs.sort(function (a, b) {
       if (a.items.length !== b.items.length) return a.items.length - b.items.length;
-      return a.name.localeCompare(b.name, 'zh-Hans-CN');
+      return String(a.name).localeCompare(String(b.name), 'zh-Hans-CN');
     });
 
     var groupExpanded = !!expandedGroups[groupId];
@@ -782,7 +813,6 @@ main{padding:16px 0 70px;}
 
     var q = searchQuery.trim().toLowerCase();
 
-    /* ---------- 搜索模式 ---------- */
     if (q) {
       var results = cafes.filter(function (c) {
         return (c.name + ' ' + c.region + ' ' + c.category + ' ' + c.desc)
@@ -802,7 +832,6 @@ main{padding:16px 0 70px;}
       return;
     }
 
-    /* ---------- 正常分组模式 ---------- */
     var favItems = cafes.filter(function (c) { return c.fav; });
     var visitedItems = cafes.filter(function (c) { return c.visited; });
 
@@ -820,7 +849,7 @@ main{padding:16px 0 70px;}
   }
 
   /* =========================================================
-     交互：标记 / 展开 / 弹窗
+     交互
   ========================================================= */
   function findCafe(id) {
     for (var i = 0; i < cafes.length; i++) {
@@ -853,7 +882,9 @@ main{padding:16px 0 70px;}
   }
 
   contentEl.addEventListener('click', function (e) {
-    var iconBtn = e.target.closest ? e.target.closest('.icon-btn') : null;
+    var t = e.target;
+
+    var iconBtn = t.closest ? t.closest('.icon-btn') : null;
     if (iconBtn) {
       e.stopPropagation();
       e.preventDefault();
@@ -861,7 +892,7 @@ main{padding:16px 0 70px;}
       return;
     }
 
-    var expandBtn = e.target.closest ? e.target.closest('.expand-btn') : null;
+    var expandBtn = t.closest ? t.closest('.expand-btn') : null;
     if (expandBtn) {
       var k = expandBtn.dataset.key;
       if (expandedSubcats[k]) delete expandedSubcats[k];
@@ -870,7 +901,7 @@ main{padding:16px 0 70px;}
       return;
     }
 
-    var moreBtn = e.target.closest ? e.target.closest('.more-btn') : null;
+    var moreBtn = t.closest ? t.closest('.more-btn') : null;
     if (moreBtn) {
       var g = moreBtn.dataset.more;
       if (expandedGroups[g]) delete expandedGroups[g];
@@ -879,13 +910,12 @@ main{padding:16px 0 70px;}
       return;
     }
 
-    var card = e.target.closest ? e.target.closest('.card') : null;
+    var card = t.closest ? t.closest('.card') : null;
     if (card && card.dataset.id) {
       openModal(card.dataset.id);
     }
   });
 
-  // 键盘可访问性
   contentEl.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
     var card = e.target.closest ? e.target.closest('.card') : null;
@@ -991,7 +1021,6 @@ main{padding:16px 0 70px;}
       link.href = URL.createObjectURL(blob);
       document.head.appendChild(link);
     } catch (e) {
-      // 部分环境不支持 Blob URL manifest，退化为 data URI
       try {
         var dataLink = document.createElement('link');
         dataLink.rel = 'manifest';
@@ -1003,87 +1032,12 @@ main{padding:16px 0 70px;}
   }
 
   /* =========================================================
-     PWA：Service Worker（Blob URL 内联注册）
-  ========================================================= */
-  function setupServiceWorker() {
-    if (!('serviceWorker' in navigator)) return;
-    if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-
-    var swCode = [
-      "var CACHE = 'feong-cafe-v1';",
-      "var PAPA = 'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js';",
-      "",
-      "self.addEventListener('install', function (e) {",
-      "  self.skipWaiting();",
-      "  e.waitUntil(caches.open(CACHE).then(function (c) {",
-      "    return c.addAll([PAPA]).catch(function () {});",
-      "  }));",
-      "});",
-      "",
-      "self.addEventListener('activate', function (e) {",
-      "  e.waitUntil(self.clients.claim());",
-      "});",
-      "",
-      "self.addEventListener('fetch', function (e) {",
-      "  var req = e.request;",
-      "  if (req.method !== 'GET') return;",
-      "  var url = req.url;",
-      "",
-      "  // PapaParse CDN：缓存优先 + 后台更新",
-      "  if (url.indexOf('papaparse') !== -1) {",
-      "    e.respondWith(caches.open(CACHE).then(function (c) {",
-      "      return c.match(req).then(function (hit) {",
-      "        var net = fetch(req).then(function (r) {",
-      "          if (r && r.ok) c.put(req, r.clone());",
-      "          return r;",
-      "        }).catch(function () { return hit; });",
-      "        return hit || net;",
-      "      });",
-      "    }));",
-      "    return;",
-      "  }",
-      "",
-      "  // 页面导航：网络优先，失败回退缓存（离线支持）",
-      "  if (req.mode === 'navigate') {",
-      "    e.respondWith(",
-      "      fetch(req).then(function (r) {",
-      "        var copy = r.clone();",
-      "        caches.open(CACHE).then(function (c) { c.put(req, copy); }).catch(function () {});",
-      "        return r;",
-      "      }).catch(function () {",
-      "        return caches.match(req).then(function (h) {",
-      "          return h || caches.match(self.registration.scope);",
-      "        });",
-      "      })",
-      "    );",
-      "    return;",
-      "  }",
-      "",
-      "  e.respondWith(fetch(req).catch(function () { return caches.match(req); }));",
-      "});"
-    ].join('\n');
-
-    try {
-      var blobUrl = URL.createObjectURL(new Blob([swCode], { type: 'text/javascript' }));
-      navigator.serviceWorker.register(blobUrl).catch(function (err) {
-        console.warn('[FEONG] Service Worker 注册失败（不影响使用）：', err && err.message);
-      });
-    } catch (e) {
-      console.warn('[FEONG] Service Worker 初始化异常：', e);
-    }
-  }
-
-  /* =========================================================
-     下拉刷新（仅 iOS 独立模式启用，避免与 Android 原生冲突）
+     下拉刷新（仅 iOS 独立模式启用）
   ========================================================= */
   function hidePullIndicator() {
     if (!pullIndicator) return;
     pullIndicator.classList.remove('ready', 'loading');
     pullIndicator.style.height = '0px';
-  }
-
-  function triggerRefresh() {
-    return loadData(true);
   }
 
   function setupPullToRefresh() {
@@ -1131,7 +1085,7 @@ main{padding:16px 0 70px;}
         pullIndicator.classList.add('loading');
         pullIndicator.classList.add('ready');
         pullIndicator.style.height = '56px';
-        Promise.resolve(triggerRefresh()).then(function () {
+        Promise.resolve(loadData(true)).then(function () {
           busy = false;
           hidePullIndicator();
         });
@@ -1153,25 +1107,14 @@ main{padding:16px 0 70px;}
   ========================================================= */
   function init() {
     setupManifest();
-    setupServiceWorker();
 
     loadMarks();
 
-    // 独立模式检测
-    var isStandalone = false;
-    try {
-      isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-        window.matchMedia('(display-mode: fullscreen)').matches ||
-        window.navigator.standalone === true;
-    } catch (e) {}
-
-    // 仅在 iOS 独立模式下启用自定义下拉刷新
     var isIOSStandalone = ('standalone' in navigator) && navigator.standalone === true;
-    if (isIOSStandalone || (isStandalone && /iPad|iPhone|iPod/.test(navigator.userAgent))) {
+    if (isIOSStandalone) {
       setupPullToRefresh();
     }
 
-    // 先渲染缓存（若存在），让首屏更快
     var cached = loadCache();
     if (cached && cached.length) {
       cafes = cached;
