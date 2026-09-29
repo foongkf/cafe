@@ -427,6 +427,46 @@
     pointer-events:none;
   }
 
+  /* ---------- 一键到顶部 ---------- */
+  .back-to-top{
+    position:fixed;
+    right:16px;
+    bottom:calc(22px + env(safe-area-inset-bottom));
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--primary);
+    font-size:19px;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:var(--shadow-lg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:90;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(14px) scale(.9);
+    transition:opacity .24s ease, transform .24s ease, visibility .24s ease, background .18s;
+    -webkit-tap-highlight-color:transparent;
+    padding:0;
+  }
+  .back-to-top.visible{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0) scale(1);
+  }
+  @media (hover:hover){
+    .back-to-top:hover{
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary);
+    }
+  }
+  .back-to-top:active{ transform:scale(.92); }
+
   /* ---------- 弹窗 ---------- */
   .modal-overlay{
     position:fixed;
@@ -614,6 +654,8 @@
 
 <main id="content" class="wrap"></main>
 
+<button class="back-to-top" id="backToTop" aria-label="回到顶部" title="回到顶部">↑</button>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <button class="modal-close" id="modalClose" aria-label="关闭">×</button>
@@ -634,6 +676,7 @@
   var LS_KEY = 'feong_cafe_visited_v1';
   var DEFAULT_VISIBLE = 6;
   var PULL_THRESHOLD = 70;
+  var BACK_TO_TOP_SCROLL = 320;
 
   var state = {
     cafes: [],
@@ -1364,6 +1407,42 @@
       setTimeout(function () { btn.classList.remove('spinning'); }, 400);
     });
   });
+
+  /* =========================================================
+     一键到顶部
+     ========================================================= */
+  var backToTop = $('backToTop');
+  var backToTopTicking = false;
+
+  function updateBackToTop() {
+    backToTopTicking = false;
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    if (y > BACK_TO_TOP_SCROLL) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+  }
+
+  window.addEventListener('scroll', function () {
+    if (backToTopTicking) return;
+    backToTopTicking = true;
+    if (window.requestAnimationFrame) {
+      window.requestAnimationFrame(updateBackToTop);
+    } else {
+      setTimeout(updateBackToTop, 60);
+    }
+  }, { passive: true });
+
+  backToTop.addEventListener('click', function () {
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      window.scrollTo(0, 0);
+    }
+  });
+
+  updateBackToTop();
 
   /* =========================================================
      下拉刷新
