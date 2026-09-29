@@ -20,13 +20,29 @@
     --radius:16px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
+  html,body{margin:0;padding:0;overscroll-behavior-y:none;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;
     -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   }
   body.no-scroll{overflow:hidden;}
+
+  /* ---------- 下拉刷新提示 ---------- */
+  .pull-refresh{
+    position:fixed;top:0;left:50%;
+    transform:translate(-50%,-100%);
+    z-index:60;
+    display:flex;align-items:center;gap:6px;
+    padding:9px 16px;
+    background:var(--accent-soft);color:var(--accent);
+    border:1px solid var(--border);border-top:none;
+    border-radius:0 0 14px 14px;
+    font-size:13px;font-weight:600;font-family:inherit;
+    box-shadow:0 4px 14px rgba(168,104,60,.12);
+    pointer-events:none;white-space:nowrap;
+    will-change:transform;
+  }
 
   /* ---------- 顶部 ---------- */
   .app-header{
@@ -106,8 +122,9 @@
   .cat-row{
     display:grid;grid-auto-flow:column;grid-auto-columns:min(78vw,300px);
     gap:12px;padding:6px 16px 18px;max-width:1200px;margin:0 auto;
-    overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:16px;
-    -webkit-overflow-scrolling:touch;touch-action:pan-x;
+    overflow-x:auto;scroll-snap-type:x proximity;scroll-padding-left:16px;
+    -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;
+    overscroll-behavior-x:contain;
     scrollbar-width:none;
   }
   .cat-row::-webkit-scrollbar{display:none;}
@@ -128,8 +145,8 @@
   }
   @media (hover:hover){
     .card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(120,80,50,.11);border-color:#e3d5c6;}
+    .card:active{transform:scale(.988);}
   }
-  .card:active{transform:scale(.988);}
   .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
   .card-title{font-size:16px;font-weight:650;margin:0;line-height:1.35;letter-spacing:.1px;word-break:break-word;}
   .fav-btn{
@@ -237,6 +254,10 @@
 </style>
 </head>
 <body>
+
+<div class="pull-refresh" id="pullRefresh" aria-hidden="true">
+  <span class="pr-text">下拉刷新 ↓</span>
+</div>
 
 <header class="app-header">
   <div class="brand">
@@ -799,7 +820,7 @@
     refreshBtn.classList.add('spin');
     refreshBtn.textContent = '↻ 同步中';
 
-    fetchCSVText().then(function (text) {
+    return fetchCSVText().then(function (text) {
       state.all = buildItems(parseCSV(text));
       state.loading = false;
       buildSelect();
@@ -812,6 +833,90 @@
       refreshBtn.classList.remove('spin');
       refreshBtn.textContent = '↻ 刷新';
     });
+  }
+
+  /* ================= 下拉刷新（仅触屏） ================= */
+  var pullEl   = document.getElementById('pullRefresh');
+  var pullText = pullEl ? pullEl.querySelector('.pr-text') : null;
+  var isTouch  = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+  var PULL_THRESHOLD = 70;   // 手指位移阈值（px）
+  var PULL_MAX       = 120;  // 视觉位移上限
+  var PULL_H         = 44;   // 提示条参考高度
+
+  var pulling = false, decided = false, refreshing = false;
+  var startX = 0, startY = 0, pullY = 0, rawDy = 0;
+
+  function setPull(y, text, animate) {
+    if (!pullEl) return;
+    if (text && pullText) pullText.textContent = text;
+    pullEl.style.transition = animate ? 'transform .28s ease' : 'none';
+    pullEl.style.transform = 'translate(-50%,' + y + 'px)';
+  }
+
+  if (isTouch && pullEl) {
+    document.addEventListener('touchstart', function (e) {
+      if (state.loading || refreshing || e.touches.length !== 1) return;
+      if ((window.pageYOffset || document.documentElement.scrollTop) > 0) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      pulling = true; decided = false; pullY = 0; rawDy = 0;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function (e) {
+      if (!pulling) return;
+      var t  = e.touches[0];
+      var dx = t.clientX - startX;
+      var dy = t.clientY - startY;
+
+      if (!decided) {
+        // 横向滑动优先交给 .cat-row，放弃下拉刷新
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) { pulling = false; return; }
+        if (Math.abs(dy) > 8) decided = true;
+        else return;
+      }
+
+      // 向上滑 / 页面已离开顶部 → 放弃本次下拉
+      if (dy <= 0) {
+        if (pullY > 0) { pullY = 0; setPull(-PULL_H, '下拉刷新 ↓', false); }
+        return;
+      }
+      if ((window.pageYOffset || document.documentElement.scrollTop) > 0) {
+        if (pullY > 0) { pullY = 0; setPull(-PULL_H, '下拉刷新 ↓', false); }
+        pulling = false;
+        return;
+      }
+
+      if (e.cancelable) e.preventDefault();
+      rawDy = dy;
+      pullY = Math.min(dy * 0.5, PULL_MAX);
+      // 位移 0~35px 之间让提示条从顶部滑入（1.6 倍映射），之后跟随手指
+      var y = Math.min(pullY * 1.6, PULL_H) - PULL_H;
+      setPull(y, dy >= PULL_THRESHOLD ? '松手刷新 ↑' : '下拉刷新 ↓', false);
+    }, { passive: false });
+
+    document.addEventListener('touchend', function () {
+      if (!pulling) return;
+      pulling = false;
+
+      if (rawDy >= PULL_THRESHOLD) {
+        refreshing = true;
+        setPull(0, '正在同步…', true);
+        load().then(function () {
+          refreshing = false;
+          setTimeout(function () { setPull(-PULL_H, '', true); }, 250);
+        });
+      } else {
+        pullY = 0; rawDy = 0;
+        setPull(-PULL_H, '下拉刷新 ↓', true);
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchcancel', function () {
+      if (!pulling) return;
+      pulling = false; pullY = 0; rawDy = 0;
+      setPull(-PULL_H, '下拉刷新 ↓', true);
+    }, { passive: true });
   }
 
   // 页面重新可见时自动同步（超过 5 分钟）
